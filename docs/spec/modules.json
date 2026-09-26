@@ -151,7 +151,7 @@
           "owl_time_declines_valid_time",
           "validFrom_validTo_recordedAt_are_domain_extension"
         ],
-        "known_gap": "JEV generating activity unmodeled; jcc:modelId on Claim not agent/activity"
+        "known_gap": "ontology now declares ClassificationActivity/ClassifierAgent, but classify.py claim records do not yet carry those activity/agent edges"
       }
     },
     {
@@ -176,6 +176,7 @@
         ],
         "current_state": {
           "entity_classes": ["jcc:Claim", "jcc:SourceFragment"],
+          "activity_classes": ["jcc:ClassificationActivity", "jcc:ClassifierAgent"],
           "status_individuals": ["jcc:Observed", "jcc:Inferred", "jcc:Hypothesized"]
         },
         "known_gap": "SHACL not implemented; no pyshacl dependency; adding it needs a leaf issue"
