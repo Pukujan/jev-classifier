@@ -10,18 +10,20 @@
 
 | id | issue | scope | status | decision |
 |----|-------|-------|--------|----------|
+| P-29-1 | #29 | dataset_card_and_reference_selection | open | accepted |
 | P-31-1 | #31 | ontology-prov | open | accepted |
 | P-32-1 | #32 | score-bias-fixes | open | accepted |
 | P-35-1 | #35 | CGM_0.4.0_README_and_docs | open | accepted |
+| P-37-1 | #37 | reference_claim_graph_and_stimulus_schema | open | accepted |
+| P-60-1 | #60 | coordination | open | open |
 
 ## Live claims
 
 | issue | agent | branch | marker |
 |-------|-------|--------|--------|
-| #31 | claude-code-main@desktop-utf8-44 | `feat/ontology-prov-activity-31` | coord |
 | #35 | Pukujan | `feat/cgm-docs-35` | prose |
 | #35 | claude-code-main@desktop-jev35 | `feat/cgm-docs-35` | coord |
-| #53 | coordination-flagger | `fix/claim-holder-collision-53` | coord |
+| #37 | claude-code-main@desktop-utf8-44 | `feat/reference-claim-schema-37` | coord |
 
 ## Run receipts
 
@@ -31,6 +33,8 @@
 | r-36-1-fix1 / JEV-0022 | A-FLAGGER (agent_declared) | unavailable / unavailable | unavailable (unavailable) | gh,git,pytest,continuity,python (agent_declared) | merged (runtime_observed) [no link] |
 | r-45-1 / JEV-41 | coordination-flagger (agent_declared) | unavailable / — | unavailable (unavailable) | sh,launchctl,pytest,gh,python3 (agent_declared) | merged (runtime_observed) [no link] |
 | r-45-1-fix1 / JEV-41 | coordination-flagger (agent_declared) | unavailable / — | unavailable (unavailable) | sh,launchctl,pytest,gh,python3 (agent_declared) | merged (runtime_observed) [no link] |
+| r-55-1 / JEV-53 | coordination-flagger (agent_declared) | unavailable / — | unavailable (unavailable) | gh,git,pytest,python3 (agent_declared) | merged (runtime_observed) [no link] |
+| r-57-1 / JEV-57 | coordination-flagger (agent_declared) | JEV-PIN / V-20260917 | unavailable (unavailable) | python3.12-venv,httpx,gh,git,pytest (agent_declared) | merged (runtime_observed) [no link] |
 
 ## Collisions
 
