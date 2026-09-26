@@ -347,6 +347,55 @@ class TestSettleAndIdentity:
         assert rc == 0 and "CLAIMED-BY-YOU" in out
 
 
+class TestClosedIssueSettle:
+    """The gate must settle a claim whose issue closed (#50).
+
+    The documented claim rule releases a claim when its branch merges or its
+    issue closes. ops_sync has always passed both signals; the gate passed only
+    merged branches, so the live board kept listing claims on delivered work
+    that the committed COORD.md had already dropped.
+    """
+
+    ITEMS = [rest("## Claim\n- Branch: `feat/bias-question-pack`\n"
+                  "- Primary writer: jev-classifier agent",
+                  1, "2026-09-26T18:57:46Z", issue=6)]
+
+    def _build(self, tmp_path: Path, issue_state=None):
+        return coord_board.build_state(
+            "o/r", comments_file(tmp_path, self.ITEMS), True,
+            issue_state=issue_state,
+        )
+
+    def test_closed_issue_claim_is_settled(self, tmp_path):
+        state, _, _ = self._build(tmp_path, lambda n: "closed")
+        assert state.live_claims() == []
+        assert {c.attrs.get("released_by") for c in state.all_claims} == {"closed_issue"}
+
+    def test_open_issue_claim_stays_live(self, tmp_path):
+        state, _, _ = self._build(tmp_path, lambda n: "open")
+        assert len(state.live_claims()) == 1
+
+    def test_unknown_state_neither_blocks_nor_settles(self, tmp_path):
+        # an API failure must never release a claim by guessing
+        state, _, _ = self._build(tmp_path, lambda n: "unknown")
+        assert len(state.live_claims()) == 1
+
+    def test_offline_modes_make_no_state_lookup(self, tmp_path):
+        # default lookup stays None under --comments-file/--no-refs, so the
+        # offline board renders the raw claim without any network call
+        state, _, _ = self._build(tmp_path)
+        assert len(state.live_claims()) == 1
+
+    def test_live_claim_issues_skips_released(self):
+        st = R.fold([
+            {"body": "<!-- coord:claim issue=6 agent=a@l branch=x-6 -->", "author": "x",
+             "created_at": "", "issue": 6, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=7 agent=b@l branch=y-7 state=released -->",
+             "author": "x", "created_at": "", "issue": 7, "comment_id": 2},
+        ])
+        assert coord_board.live_claim_issues(st) == [6]
+
+
 class TestUtf8Decoding:
     """gh emits UTF-8; the gate must not decode with the platform locale (#44).
 
