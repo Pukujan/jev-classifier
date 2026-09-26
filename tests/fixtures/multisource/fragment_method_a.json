@@ -1,0 +1,17 @@
+{
+  "id": "msrc-frag-method-a",
+  "source": "synthetic:lab-notebook-alpha",
+  "source_id": "src-lab-alpha",
+  "title": "Alpha study protocol excerpt",
+  "text": "Study Alpha enrolled 80 adults under a pre-registered protocol. Randomization used permuted blocks of size 4. The primary endpoint was change in symptom score at day 28 versus baseline.",
+  "closed_label_set": ["empirical_finding", "method_claim", "opinion", "other"],
+  "question_id": "claim_kind",
+  "instructions": "Classify the research fragment into exactly one claim kind.",
+  "criteria": {
+    "empirical_finding": "Reports observed data, measurements, or statistical results from a study or experiment.",
+    "method_claim": "Describes a method, procedure, architecture, or how something was done rather than what was observed.",
+    "opinion": "Authorial judgment, speculation, or recommendation without direct empirical support in the fragment.",
+    "other": "Does not clearly fit empirical finding, method claim, or opinion."
+  },
+  "notes": "Synthetic correlated source A (protocol/methods) for multi-source e2e; not HF."
+}
