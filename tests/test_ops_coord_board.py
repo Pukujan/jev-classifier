@@ -111,3 +111,50 @@ def test_normalize_comments_both_shapes() -> None:
                       "created_at": "2026-09-26T19:00:00Z",
                       "issue": 22, "comment_id": 1}
     assert out[1]["issue"] == 15 and out[1]["created_at"].endswith("01:00Z")
+
+
+def test_merged_pr_head_settles_claim_row(tmp_path: Path) -> None:
+    """Regression (the stale-row defect #38 fixes): a claim whose reserved
+    branch has a merged PR record (mergedAt + headRefName) must NOT appear
+    in Live claims, even while its issue is still open. Squash-merges never
+    make the branch an ancestor of main, so the PR record is the only truth.
+    """
+    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    # keep #22 OPEN in the payload; only the merged PR can release the row
+    data["pull_requests"] = [pr for pr in data["pull_requests"]
+                             if pr.get("number") != 36]
+    data["pull_requests"].append({
+        "number": 36, "title": "coordination layer v2", "state": "merged",
+        "author": {"login": "Pukujan"}, "assignees": [], "labels": [],
+        "body": "Refs #22", "url": "https://github.com/Pukujan/jev-classifier/pull/36",
+        "updatedAt": "2026-09-26T21:29:00Z",
+        "headRefName": "feat/coordination-layer-22",
+        "mergedAt": "2026-09-26T21:29:26Z",
+    })
+    f = tmp_path / "snapshot-merged.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+
+    # sanity: without the mergedAt field the row WOULD remain (guard proves
+    # the settle signal is the PR record, not the state string)
+    assert "feat/coordination-layer-22" not in _sync(tmp_path, f).read_text(), (
+        "merged PR head must release its claim row from Live claims"
+    )
+    plain = tmp_path / "ledger2"
+    ops_sync.run_sync(
+        fixture=FIXTURE, repo="r", db_path=tmp_path / "o2.db",
+        ledger_dir=plain, current_md_path=None, coord_db_path=None,
+        write_coord=True,
+    )
+    # the shipped fixture has no mergedAt entries and keeps #22 open: its
+    # claim row stays live — the settle path is driven by real PR records only
+    assert "feat/coordination-layer-22" in (plain / "COORD.md").read_text()
+
+
+def test_merged_pr_heads_unit() -> None:
+    payload = {"pull_requests": [
+        {"mergedAt": "2026-09-26T21:29:26Z", "headRefName": "feat/a-1"},
+        {"mergedAt": None, "headRefName": "feat/b-2"},
+        {"mergedAt": "2026-09-26T20:00:00Z", "headRefName": None},
+        "garbage",
+    ]}
+    assert ops_sync.merged_pr_heads(payload) == {"feat/a-1"}

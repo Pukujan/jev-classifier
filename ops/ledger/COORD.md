@@ -14,7 +14,6 @@ _(none)_
 
 | issue | agent | branch | marker |
 |-------|-------|--------|--------|
-| #22 | coordination-flagger | `feat/coordination-layer-22` | coord |
 | #35 | Pukujan | `feat/cgm-docs-35` | prose |
 
 ## Run receipts
