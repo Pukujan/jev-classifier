@@ -172,7 +172,7 @@ def fetch_via_gh(repo: str) -> dict[str, Any]:
             "--limit",
             "200",
             "--json",
-            "number,title,state,author,assignees,labels,body,url,updatedAt",
+            "number,title,state,author,assignees,labels,body,url,updatedAt,headRefName,mergedAt",
         ]
     )
     comments: list[Any] = []
@@ -204,6 +204,21 @@ def _norm_login(obj: Any) -> str | None:
     if isinstance(obj, dict):
         return obj.get("login") or obj.get("name") or obj.get("id")
     return str(obj)
+
+
+def merged_pr_heads(payload: dict[str, Any]) -> set[str]:
+    """Head branches of merged PRs in a fetched payload.
+
+    Authoritative release signal for reserved-branch claims even under
+    squash-merge (the branch tip never becomes an ancestor of main): the PR
+    record carries mergedAt + headRefName. Fixture payloads without these
+    fields simply release nothing.
+    """
+    heads = set()
+    for pr in payload.get("pull_requests") or []:
+        if isinstance(pr, dict) and pr.get("mergedAt") and pr.get("headRefName"):
+            heads.add(str(pr["headRefName"]))
+    return heads
 
 
 def snapshots_from_payload(payload: dict[str, Any]) -> list[IssueSnapshot]:
@@ -858,6 +873,7 @@ def run_sync(
     coord_records.settle_claims(
         coord_state,
         closed_issues={s.number for s in snapshots if not s.is_pr and s.state == "closed"},
+        merged_branches=merged_pr_heads(payload),
     )
     with OpsStore(db_path) as store:
         run_id = store.begin_sync_run(source=source)

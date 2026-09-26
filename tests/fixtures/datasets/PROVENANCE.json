@@ -1,0 +1,39 @@
+{
+  "files": {
+    "claim_type_shapes.json": {
+      "bytes": 2182,
+      "kind": "synthetic",
+      "label_shapes_modeled_on": "SciCite",
+      "path": "tests/fixtures/datasets/claim_type_shapes.json",
+      "sha256": "263ac157115ee68f018b351db710a65f243709ee57d08714a6d8e4fedb114b09"
+    },
+    "contradiction_shapes.json": {
+      "bytes": 2339,
+      "kind": "synthetic",
+      "label_shapes_modeled_on": "SciNLI",
+      "path": "tests/fixtures/datasets/contradiction_shapes.json",
+      "sha256": "a2c5ceb147b44feba890c7bbd42e4d9739aba5ccb0a490f89416101291eab0c0"
+    }
+  },
+  "generator": "generate_synthetic_fixtures.py",
+  "generator_version": "1",
+  "issue": 33,
+  "omissions": [
+    {
+      "name": "SciCite corpus text",
+      "reason": "Dataset card license unknown (HF license empty); code-repo Apache-2.0 does not clear corpus text. Synthetic label-shape fixtures only; optional runtime fetch into .research_cache/."
+    },
+    {
+      "name": "SciNLI corpus text",
+      "reason": "Distribution URL/license unverified for commit; treat as unlicensed-for-commit until a pinned dataset card license is recorded. Synthetic label-shape fixtures only."
+    },
+    {
+      "name": "SciFact any component",
+      "reason": "Issue research and arbiter ruling: NEVER commit. Runtime fetch into gitignored .research_cache/ only if used."
+    }
+  ],
+  "ruling": "synthetic-first; no SciCite/SciNLI/SciFact corpus text committed",
+  "runtime_fetch_note": "Larger or uncleared corpora may be fetched locally into the already-gitignored .research_cache/ directory; that path is not required for offline CI and is out of scope for this PR.",
+  "schema": "jev.synthetic_fixtures.provenance.v1",
+  "seed": 33
+}
