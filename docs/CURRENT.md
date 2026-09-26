@@ -35,3 +35,7 @@ GitHub issues and pull requests are canonical for work, ownership, and decisions
 ## Storage
 
 Keep source datasets and research caches in ignored folders. Commit small fixtures and summaries only. Never put secrets, large datasets, or hidden holdout labels in this repository.
+## Continuity projection note
+
+The machine-readable PCM pointer below still names task JEV-0030, whose task record remains marked active even though canonical GitHub issue #30 and PR #34 are closed. Treat this as a stale continuity projection, not a current ownership claim or a status override; GitHub remains authoritative. The legacy pointer is retained for compatibility with the existing system-spec check and is not the active #35 writer claim.
+<!-- continuity:current {"schema":"project-continuity.current.v1","protocol_version":"0.1.0-draft","active_task":"JEV-0030","active_task_file":"tasks/TASK-JEV-0030-system-spec.md"} -->
