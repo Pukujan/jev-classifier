@@ -313,10 +313,15 @@ class CoordState:
         }
 
     def collisions(self) -> dict[int, list[Record]]:
-        """Issues with more than one live claim from different holders.
+        """Issues with more than one live claim holding DIFFERENT locks.
 
-        A holder is the coord marker's `agent` or the prose claim's branch; two
-        rows for the same (issue, holder) are a re-claim, not a collision.
+        The reserved branch is the mutex: a ref cannot have two holders, and
+        one agent posting a legacy prose claim plus a coord marker for the
+        SAME branch is a double record, not a collision. The old agent+branch
+        tuple rule flagged exactly that documented pattern (observed on #35)
+        and would train agents to ignore the alarm. Holder = the branch when
+        present, else the agent (branch-less rows). Collision fires only on
+        more than one distinct holder per issue.
         """
         groups: dict[int, list[Record]] = {}
         for c in self.live_claims():
@@ -325,10 +330,15 @@ class CoordState:
             except ValueError:
                 continue
             groups.setdefault(n, []).append(c)
-        return {
-            n: cs for n, cs in groups.items()
-            if len({(r.attrs.get("agent"), r.attrs.get("branch")) for r in cs}) > 1
-        }
+        out: dict[int, list[Record]] = {}
+        for n, cs in groups.items():
+            holders = {
+                c.attrs.get("branch") or f"agent:{c.attrs.get('agent', '?')}"
+                for c in cs
+            }
+            if len(holders) > 1:
+                out[n] = cs
+        return out
 
     def open_proposals(self) -> list[Record]:
         out = []

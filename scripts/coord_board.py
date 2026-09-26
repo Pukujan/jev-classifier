@@ -379,9 +379,16 @@ def main(argv: list[str] | None = None) -> int:
             h = others[-1]
             print(f"CLAIMED issue={args.check_issue} agent={h.attrs.get('agent')} "
                   f"branch={h.attrs.get('branch')}")
-            if len(others) > 1:
-                print("  !! COLLISION: multiple non-self live claims; escalate to main agent",
-                      file=sys.stderr)
+            # Distinct-holder rule matches records.collisions(): the reserved
+            # branch is the mutex, so prose+coord double rows on ONE branch
+            # are CLAIMED, not a collision (only >1 lock alarms).
+            distinct = {
+                c.attrs.get("branch") or f"agent:{c.attrs.get('agent', '?')}"
+                for c in others
+            }
+            if len(distinct) > 1:
+                print("  !! COLLISION: multiple different locks held here; "
+                      "escalate to main agent", file=sys.stderr)
             return 3
         released = state.released_branches(args.check_issue)
         for ref in refs:
