@@ -34,6 +34,7 @@ def test_rdflib_parses_claims_ttl() -> None:
     assert "jcc:validTo" in text
     assert "jcc:recordedAt" in text
     assert "jcc:supersedes" in text
+    assert "jcc:independenceClass" in text
 
 
 def test_fragment_fixture_has_closed_set() -> None:

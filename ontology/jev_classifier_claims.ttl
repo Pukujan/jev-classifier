@@ -106,3 +106,9 @@ jcc:fragmentText a owl:DatatypeProperty ;
     rdfs:domain jcc:SourceFragment ;
     rdfs:range xsd:string ;
     rdfs:comment "Literal text of the fragment (fixtures may keep this short)." .
+
+jcc:independenceClass a owl:DatatypeProperty ;
+    rdfs:label "independenceClass" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:string ;
+    rdfs:comment "PCM-compatible: independence_class. How independently this claim was obtained (e.g. single-run, multi-run, cross-source)." .
