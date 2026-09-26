@@ -1,19 +1,19 @@
-# CURRENT — next priority
+# CURRENT ? next priority
 
 Updated: 2026-09-26 (America/New_York)
 
 ## Just completed
 
-- Issue #1 bootstrap merged via PR #2 → `main` @ `e09343d` (pytest 12 passed; smoke PASS with typesafe/jev-1.13).
+- Issue #1 bootstrap merged via PR #2 ? `main` @ `e09343d`.
+- Issue #3 multi-agent coordination scaffold merged via PR #4 ? `main` @ `2765d50` (pytest 18 passed).
 
 ## In flight
 
-- **Issue #3** — Multi-agent coordination scaffold (`feat/agent-coord-scaffold`): local SQLite coord store + `docs/AGENT_COORD.md` + red-first tests.
+- **Issue #5** ? Paper-assembly scaffolding (`feat/paper-assembly-scaffold`): claim JSON ? markdown skeleton (templates only).
 
 ## Next (queued)
 
-1. Paper-assembly scaffolding — deterministic template assembler (claim JSON → medium-quality markdown research-paper skeleton); prose templates are code/strings only; no non-JEV LLM for claim labels.
-2. Bias-detection question pack — closed JEV choice/noul packs; local aggregation; fixtures with expected legal option sets; fail-closed.
+1. **Issue #6** ? Bias-detection question pack (closed JEV choice/noul; local aggregation; fail-closed fixtures).
 
 ## Authority reminder
 

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "C1",
+    "label": "empirical_finding",
+    "epistemic_status": "Inferred",
+    "recorded_at": "2026-09-26T18:00:00+00:00",
+    "valid_from": "2026-09-01T00:00:00+00:00",
+    "valid_to": null,
+    "supersedes": null,
+    "evidence": {
+      "fragment_id": "fragment_empirical_001",
+      "path": "tests/fixtures/fragment_empirical_001.json"
+    },
+    "model": "typesafe/jev-1.13",
+    "probabilities": {
+      "empirical_finding": 0.72,
+      "hypothesis": 0.18,
+      "other": 0.1
+    },
+    "confidence": 0.72,
+    "independence_class": "single-run"
+  },
+  {
+    "id": "C2",
+    "label": "hypothesis",
+    "epistemic_status": "Inferred",
+    "recorded_at": "2026-09-26T18:05:00+00:00",
+    "valid_from": null,
+    "valid_to": null,
+    "supersedes": "C1-draft",
+    "evidence": {
+      "fragment_id": "fragment_hypothesis_002",
+      "path": "tests/fixtures/paper/fragment_hypothesis_002.txt"
+    },
+    "model": "typesafe/jev-1.13",
+    "probabilities": {
+      "empirical_finding": 0.2,
+      "hypothesis": 0.65,
+      "other": 0.15
+    },
+    "confidence": 0.65,
+    "independence_class": "single-run"
+  }
+]
