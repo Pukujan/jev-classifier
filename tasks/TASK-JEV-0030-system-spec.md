@@ -53,6 +53,29 @@ Blocked/uncertain:
 Next:
 - Wait for CI and review on PR #34; resolve the remaining JEV-0001 stale-worktree PCM preflight error only through a safe registered-worktree cleanup.
 
+### 2026-09-26 21:11:50 UTC — claude-code-main
+
+<!-- continuity:checkpoint {"agent":"claude-code-main","blocked":[],"changed":["docs/SYSTEM_SPEC.md, tasks/TASK-JEV-0030-system-spec.md"],"completed":["Clarified that fail-closed missing-field behavior applies to required answer values; omitted answer type remains optional."],"decisions":["Keep the implementation unchanged; document the observed accepted shape and test it."],"evidence":["pytest tests/test_system_spec.py tests/test_normalize.py tests/test_normalize_noul.py -q: 39 passed; git diff --check clean; commit 31f7667 pushed to feat/system-spec-30."],"next_action":"Wait for CI on updated PR #34 and continue only with current GitHub issue ownership.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JEV-0030","timestamp":"2026-09-26T21:11:50Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"b3255ff44ae96669b01fe33c11cbd8b2bb69597f1371140415f5acc1167bb5a6","request_id":"JEV-0030-required-values-31f7667","schema":"project-continuity.checkpoint-operation.v1","task_id":"JEV-0030"} -->
+
+Completed:
+- Clarified that fail-closed missing-field behavior applies to required answer values; omitted answer type remains optional.
+
+Evidence:
+- pytest tests/test_system_spec.py tests/test_normalize.py tests/test_normalize_noul.py -q: 39 passed; git diff --check clean; commit 31f7667 pushed to feat/system-spec-30.
+
+Decisions:
+- Keep the implementation unchanged; document the observed accepted shape and test it.
+
+Changed:
+- docs/SYSTEM_SPEC.md, tasks/TASK-JEV-0030-system-spec.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Wait for CI on updated PR #34 and continue only with current GitHub issue ownership.
+
 ## Handoff
 
 Await review and merge of PR #34. Do not change the #22 coordination
