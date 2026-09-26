@@ -32,23 +32,27 @@ projections — never a second source of truth. If SQLite and GitHub disagree,
 - **Branch protection ENABLED on `main`**: required status checks `test (3.11)`,
   `test (3.12)`, `hygiene`; strict; force-push and deletion blocked. PRs cannot
   merge red or bypass the storage/secret gate.
+- **#15 Grok research-source bot** completed and closed after PR #27 merged to
+  `main` at `e763206`. The branch checkpoint records 74 offline tests at merge
+  time; its one capped live smoke returned HTTP 404, so live Grok capture was
+  not verified. Grok output remains untrusted source material and is not
+  automatically sent through JEV or the paper assembler.
 - **GO issued**: authoritative agent ACCEPTED #15 and #18 and posted
   `COLLAB_GO` on parent #14
   ([comment](https://github.com/Pukujan/jev-classifier/issues/14#issuecomment-5848946788)).
 
 ## In flight (claimed / accepted)
 
-- **#15** Grok research-source bot — ACCEPTED, writer: Codex project agent,
-  branch `feat/grok-source-bot`; draft PR #27 @ `561c9e7` (74 offline tests
-  passed; one capped live smoke returned HTTP 404, recorded on #15). Grok output
-  is untrusted source material only; JEV remains the only deterministic
-  classifier model.
 - **#22** Coordination layer v2 — ACCEPTED, writer: **coordination-flagger
   agent**, branch `feat/coordination-layer-22` (reserved @ `67eaa8b`). The
   reserved-branch mutex fired against the arbiter's own dogfood push and
   resolved the collision deterministically; the arbiter adjudicates, the flagger
   agent implements. Scope now includes the owner's append-only **run-receipt
   telemetry** with opaque aliases and per-field provenance marking.
+- **#30** Versioned system spec — claimed by `claude-code-main` on
+  `feat/system-spec-30`; PR #34 is open with module-contract corrections and
+  verification complete. Its CI passed on Python 3.11/3.12 and hygiene; review
+  and merge remain.
 
 ## Adjudicated (accepted, sequenced)
 
@@ -84,4 +88,4 @@ external downloads to gitignored `data/` referenced by name+revision. CI
 enforces a secret scan, a 2MB tracked-file cap, and a 2MB fixture cap.
 `scripts/watchdog_storage.py` (#22) must stay read-only and abort-safe.
 
-<!-- continuity:current {"schema":"project-continuity.current.v1","protocol_version":"0.1.0-draft","active_task":"JEV-0001","active_task_file":"tasks/TASK-JEV-0001-grok-source-bot.md"} -->
+<!-- continuity:current {"schema":"project-continuity.current.v1","protocol_version":"0.1.0-draft","active_task":"JEV-0030","active_task_file":"tasks/TASK-JEV-0030-system-spec.md"} -->

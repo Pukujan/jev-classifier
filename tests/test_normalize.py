@@ -28,6 +28,15 @@ def test_normalize_choice_happy_path() -> None:
     assert out["probabilities"]["b"] == 0.7
 
 
+def test_missing_answer_type_is_accepted_when_choice_is_valid() -> None:
+    out = normalize_choice_answer(
+        {"choice": "b", "probabilities": {"a": 0.1, "b": 0.7, "c": 0.2}},
+        legal_options=LEGAL,
+        question_id="label",
+    )
+    assert out["choice"] == "b"
+
+
 def test_out_of_set_choice_is_parse_error() -> None:
     with pytest.raises(NormalizeError) as ei:
         normalize_choice_answer(

@@ -1,8 +1,8 @@
 # TASK-JEV-0001 — Grok Source Bot
 
-<!-- continuity:task {"acceptance":["Mocked request proves configured Grok model and bounded web-search settings; parser preserves citations, usage, and raw response.","Canonical artifact serialization produces a stable SHA-256 content hash, excluding retrieval-time metadata.","Malformed/missing identifiers fail closed without invented citations or claims.","CLI writes an inspectable versioned source artifact and never writes credentials.","Offline tests pass without an API call; any live smoke is capped, optional, and recorded on issue #15.","PROJECT.md, docs/CURRENT.md, and source documentation describe the source-only/JEV-only boundary."],"depends_on":[],"goal":"Capture Grok web research as a source-only, cited, provenance-bearing artifact; never use Grok for deterministic classifier outputs.","id":"JEV-0001","issue_url":"https://github.com/Pukujan/jev-classifier/issues/15","next_action":"Review the scoped diff, commit the accepted feature branch, and open a small PR for #15.","owner":"Codex project agent","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Add a model-agnostic research source for correlated transcripts while preserving JEV as the sole semantic decision model and keeping evidence auditable."} -->
+<!-- continuity:task {"acceptance":["Mocked request proves configured Grok model and bounded web-search settings; parser preserves citations, usage, and raw response.","Canonical artifact serialization produces a stable SHA-256 content hash, excluding retrieval-time metadata.","Malformed/missing identifiers fail closed without invented citations or claims.","CLI writes an inspectable versioned source artifact and never writes credentials.","Offline tests pass without an API call; any live smoke is capped, optional, and recorded on issue #15.","PROJECT.md, docs/CURRENT.md, and source documentation describe the source-only/JEV-only boundary."],"depends_on":[],"goal":"Capture Grok web research as a source-only, cited, provenance-bearing artifact; never use Grok for deterministic classifier outputs.","id":"JEV-0001","issue_url":"https://github.com/Pukujan/jev-classifier/issues/15","next_action":"No further implementation action: PR #27 is merged and issue #15 is closed. Create a new issue for follow-up work.","owner":"Codex project agent","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"completed","why":"Add a model-agnostic research source for correlated transcripts while preserving JEV as the sole semantic decision model and keeping evidence auditable."} -->
 
-- Status: active
+- Status: completed (PR #27 merged; issue #15 closed)
 - Owner: Codex project agent
 - Priority: P1
 - Depends on: none
@@ -53,7 +53,7 @@ Starting revision, material inputs/configuration, runtime, exact command or prom
 - Leaf: #15; parent: #14; dependencies for capture: none; later integration: #10 and #12.
 - Primary writer: Codex project agent; branch: feat/grok-source-bot; task: JEV-0001.
 - Authoritative decision: https://github.com/Pukujan/jev-classifier/issues/15#issuecomment-5848935840.
-- As of: 2026-09-26; issue #15 is open and the accepted source-capture work is in progress.
+- As of: 2026-09-26; issue #15 is closed and PR #27 is merged to `main` at `e763206`.
 ## Checkpoint log
 
 - 2026-09-26: Implementation and mocked tests complete. Full Python suite: 74 passed; CLI help and JSON schema syntax checked. One capped live smoke returned HTTP 404; current official OpenRouter docs confirm the configured Chat Completions endpoint and model listing, but the runtime cause is unknown. No second live request was made. Heavy iterative benchmarks are separately owner-directed to run serially on the MacBook Pro under #21.
