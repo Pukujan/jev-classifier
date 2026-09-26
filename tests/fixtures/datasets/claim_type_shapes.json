@@ -1,0 +1,64 @@
+{
+  "label_set": [
+    "background",
+    "method",
+    "result"
+  ],
+  "provenance": {
+    "corpus_text": "none",
+    "generator": "generate_synthetic_fixtures.py",
+    "generator_version": "1",
+    "kind": "synthetic",
+    "license": "first-party; no external corpus",
+    "modeled_on_label_shapes": "SciCite closed set background/method/result",
+    "seed": 33
+  },
+  "samples": [
+    {
+      "id": "syn-ct-bg-001",
+      "label": "background",
+      "text": "Prior reviews of ambulatory glucose sensing emphasize drift and calibration burden as recurring deployment constraints."
+    },
+    {
+      "id": "syn-ct-bg-002",
+      "label": "background",
+      "text": "Several observational cohorts have linked overnight hypoglycemia alerts with next-day cognitive fatigue scores."
+    },
+    {
+      "id": "syn-ct-bg-003",
+      "label": "background",
+      "text": "The broader literature treats sensor wear-time adherence as a known moderator of real-world accuracy estimates."
+    },
+    {
+      "id": "syn-ct-me-001",
+      "label": "method",
+      "text": "We randomized 120 adults 1:1 using permuted blocks of size four and locked the analysis plan before unblinding."
+    },
+    {
+      "id": "syn-ct-me-002",
+      "label": "method",
+      "text": "Feature vectors were built from five-minute interstitial glucose windows and scored with a fixed ridge regression pipeline."
+    },
+    {
+      "id": "syn-ct-me-003",
+      "label": "method",
+      "text": "Inter-annotator agreement was measured with Cohen's kappa on a held-out double-coded subset of twenty fragments."
+    },
+    {
+      "id": "syn-ct-re-001",
+      "label": "result",
+      "text": "Mean absolute relative difference fell from 11.4% to 8.1% (95% CI 2.1–4.5) in the intervention arm."
+    },
+    {
+      "id": "syn-ct-re-002",
+      "label": "result",
+      "text": "Nighttime alert precision was 0.73 versus 0.51 for the baseline rule set (McNemar p = 0.004)."
+    },
+    {
+      "id": "syn-ct-re-003",
+      "label": "result",
+      "text": "No serious device-related adverse events were observed across ninety days of continuous wear."
+    }
+  ],
+  "schema": "jev.synthetic_fixtures.claim_type.v1"
+}

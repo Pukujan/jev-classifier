@@ -1,0 +1,68 @@
+{
+  "label_set": [
+    "entailment",
+    "contrasting",
+    "neutral",
+    "reasoning"
+  ],
+  "provenance": {
+    "corpus_text": "none",
+    "generator": "generate_synthetic_fixtures.py",
+    "generator_version": "1",
+    "kind": "synthetic",
+    "license": "first-party; no external corpus",
+    "modeled_on_label_shapes": "SciNLI closed set entailment/contrasting/neutral/reasoning",
+    "seed": 33
+  },
+  "samples": [
+    {
+      "hypothesis": "At least one overnight hypoglycemia alert occurred.",
+      "id": "syn-cx-en-001",
+      "label": "entailment",
+      "premise": "The sensor reported two nocturnal lows between midnight and 06:00."
+    },
+    {
+      "hypothesis": "No participant discontinued the study before day fourteen.",
+      "id": "syn-cx-en-002",
+      "label": "entailment",
+      "premise": "All enrolled participants completed the fourteen-day wear protocol."
+    },
+    {
+      "hypothesis": "Arm A increased false alarms relative to control.",
+      "id": "syn-cx-co-001",
+      "label": "contrasting",
+      "premise": "Arm A reduced false alarms by forty percent versus control."
+    },
+    {
+      "hypothesis": "The device required no user calibration during wear.",
+      "id": "syn-cx-co-002",
+      "label": "contrasting",
+      "premise": "Calibration every twelve hours was required for the device."
+    },
+    {
+      "hypothesis": "Rainfall in the catchment area rose during the trial window.",
+      "id": "syn-cx-ne-001",
+      "label": "neutral",
+      "premise": "The clinic enrolled adults aged eighteen to sixty-five."
+    },
+    {
+      "hypothesis": "The cafeteria introduced a new lunch menu that week.",
+      "id": "syn-cx-ne-002",
+      "label": "neutral",
+      "premise": "Primary endpoint was change in time-in-range at day twenty-eight."
+    },
+    {
+      "hypothesis": "High MARD is treated as a reason to postpone dose changes.",
+      "id": "syn-cx-re-001",
+      "label": "reasoning",
+      "premise": "If MARD exceeds twelve percent, clinicians delay therapy titration."
+    },
+    {
+      "hypothesis": "Incomplete night coverage underestimates true overnight lows.",
+      "id": "syn-cx-re-002",
+      "label": "reasoning",
+      "premise": "Missing overnight readings bias hypoglycemia prevalence downward."
+    }
+  ],
+  "schema": "jev.synthetic_fixtures.contradiction.v1"
+}

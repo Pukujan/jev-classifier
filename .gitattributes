@@ -1,0 +1,6 @@
+
+# Synthetic dataset fixtures: hashes are of LF bytes (Issue #33)
+tests/fixtures/datasets/** text eol=lf
+scripts/generate_synthetic_fixtures.py text eol=lf
+docs/DATASETS.md text eol=lf
+tests/test_synthetic_fixtures.py text eol=lf
