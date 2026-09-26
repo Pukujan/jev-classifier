@@ -1,0 +1,20 @@
+{
+  "schema": "project-continuity.config.v1",
+  "protocol": "project-continuity",
+  "protocol_version": "0.1.0-draft",
+  "profile": "software",
+  "task_prefix": "JEV",
+  "canonical": {
+    "project": "PROJECT.md",
+    "current": "docs/CURRENT.md",
+    "tasks": "tasks"
+  },
+  "schema_dir": "schemas/v1",
+  "trackers": {
+    "github": true,
+    "beads": false
+  },
+  "workspace": {
+    "mode": "managed-worktrees"
+  }
+}

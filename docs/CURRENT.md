@@ -39,7 +39,10 @@ projections — never a second source of truth. If SQLite and GitHub disagree,
 ## In flight (claimed / accepted)
 
 - **#15** Grok research-source bot — ACCEPTED, writer: Codex project agent,
-  branch `feat/grok-source-bot`. Grok output is untrusted source material only.
+  branch `feat/grok-source-bot`; draft PR #27 @ `561c9e7` (74 offline tests
+  passed; one capped live smoke returned HTTP 404, recorded on #15). Grok output
+  is untrusted source material only; JEV remains the only deterministic
+  classifier model.
 - **#22** Coordination layer v2 — ACCEPTED, writer: **coordination-flagger
   agent**, branch `feat/coordination-layer-22` (reserved @ `67eaa8b`). The
   reserved-branch mutex fired against the arbiter's own dogfood push and
@@ -54,6 +57,9 @@ projections — never a second source of truth. If SQLite and GitHub disagree,
   Becomes a parent with 7 bounded child leaves; children 1 (versioned system
   spec + module contracts) and 2 (dataset card + reference-paper selection) are
   **unblocked now**. Writer: Codex project agent coordinates children.
+  Owner execution decision: run resource-intensive test benches serially on the
+  MacBook Pro agent, not Windows; record host/runtime/tool and resource details
+  on the relevant GitHub issue.
 - **#23** Memory-context-contamination benchmark — **ACCEPT-DEFERRED**. Goal
   accepted, implementation **BLOCKED** on #21 + #15 + #22. Do not claim or
   branch it. Unblocked contribution today: the privacy-reviewed
@@ -77,3 +83,5 @@ disposable. Keep the tree lean: no large binaries, no committed datasets,
 external downloads to gitignored `data/` referenced by name+revision. CI
 enforces a secret scan, a 2MB tracked-file cap, and a 2MB fixture cap.
 `scripts/watchdog_storage.py` (#22) must stay read-only and abort-safe.
+
+<!-- continuity:current {"schema":"project-continuity.current.v1","protocol_version":"0.1.0-draft","active_task":"JEV-0001","active_task_file":"tasks/TASK-JEV-0001-grok-source-bot.md"} -->
