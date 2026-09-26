@@ -27,7 +27,10 @@ def _load(path: Path) -> dict:
 
 
 def _sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    # Normalize newlines so Windows checkout CRLF cannot drift hashes;
+    # committed fixtures and generator emit LF-only (see .gitattributes).
+    normalized = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(normalized).hexdigest()
 
 
 def _load_generator_module():

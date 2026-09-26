@@ -288,7 +288,7 @@ def check_outputs(outputs: dict[str, str]) -> list[str]:
         if not path.is_file():
             errors.append(f"missing: {path}")
             continue
-        actual = path.read_text(encoding="utf-8")
+        actual = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
         if actual != expected:
             errors.append(
                 f"mismatch: {path} (sha expected {sha256_text(expected)[:12]}… "
