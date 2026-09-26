@@ -28,6 +28,29 @@ and known gaps explicit. Reconcile stale #15/PR #27 status projections.
   normalizers. Corrected the spec/index to match and added focused tests for
   absent `type`; PR #34 remains open pending merge.
 
+### 2026-09-26 21:10:08 UTC — claude-code-main
+
+<!-- continuity:checkpoint {"agent":"claude-code-main","blocked":[],"changed":["docs/SYSTEM_SPEC.md, docs/spec/modules.json, tests/test_normalize.py, tests/test_normalize_noul.py, tasks/TASK-JEV-0030-system-spec.md"],"completed":["Aligned the M2 answer-type contract and index with normalizer behavior; added focused omission tests."],"decisions":["Document current behavior: type is optional; when supplied it must match the primitive. No normalization behavior change."],"evidence":["pytest tests/test_normalize.py tests/test_normalize_noul.py tests/test_system_spec.py -q: 39 passed; git diff --check clean; source commit 6d9963b pushed to feat/system-spec-30."],"next_action":"Wait for CI and review on PR #34; resolve the remaining JEV-0001 stale-worktree PCM preflight error only through a safe registered-worktree cleanup.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JEV-0030","timestamp":"2026-09-26T21:10:08Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"cccfdebb9056299bf21f4d65c82d492e6f4e86efdb1112e8d81bcdbcba61b4b1","request_id":"JEV-0030-optional-type-6d9963b","schema":"project-continuity.checkpoint-operation.v1","task_id":"JEV-0030"} -->
+
+Completed:
+- Aligned the M2 answer-type contract and index with normalizer behavior; added focused omission tests.
+
+Evidence:
+- pytest tests/test_normalize.py tests/test_normalize_noul.py tests/test_system_spec.py -q: 39 passed; git diff --check clean; source commit 6d9963b pushed to feat/system-spec-30.
+
+Decisions:
+- Document current behavior: type is optional; when supplied it must match the primitive. No normalization behavior change.
+
+Changed:
+- docs/SYSTEM_SPEC.md, docs/spec/modules.json, tests/test_normalize.py, tests/test_normalize_noul.py, tasks/TASK-JEV-0030-system-spec.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- Wait for CI and review on PR #34; resolve the remaining JEV-0001 stale-worktree PCM preflight error only through a safe registered-worktree cleanup.
+
 ## Handoff
 
 Await review and merge of PR #34. Do not change the #22 coordination
