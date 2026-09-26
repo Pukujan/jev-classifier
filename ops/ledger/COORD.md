@@ -15,10 +15,14 @@ _(none)_
 | issue | agent | branch | marker |
 |-------|-------|--------|--------|
 | #22 | coordination-flagger | `feat/coordination-layer-22` | coord |
+| #35 | Pukujan | `feat/cgm-docs-35` | prose |
 
 ## Run receipts
 
-_(none)_
+| Run/task | Agent alias | Model alias / version alias | Temperature + source | Tools/version/count + source | Outcome / evidence |
+|---|---|---|---|---|---|
+| r-36-1 / JEV-0022 | A-FLAGGER (owner_recorded) | unavailable / unavailable | unavailable (unavailable) | gh,git,pytest,continuity,python (agent_declared) | merged (runtime_observed) [no link] |
+| r-36-1-fix1 / JEV-0022 | A-FLAGGER (agent_declared) | unavailable / unavailable | unavailable (unavailable) | gh,git,pytest,continuity,python (agent_declared) | merged (runtime_observed) [no link] |
 
 ## Collisions
 
