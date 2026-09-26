@@ -345,3 +345,57 @@ class TestSettleAndIdentity:
         ])
         out = capsys.readouterr().out
         assert rc == 0 and "CLAIMED-BY-YOU" in out
+
+
+class TestCollisionSemantics:
+    """#53: holder identity is the reserved branch (the mutex), not the label."""
+
+    def test_prose_plus_coord_on_same_branch_is_not_collision(self):
+        # the exact #35 pattern: one session's legacy prose claim (agent =
+        # shared login) plus its coord marker on ONE branch
+        st = R.fold([
+            {"body": "## Claim\n- Branch: `feat/cgm-docs-35`\n- Primary writer: Pukujan",
+             "author": "Pukujan", "created_at": "2026-09-26T21:00:00Z",
+             "issue": 35, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=35 agent=claude-code-main@desktop-jev35 "
+                     "branch=feat/cgm-docs-35 sha=f9ffdf0 state=active -->",
+             "author": "Pukujan", "created_at": "2026-09-26T21:39:11Z",
+             "issue": 35, "comment_id": 2},
+        ])
+        assert len(st.live_claims()) == 2, "both rows stay visible on the board"
+        assert st.collisions() == {}, (
+            "a git ref cannot have two holders; same-branch double posting "
+            "must not alarm"
+        )
+
+    def test_two_different_branches_still_collide(self):
+        st = R.fold([
+            {"body": "<!-- coord:claim issue=9 agent=a@x branch=feat/a-9 -->",
+             "author": "u", "created_at": "2026-09-26T19:00:00Z", "issue": 9, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=9 agent=b@y branch=feat/b-9 -->",
+             "author": "u", "created_at": "2026-09-26T19:01:00Z", "issue": 9, "comment_id": 2},
+        ])
+        assert 9 in st.collisions()
+
+    def test_branchless_rows_fall_back_to_agent(self):
+        c1 = R.Record("claim", {"issue": "9", "agent": "a@x"}, "u", "t1", 9, 1)
+        c2 = R.Record("claim", {"issue": "9", "agent": "b@y"}, "u", "t2", 9, 2)
+        st = R.CoordState(claims={("9", "a@x"): c1, ("9", "b@y"): c2})
+        assert 9 in st.collisions()
+
+    def test_gate_on_double_posted_branch_says_claimed_not_collision(
+            self, tmp_path, capsys):
+        items = [
+            rest("## Claim\n- Branch: `feat/cgm-docs-35`\n- Primary writer: Pukujan",
+                 1, "2026-09-26T21:00:00Z", issue=35),
+            rest("<!-- coord:claim issue=35 agent=claude-code-main@desktop-jev35 "
+                 "branch=feat/cgm-docs-35 sha=f9ffdf0 -->",
+                 2, "2026-09-26T21:39:11Z", issue=35),
+        ]
+        rc = coord_board.main([
+            "--comments-file", comments_file(tmp_path, items),
+            "--issue-open", "35", "--agent", "someone@else", "--no-refs",
+        ])
+        out = capsys.readouterr()
+        assert rc == 3 and "CLAIMED issue=35" in out.out
+        assert "COLLISION" not in out.err, "alarm must stay reserved for two locks"
