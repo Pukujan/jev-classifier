@@ -15,7 +15,8 @@
 | P-32-1 | #32 | score-bias-fixes | open | accepted |
 | P-35-1 | #35 | CGM_0.4.0_README_and_docs | open | accepted |
 | P-37-1 | #37 | reference_claim_graph_and_stimulus_schema | open | accepted |
-| P-60-1 | #60 | coordination | open | open |
+| P-60-1 | #60 | coordination | open | accepted |
+| P-61-1 | #61 | coordination | open | open |
 
 ## Live claims
 
