@@ -19,8 +19,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "install_watchdog_launchagent.sh"
+
+# The other tests here only inspect the rendered plist or run it through
+# whatever `sh` is on PATH. The one below executes the command with the
+# literal /bin/sh the plist targets, so it is meaningful only where that
+# path exists (macOS and Linux CI); on Windows it fails on a missing file
+# rather than on anything about the installer (#47).
+POSIX_SH = Path("/bin/sh").exists()
 
 
 def _dry_run(home: str, **env_over: str) -> dict:
@@ -66,6 +75,11 @@ def test_interval_env_override() -> None:
     assert "--budget-mb 128" in d["ProgramArguments"][2]
 
 
+@pytest.mark.skipif(
+    not POSIX_SH,
+    reason="executes the rendered command with /bin/sh, the shell the plist "
+           "targets; that path does not exist on Windows (#47)",
+)
 def test_rendered_command_actually_runs(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
