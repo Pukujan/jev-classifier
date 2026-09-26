@@ -1,0 +1,1 @@
+We hypothesize that typed decision models reduce label drift versus free-form chat summarizers.
