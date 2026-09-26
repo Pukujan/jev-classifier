@@ -1,0 +1,33 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "jev-classifier",
+  "personality": [
+    "clear",
+    "careful",
+    "plain-spoken",
+    "evidence-led"
+  ],
+  "audience_feeling": "A researcher should understand the useful path and its limits before learning internal module names.",
+  "promise": "Turn one supplied research fragment into a structured JEV judgment record with a traceable evidence pointer.",
+  "preferred_terms": {
+    "source capture": "untrusted source collection",
+    "JEV judgment": "closed semantic classification",
+    "paper draft": "six-section structural draft",
+    "bias signal": "measured signal, not proof"
+  },
+  "avoid": [
+    "AI-powered magic",
+    "guaranteed truth",
+    "fully autonomous research",
+    "validated bias detection",
+    "paper-quality output"
+  ],
+  "good_examples": [
+    "One fragment goes to a closed JEV label set; malformed answers fail closed.",
+    "The two-source demo uses synthetic fixture text and mocked responses."
+  ],
+  "bad_examples": [
+    "The system proves whether a research agent is biased.",
+    "Grok output is automatically trusted and turned into a paper."
+  ]
+}
