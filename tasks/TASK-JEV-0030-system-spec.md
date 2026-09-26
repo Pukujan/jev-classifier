@@ -14,7 +14,7 @@ Correct and version the current module contracts without rewriting product
 modules. Keep code behavior, permitted JEV/non-JEV roles, validation ownership,
 and known gaps explicit. Reconcile stale #15/PR #27 status projections.
 
-## Checkpoints
+## Checkpoint log
 
 - 2026-09-26: Re-audited current code and identified inaccurate module inputs,
   timestamp/provenance guarantees, test mappings, and stale merged-source status.
@@ -24,6 +24,9 @@ and known gaps explicit. Reconcile stale #15/PR #27 status projections.
   covered by the suite.
 - 2026-09-26: PR #34 CI passed on Python 3.11 and 3.12, including the hygiene
   job (run 36270138029).
+- 2026-09-26: Independent review found answer `type` is optional in the current
+  normalizers. Corrected the spec/index to match and added focused tests for
+  absent `type`; PR #34 remains open pending merge.
 
 ## Handoff
 

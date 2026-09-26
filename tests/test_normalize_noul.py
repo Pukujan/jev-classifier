@@ -23,3 +23,9 @@ def test_noul_wrong_type_fails() -> None:
     with pytest.raises(NormalizeError) as ei:
         normalize_noul_answer({"type": "choice", "choice": "a"})
     assert ei.value.kind == "parse_error"
+
+
+def test_noul_missing_answer_type_is_accepted() -> None:
+    out = normalize_noul_answer({"noul": 0.8}, question_id="signal")
+    assert out["label"] == "yes"
+    assert out["p_yes"] == 0.8

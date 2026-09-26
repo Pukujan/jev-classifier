@@ -83,7 +83,7 @@ canonical label, score, or claim, and may not call M2/M3 to promote itself.
 | Input | one Decisions answer object, or a response body plus question id and legal options / noul threshold |
 | Output | validated typed answer preserving native probability map + confidence |
 | API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
-| Invariants | answer `type` must match the expected primitive; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
+| Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
 | Fail-closed | yes — out-of-set, missing, wrong-typed, or malformed → `NormalizeError`, never a guessed label |
 | Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py` |
 

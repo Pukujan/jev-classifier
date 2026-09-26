@@ -50,7 +50,7 @@
         "input": ["decisions_answer_object", "response_body_with_question_id_and_options_or_threshold"],
         "output": ["validated_typed_answer"],
         "invariants": [
-          "answer_type_matches_primitive",
+          "answer_type_matches_primitive_when_present",
           "choice_in_legal_options",
           "probability_keys_within_legal_set",
           "legal_options_nonempty",
