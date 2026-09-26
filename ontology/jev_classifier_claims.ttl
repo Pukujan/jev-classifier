@@ -1,0 +1,108 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix jcc:  <https://github.com/Pukujan/jev-classifier/ontology/claims#> .
+
+# Lean OWL2 skeleton for jev-classifier claims.
+# PROV-O alignment is via comments + rdfs:seeAlso / subclassWhere cheap;
+# we do not hard-require a remote import fetch for local syntax checks.
+
+<https://github.com/Pukujan/jev-classifier/ontology/claims>
+    a owl:Ontology ;
+    rdfs:label "jev-classifier claims ontology" ;
+    rdfs:comment "Claim + SourceFragment with epistemic status and bitemporal hooks (valid time + transaction time). Aligns leanly with PROV-O Entity/Activity patterns and PCM-0050-compatible field names." ;
+    rdfs:seeAlso <http://www.w3.org/ns/prov#> .
+
+##############################################################################
+# Classes
+##############################################################################
+
+jcc:Claim a owl:Class ;
+    rdfs:label "Claim" ;
+    rdfs:comment "A classified assertion derived from a SourceFragment. Treat as a PROV Entity (prov:Entity) produced by a classification activity." ;
+    rdfs:subClassOf prov:Entity .
+
+jcc:SourceFragment a owl:Class ;
+    rdfs:label "SourceFragment" ;
+    rdfs:comment "A bounded excerpt of a transcript or paper used as evidence. Aligns with prov:Entity as an information resource fragment." ;
+    rdfs:subClassOf prov:Entity .
+
+jcc:EpistemicStatus a owl:Class ;
+    rdfs:label "EpistemicStatus" ;
+    rdfs:comment "Closed vocabulary for how the claim was obtained (Observed, Inferred, Hypothesized, etc.). Domain extension over PROV; not a truth bit." .
+
+##############################################################################
+# Individuals (lean closed set for epistemic status)
+##############################################################################
+
+jcc:Observed a jcc:EpistemicStatus ;
+    rdfs:label "Observed" ;
+    rdfs:comment "Directly grounded in source evidence without substantial inference." .
+
+jcc:Inferred a jcc:EpistemicStatus ;
+    rdfs:label "Inferred" ;
+    rdfs:comment "Derived via JEV judgment and/or local aggregation over evidence." .
+
+jcc:Hypothesized a jcc:EpistemicStatus ;
+    rdfs:label "Hypothesized" ;
+    rdfs:comment "Tentative; pending review or further evidence." .
+
+##############################################################################
+# Properties — epistemic + bitemporal + lineage
+##############################################################################
+
+jcc:epistemicStatus a owl:ObjectProperty ;
+    rdfs:label "epistemicStatus" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range jcc:EpistemicStatus ;
+    rdfs:comment "PCM-compatible: epistemic_status. How the claim was established." .
+
+jcc:labelValue a owl:DatatypeProperty ;
+    rdfs:label "labelValue" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Closed-set classifier label string (validated in application code)." .
+
+jcc:validFrom a owl:DatatypeProperty ;
+    rdfs:label "validFrom" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Valid-time start: when the claim is considered true in the world (PCM valid_from)." .
+
+jcc:validTo a owl:DatatypeProperty ;
+    rdfs:label "validTo" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Valid-time end (exclusive or inclusive per adopter); omit if still current." .
+
+jcc:recordedAt a owl:DatatypeProperty ;
+    rdfs:label "recordedAt" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Transaction time: when this claim record was written (PCM recorded_at)." .
+
+jcc:supersedes a owl:ObjectProperty ;
+    rdfs:label "supersedes" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range jcc:Claim ;
+    rdfs:comment "Lineage: this claim replaces a prior claim. Aligns with PCM supersedes / PROV derivation patterns." .
+
+jcc:evidence a owl:ObjectProperty ;
+    rdfs:label "evidence" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range jcc:SourceFragment ;
+    rdfs:comment "Pointer to the SourceFragment that grounded the classification." .
+
+jcc:modelId a owl:DatatypeProperty ;
+    rdfs:label "modelId" ;
+    rdfs:domain jcc:Claim ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Requested or provider-surfaced JEV model id used for the judgment." .
+
+jcc:fragmentText a owl:DatatypeProperty ;
+    rdfs:label "fragmentText" ;
+    rdfs:domain jcc:SourceFragment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal text of the fragment (fixtures may keep this short)." .

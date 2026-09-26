@@ -1,0 +1,23 @@
+{
+  "id": "claim-fixture-empirical-001",
+  "label": "empirical_finding",
+  "epistemic_status": "Inferred",
+  "recorded_at": "2026-09-26T18:00:00+00:00",
+  "valid_from": null,
+  "valid_to": null,
+  "supersedes": null,
+  "evidence": {
+    "fragment_id": "fixture-frag-001",
+    "path": "tests/fixtures/fragment_empirical_001.json"
+  },
+  "model": "typesafe/jev-1.13",
+  "probabilities": {
+    "empirical_finding": 0.9,
+    "method_claim": 0.05,
+    "opinion": 0.03,
+    "other": 0.02
+  },
+  "confidence": 0.85,
+  "independence_class": null,
+  "notes": "Golden shape example (offline). Live classify path may differ in probs; keys required."
+}

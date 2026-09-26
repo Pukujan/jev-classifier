@@ -1,0 +1,21 @@
+{
+  "id": "fixture-frag-001",
+  "source": "synthetic",
+  "title": "Controlled study primary endpoint",
+  "text": "In a controlled study of 120 participants, the treatment group showed a statistically significant improvement (p < 0.01) on the primary endpoint compared to placebo.",
+  "closed_label_set": [
+    "empirical_finding",
+    "method_claim",
+    "opinion",
+    "other"
+  ],
+  "question_id": "claim_kind",
+  "instructions": "Classify the research fragment into exactly one claim kind.",
+  "criteria": {
+    "empirical_finding": "Reports observed data, measurements, or statistical results from a study or experiment.",
+    "method_claim": "Describes a method, procedure, architecture, or how something was done rather than what was observed.",
+    "opinion": "Authorial judgment, speculation, or recommendation without direct empirical support in the fragment.",
+    "other": "Does not clearly fit empirical finding, method claim, or opinion."
+  },
+  "notes": "Synthetic fixture for Iteration 2; not gold-labeled for calibration."
+}
