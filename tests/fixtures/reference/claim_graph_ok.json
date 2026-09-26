@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "graph_id": "refgraph:synthetic-demo-1",
+  "papers": [
+    {
+      "paper_id": "paper:demo-a",
+      "title": "Synthetic Demonstration Paper A",
+      "version": "v1",
+      "doi": null,
+      "url": null
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "source:demo-a-abstract",
+      "paper_id": "paper:demo-a",
+      "version": "v1",
+      "content_sha256": null
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim:demo-1",
+      "text": "The synthetic abstract reports an effect under condition X.",
+      "paper_id": "paper:demo-a",
+      "source_id": "source:demo-a-abstract",
+      "evidence": {
+        "quote": "an effect was observed under condition X",
+        "byte_start": 120,
+        "byte_end": 163
+      },
+      "epistemic_status": "observed",
+      "valid_from": null,
+      "valid_to": null,
+      "recorded_at": "2026-09-26T00:00:00+00:00"
+    },
+    {
+      "claim_id": "claim:demo-2",
+      "text": "Condition X is therefore the driver of the effect.",
+      "paper_id": "paper:demo-a",
+      "source_id": "source:demo-a-abstract",
+      "evidence": {
+        "quote": "consistent with condition X driving the effect",
+        "byte_start": 200,
+        "byte_end": 245
+      },
+      "epistemic_status": "inferred",
+      "valid_from": null,
+      "valid_to": null,
+      "recorded_at": "2026-09-26T00:00:00+00:00"
+    }
+  ],
+  "relationships": [
+    {
+      "rel_id": "rel:demo-1",
+      "type": "supports",
+      "from_claim_id": "claim:demo-1",
+      "to_claim_id": "claim:demo-2"
+    }
+  ],
+  "reviews": [
+    {
+      "review_id": "review:demo-1",
+      "claim_id": "claim:demo-2",
+      "annotator_id": "annotator:alpha",
+      "decision": "uncertain",
+      "note": "Inference is plausible but not stated by the source.",
+      "recorded_at": "2026-09-26T01:00:00+00:00",
+      "supersedes_review_id": null
+    },
+    {
+      "review_id": "review:demo-2",
+      "claim_id": "claim:demo-2",
+      "annotator_id": "annotator:beta",
+      "decision": "revise",
+      "note": "Keep, but weaken the causal wording.",
+      "recorded_at": "2026-09-26T02:00:00+00:00",
+      "supersedes_review_id": null
+    }
+  ]
+}

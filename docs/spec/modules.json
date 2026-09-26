@@ -308,6 +308,45 @@
         "known_defects": [],
         "tracked_reports": []
       }
+    },
+    {
+      "id": "R",
+      "name": "reference_claim_schema",
+      "title": "Reference claim schema",
+      "version": "0.1.0",
+      "role": "deterministic",
+      "code": [
+        "schemas/reference_claim_graph.schema.json",
+        "schemas/context_stimulus_manifest.schema.json",
+        "src/jev_classifier/reference/validate.py"
+      ],
+      "tests": ["tests/test_reference_schema.py"],
+      "fail_closed": true,
+      "issue": 37,
+      "status": "merged",
+      "contract": {
+        "input": ["reference_claim_graph_document", "privacy_safe_context_stimulus_manifest"],
+        "output": ["validated_records_or_ReferenceSchemaError"],
+        "formats": ["json_schema_draft_2020_12", "python_cross_record_validation"],
+        "invariants": [
+          "claim_resolves_to_immutable_paper_and_source_version",
+          "evidence_span_nonempty_with_byte_end_exceeding_start",
+          "relationship_endpoints_resolve_and_are_irreflexive",
+          "valid_time_and_transaction_time_are_separate_fields",
+          "absent_dates_stay_null_and_are_never_inferred",
+          "review_records_accumulate_and_preserve_disagreement",
+          "paired_counterfactual_cases_share_family_and_packet",
+          "public_records_contain_no_url_or_raw_private_content",
+          "unknown_keys_rejected"
+        ],
+        "design_rulings": [
+          "json_schema_is_normative_shacl_deferred",
+          "cross_record_invariants_in_pure_python_no_pyshacl",
+          "schema_defines_records_only_not_benchmark_execution",
+          "jsonschema_declared_in_dev_extra"
+        ],
+        "known_gap": "SHACL not implemented; the cross-record invariants SHACL would express are enforced in Python instead. Adding pyshacl needs its own leaf issue (see M6)."
+      }
     }
   ],
   "cross_cutting_invariants": [
