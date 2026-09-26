@@ -1,4 +1,4 @@
-﻿.env
+.env
 .env.*
 !.env.example
 __pycache__/
@@ -16,4 +16,8 @@ build/
 
 # Local research extracts (not for commit)
 .research_cache/
+
+
+# Local agent coordination DB (execution aid; not authority)
+.coord/
 
