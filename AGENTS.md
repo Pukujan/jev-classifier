@@ -2,6 +2,12 @@
 
 ## Authority
 
+- **The authoritative agent is the sole arbiter.** Disagreements, proposal
+  collisions, and sequencing disputes are decided by the main agent session
+  acting for the owner; its ruling on the issue is final. Product agents
+  propose only. **The project does not stop for anyone — including the owner.**
+  On a blocker, apply the slimmest plausible fix, record it, keep moving.
+  Full policy: [`docs/AUTHORITY.md`](docs/AUTHORITY.md).
 - **GitHub issues** are the authority for work items. Do not invent parallel task systems.
 - Prefer small PRs against feature branches. **Never force-push** shared history. **Do not commit classifier product work to `main`/`master` without an issue-backed PR.**
 - PCM (`Pukujan/project-continuity-modules`) is a **helper** for continuity, claim/epistemic patterns, and process — not a second product owner for this repo.
