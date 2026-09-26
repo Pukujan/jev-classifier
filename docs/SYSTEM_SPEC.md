@@ -82,15 +82,18 @@ canonical label, score, or claim, and may not call M2/M3 to promote itself.
 | Role | **deterministic** |
 | Input | one Decisions answer object, or a response body plus question id and legal options / noul threshold |
 | Output | validated typed answer preserving native probability map + confidence |
-| API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
-| Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
-| Fail-closed | yes — missing required answer values, a supplied wrong `type`, wrong-typed values, out-of-set choices/probability keys, or malformed answers → `NormalizeError`; an omitted optional `type` is accepted |
-| Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py` |
+| API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_score_answer(answer, *, legal_scores, question_id)` · `extract_score_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
+| Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty; `score` must be a level **in** the ordered rubric legend, and a provider-surfaced `legend` that disagrees with the requested rubric fails closed |
+| Fail-closed | yes — missing required answer values, a supplied wrong `type`, wrong-typed values, out-of-set choices/scores/probability keys, a mismatched or malformed surfaced `legend`, or malformed answers → `NormalizeError`; an omitted optional `type` is accepted |
+| Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py`, `tests/test_normalize_score.py` |
 
-**Known gap (issue #32):** the declared `score` primitive is **not implemented**
-(`QuestionType = Literal["choice","noul"]`; no `normalize_score_answer`). Either
-implement it or strike it from AGENTS.md/PROJECT.md. Docs must not claim a
-capability the code lacks.
+**Closed (issue #32).** The `score` primitive is implemented:
+`normalize_score_answer` / `extract_score_from_response` validate the chosen
+level against an explicit ordered rubric (`legal_scores`), preserve the native
+probability map, legend, and confidence, and never fabricate a level. A
+provider-surfaced `legend` is preserved when it matches the requested rubric and
+fails closed when it does not, so a rubric disagreement routes to a parse error
+rather than a guessed score. `QuestionType` is `Literal["choice","score","noul"]`.
 
 ### M3 — JEV semantic decisions
 
@@ -272,20 +275,25 @@ point-query gate importing the same records — it must not become a second boar
 | | |
 |---|---|
 | Version | `0.1.0` |
-| Code | `src/jev_classifier/bias/packs.py`, `aggregate.py`; `scripts/smoke_bias.py` |
+| Code | `src/jev_classifier/bias/packs.py`, `aggregate.py`, `sycophancy.py`; `scripts/smoke_bias.py` |
 | Role | **JEV** for the closed questions; **deterministic** for aggregation |
 | Contract | `BiasPack(pack_id, version, questions)`, `BiasQuestion`, `validate_pack`, `legal_options_for`, `aggregate_bias_answers`, `get_pack`; shipped pack `bias_pack_v1` |
-| Invariants | every question is closed (choice/noul) with a legal option set; pack_id and version required; unknown pack → `NormalizeError`; live smoke **skips without a key** |
-| Tests | `tests/test_bias_packs.py`, `tests/test_smoke_bias.py` |
+| Invariants | every question is closed (`choice`/`score`/`noul`) with a legal option set; `score` questions carry an ordered `legend`; `flags_on` values must be legal for their question; pack_id and version required; unknown pack → `NormalizeError`; live smoke **skips without a key** |
+| Tests | `tests/test_bias_packs.py`, `tests/test_bias_sycophancy.py`, `tests/test_bias_position.py`, `tests/test_smoke_bias.py` |
 
 **Bias signals are measured signals** validated against explicit fixtures. They
 are never presented as proof of bias, and never as proof of correctness.
 
-**Issue #32 reports** defects in the bias pack and score primitive. The current
-aggregate code passes `yes_threshold` to the noul normalizer, so that reported
-threshold defect requires correction at the issue record. Existing signals
-measure source text; they are not validated as a detector of classifier or
-agent bias.
+**Closed (issue #32).** The bias pack now supports `score` questions with an
+explicit ordered rubric; raised flags come from each question's declared
+`flags_on` values (validated to be legal), so the dead hardcoded entries `"high"`
+/ `"yes_biased"` are gone. Noul signals record the `yes_threshold` that produced
+their label. The `overconfidence` question now asks about the classifier's own
+stated confidence against its evidence (calibration), not a property of the
+source text. Sycophancy is a two-call pattern with ΔP computed locally in
+`sycophancy.py` (raw state, then appended pushback; questions inside one request
+stay atomic). Position bias is a pure-Python harness in `tests/test_bias_position.py`,
+never a pack question.
 
 ---
 

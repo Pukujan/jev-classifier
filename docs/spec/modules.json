@@ -9,8 +9,8 @@
     "pinned_model": "typesafe/jev-1.13",
     "canary_model": "~typesafe/jev-latest",
     "primitives_declared": ["choice", "score", "noul"],
-    "primitives_implemented": ["choice", "noul"],
-    "note": "score is declared in AGENTS.md/PROJECT.md but unimplemented; see issue #32."
+    "primitives_implemented": ["choice", "score", "noul"],
+    "note": "All three declared primitives are implemented in normalize.py. score landed in #32 (fail-closed rubric validation; native probabilities/confidence preserved)."
   },
   "modules": [
     {
@@ -42,9 +42,13 @@
       "version": "0.1.0",
       "role": "deterministic",
       "code": ["src/jev_classifier/normalize.py"],
-      "tests": ["tests/test_normalize.py", "tests/test_normalize_noul.py"],
+      "tests": [
+        "tests/test_normalize.py",
+        "tests/test_normalize_noul.py",
+        "tests/test_normalize_score.py"
+      ],
       "fail_closed": true,
-      "issue": null,
+      "issue": 32,
       "status": "merged",
       "contract": {
         "input": ["decisions_answer_object", "response_body_with_question_id_and_options_or_threshold"],
@@ -55,7 +59,10 @@
           "probability_keys_within_legal_set",
           "legal_options_nonempty",
           "preserves_native_probability_map",
-          "preserves_confidence"
+          "preserves_confidence",
+          "score_in_ordered_rubric_legend",
+          "surfaced_legend_must_match_requested_rubric",
+          "empty_rubric_or_duplicate_levels_rejected"
         ]
       }
     },
@@ -265,11 +272,21 @@
       "title": "Bias signals",
       "version": "0.1.0",
       "role": "jev_plus_deterministic",
-      "code": ["src/jev_classifier/bias/packs.py", "src/jev_classifier/bias/aggregate.py", "scripts/smoke_bias.py"],
-      "tests": ["tests/test_bias_packs.py", "tests/test_smoke_bias.py"],
+      "code": [
+        "src/jev_classifier/bias/packs.py",
+        "src/jev_classifier/bias/aggregate.py",
+        "src/jev_classifier/bias/sycophancy.py",
+        "scripts/smoke_bias.py"
+      ],
+      "tests": [
+        "tests/test_bias_packs.py",
+        "tests/test_bias_sycophancy.py",
+        "tests/test_bias_position.py",
+        "tests/test_smoke_bias.py"
+      ],
       "fail_closed": true,
       "issue": 32,
-      "status": "partial",
+      "status": "merged",
       "contract": {
         "packs_shipped": ["bias_pack_v1"],
         "invariants": [
@@ -278,16 +295,18 @@
           "unknown_pack_raises",
           "live_smoke_skips_without_key",
           "signals_are_measured_not_proof_of_bias",
-          "signals_never_proof_of_correctness"
+          "signals_never_proof_of_correctness",
+          "flags_on_values_must_be_legal",
+          "noul_signal_records_the_threshold_used",
+          "overconfidence_measures_classifier_calibration_not_source_text"
         ],
         "design_rulings": [
           "sycophancy_requires_two_calls_delta_computed_locally",
-          "position_bias_is_a_harness_not_a_question"
+          "position_bias_is_a_harness_not_a_question",
+          "position_bias_harness_lives_in_tests_not_packs"
         ],
-        "known_defects": ["score_primitive_unimplemented"],
-        "tracked_reports": [
-          "issue_32_reports_a_yes_threshold_drop_but_current_aggregate_code_passes_the_threshold; reconcile_the_issue_record"
-        ]
+        "known_defects": [],
+        "tracked_reports": []
       }
     }
   ],

@@ -1,4 +1,4 @@
-"""Closed bias question packs for claim+source state (JEV choice/noul only)."""
+"""Closed bias question packs for claim+source state (JEV choice/score/noul only)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import Any, Literal, Mapping, Sequence
 from jev_classifier.normalize import NormalizeError
 
 
-QuestionType = Literal["choice", "noul"]
+QuestionType = Literal["choice", "score", "noul"]
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,11 @@ class BiasQuestion:
     instructions: str
     criteria: dict[str, str] | None = None  # required for choice
     signal: str = ""  # local aggregation key, e.g. source_authority_inflation
+    legend: tuple[str, ...] | None = None  # required for score: ordered rubric levels
+    # Legal values that raise a local flag. Declared per question so the flag
+    # surface cannot drift from the legal set (#32: the old hardcoded set had
+    # dead entries "high"/"yes_biased" that no question could ever return).
+    flags_on: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -44,6 +49,21 @@ class BiasPack:
                     "type": "choice",
                     "instructions": q.instructions,
                     "criteria": dict(q.criteria),
+                }
+            elif q.type == "score":
+                if not q.legend:
+                    raise NormalizeError(
+                        f"score question {q.id!r} missing legend",
+                        kind="parse_error",
+                    )
+                # Request key inferred from the documented response shape
+                # (score + legend); a provider that ignores it yields no
+                # surfaced legend and we fall back to our requested rubric,
+                # while a mismatched surfaced legend fails closed (#32).
+                out[q.id] = {
+                    "type": "score",
+                    "instructions": q.instructions,
+                    "legend": list(q.legend),
                 }
             elif q.type == "noul":
                 out[q.id] = {
@@ -80,11 +100,36 @@ def validate_pack(pack: BiasPack) -> None:
                         f"{q.id}: each choice option needs non-empty criteria text",
                         kind="parse_error",
                     )
+        elif q.type == "score":
+            if not q.legend or len(q.legend) < 2:
+                raise NormalizeError(
+                    f"{q.id}: score legend must have >=2 ordered levels",
+                    kind="parse_error",
+                )
+            for level in q.legend:
+                if not isinstance(level, str) or not level.strip():
+                    raise NormalizeError(
+                        f"{q.id}: each score legend level must be a non-empty string",
+                        kind="parse_error",
+                    )
+            if len(set(q.legend)) != len(q.legend):
+                raise NormalizeError(
+                    f"{q.id}: score legend levels must be unique",
+                    kind="parse_error",
+                )
         elif q.type == "noul":
             if not q.instructions.strip():
                 raise NormalizeError(f"{q.id}: noul instructions required", kind="parse_error")
         else:
             raise NormalizeError(f"{q.id}: bad type {q.type!r}", kind="parse_error")
+
+        legal = legal_options_for(pack, q.id)
+        for value in q.flags_on:
+            if value not in legal:
+                raise NormalizeError(
+                    f"{q.id}: flags_on {value!r} is not a legal value {sorted(legal)}",
+                    kind="parse_error",
+                )
 
 
 def legal_options_for(pack: BiasPack, question_id: str) -> frozenset[str]:
@@ -94,6 +139,9 @@ def legal_options_for(pack: BiasPack, question_id: str) -> frozenset[str]:
         if q.type == "choice":
             assert q.criteria is not None
             return frozenset(q.criteria.keys())
+        if q.type == "score":
+            assert q.legend is not None
+            return frozenset(q.legend)
         if q.type == "noul":
             return frozenset({"yes", "no"})
         raise NormalizeError(f"bad type for {question_id}", kind="parse_error")
@@ -117,9 +165,9 @@ def aggregate_bias_answers(
     for q in pack.questions:
         ans = normalized[q.id]
         key = q.signal or q.id
+        legal = legal_options_for(pack, q.id)
         if q.type == "choice":
             choice = ans.get("choice")
-            legal = legal_options_for(pack, q.id)
             if choice not in legal:
                 raise NormalizeError(
                     f"{q.id}: choice {choice!r} not in {sorted(legal)}",
@@ -131,9 +179,22 @@ def aggregate_bias_answers(
                 "probabilities": ans.get("probabilities"),
                 "confidence": ans.get("confidence"),
             }
-            # Heuristic local flags for concerning options (code, not LLM)
-            if choice in {"inflated", "present", "high", "yes_biased"}:
-                flags.append(key)
+            raised = choice
+        elif q.type == "score":
+            score = ans.get("score")
+            if score not in legal:
+                raise NormalizeError(
+                    f"{q.id}: score {score!r} not in {sorted(legal)}",
+                    kind="parse_error",
+                )
+            signals[key] = {
+                "type": "score",
+                "score": score,
+                "legend": ans.get("legend"),
+                "probabilities": ans.get("probabilities"),
+                "confidence": ans.get("confidence"),
+            }
+            raised = score
         else:
             label = ans.get("label")
             if label not in {"yes", "no"}:
@@ -145,9 +206,15 @@ def aggregate_bias_answers(
                 "type": "noul",
                 "label": label,
                 "p_yes": ans.get("p_yes"),
+                # The threshold that produced this label is part of the
+                # measurement, not a hidden default (#32).
+                "yes_threshold": ans.get("yes_threshold"),
             }
-            if label == "yes":
-                flags.append(key)
+            raised = label
+        # Flags come from the question's declared concerning values (code, not
+        # LLM); no hardcoded set to drift out of sync with the legal options.
+        if raised in q.flags_on:
+            flags.append(key)
     return {
         "pack_id": pack.pack_id,
         "pack_version": pack.version,
@@ -181,6 +248,7 @@ BIAS_PACK_V1 = BiasPack(
                 "inflated": "Authority/prestige clearly outweighs evidence strength.",
                 "unknown": "Insufficient source metadata to judge.",
             },
+            flags_on=("inflated",),
         ),
         BiasQuestion(
             id="recency_bias",
@@ -196,6 +264,7 @@ BIAS_PACK_V1 = BiasPack(
                 "present": "Newer material dominates despite weaker support.",
                 "unknown": "Timestamps/ordering insufficient to judge.",
             },
+            flags_on=("present",),
         ),
         BiasQuestion(
             id="confirmation_cherry_pick",
@@ -211,6 +280,7 @@ BIAS_PACK_V1 = BiasPack(
                 "present": "Clear cherry-picking of confirming fragments.",
                 "unknown": "Evidence set too thin to judge.",
             },
+            flags_on=("present",),
         ),
         BiasQuestion(
             id="anthropomorphism",
@@ -221,15 +291,20 @@ BIAS_PACK_V1 = BiasPack(
                 "agency to the model/system beyond metaphorical shorthand? Answer yes "
                 "if anthropomorphism is present."
             ),
+            flags_on=("yes",),
         ),
         BiasQuestion(
             id="overconfidence",
             type="noul",
             signal="overconfidence",
             instructions=(
-                "Is the claim stated with certainty that exceeds the support in the "
-                "source fragments (overconfidence)? Answer yes if overconfident."
+                "Given the classifier's own stated confidence for this claim and the "
+                "evidence strength recorded in state, does that confidence exceed what "
+                "the cited evidence supports? Answer yes if the classifier's certainty "
+                "is not warranted by its own evidence. This measures the classifier's "
+                "calibration, not a property of the evidence alone (#32)."
             ),
+            flags_on=("yes",),
         ),
     ),
 )
