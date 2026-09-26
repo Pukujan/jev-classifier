@@ -32,7 +32,7 @@ The current source adapter uses Grok through OpenRouter. Model-agnostic source a
 
 ```mermaid
 graph TD
-A[Capture untrusted source] --> B[Supply one fragment]
+A[Optional source capture] --> B[Caller manually supplies one fragment]
 B --> C[Ask TypeSafe JEV]
 C --> D[Validate claim record]
 D --> E[Render draft skeleton]
@@ -96,6 +96,4 @@ For one opt-in live JEV check, set OPENROUTER_API_KEY in the environment or igno
 
 This smoke test makes a live provider request. Source collection has a separate command and its bounded behavior is described in [GROK_SOURCE.md](docs/GROK_SOURCE.md). The first useful review step is to open [the synthetic fragment](tests/fixtures/multisource/fragment_method_a.json) and trace it through the [multi-source test](tests/test_multisource_e2e.py).
 
-## Build and reproduce
-
-See [the project notes](PROJECT.md), [the system specification](docs/SYSTEM_SPEC.md), and [the source-capture instructions](docs/GROK_SOURCE.md). The planned paper-level evaluation is tracked in [issue #21](https://github.com/Pukujan/jev-classifier/issues/21).
+For build details, module contracts, source-capture behavior, and planned paper-level evaluation, see [the project notes](PROJECT.md), [the system specification](docs/SYSTEM_SPEC.md), [the source-capture instructions](docs/GROK_SOURCE.md), and [issue #21](https://github.com/Pukujan/jev-classifier/issues/21).

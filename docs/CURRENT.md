@@ -1,6 +1,6 @@
 # CURRENT — project status and next priority
 
-Updated: 2026-09-26 22:39 UTC from GitHub issues and pull requests.
+Updated: 2026-09-26 23:22 UTC from GitHub issues and pull requests.
 
 ## Authority
 
@@ -11,26 +11,27 @@ GitHub issues and pull requests are canonical for work, ownership, and decisions
 - Issue #15 source capture is closed after PR #27; its source transcript remains untrusted, and its single capped live provider smoke returned HTTP 404 with no retry or live artifact.
 - Issue #22 coordination layer is closed after its coordination and ledger follow-ups. GitHub remains the decision and ownership authority.
 - Issue #30 and PR #34 for the earlier module-spec leaf are closed. Issue #28 remains open as the current #21 child for versioned module contracts.
+- Issue #31 and PR #56 are closed; PR #56 merged at `a44f0da` and added the JEV `ClassificationActivity` / `ClassifierAgent` ontology model.
 - Issue #33 synthetic offline fixtures are closed after PR #43 merged. Those fixtures support offline shape checks; they are not a real-paper benchmark.
 
 ## Open program work
 
 - Issue #21 is the modular quality-program parent. Its paper selection, claim graph, split, and metric-harness work remain in progress.
 - Issue #28 is open for versioned system specification and module contracts; #29 is open for dataset-card and reference-paper selection; #37 is open for the reference claim graph and privacy-safe context stimulus schema.
-- Issue #31 tracks an ontology provenance/activity gap. Issue #32 tracks the unimplemented score primitive and bias-pack defects. Do not describe either as resolved.
-- Issue #23 is open under the updated title “model/vendor framing and research-goal drift across iterative prompts.” Its current study question compares changes to the research goal and outputs across the supplied prompt sequence; the Discord memory-on example is a separate comparator. The existing authoritative decision still marks implementation accepted-but-deferred until its stated #21/#15/#22 gates are satisfied. This status entry does not reopen that work or resolve conflicts between later owner scope text and the recorded proposal decision.
+- Issue #32 tracks the unimplemented score primitive and bias-pack defects; it remains open.
+- Issue #23 includes the paired Version 1 / Version 2 multimodal-alignment results as a core comparison of memory-context effects; the owner identifies the supplied Version 2 PDF as produced without prior user-specific memory. Version 1's memory state is unknown and its conversation includes an additional follow-up, so the pair shows observed differences but cannot establish a causal memory effect. Separately, the study tracks research-goal/output changes across the iterative prompt sequence and model/vendor framing. The authoritative decision still defers implementation until the required #21 substrate and proposal gate are satisfied; #15 source capture and #22 coordination are now closed.
 
 ## Current writer claim
 
-- Issue #35 is accepted for the README and supporting documentation under CGM 0.4.0. The reserved branch is `feat/cgm-docs-35` and the writer claim is recorded on issue #35.
+- Issue #35 is accepted for the README and supporting documentation under CGM 0.4.0. The reserved branch is `feat/cgm-docs-35`; PR #49 is open for independent review.
 - This task updates public documentation and evidence manifests only. It does not change classifier semantics, the coordination implementation, or the technical specification owned by its issue.
 - Resource-intensive classifier benchmark runs are assigned to the MacBook Pro agent because of the Windows machine's RAM, storage, and package/container constraints.
 
 ## Next
 
-1. Finish and validate the #35 README, evidence brief, image provenance notes, and linked reader guides.
-2. Continue #21 through its open children #28, #29, and #37; keep #23 implementation gated by its authoritative decision.
-3. Keep user-history and research-output evaluations separate from claims the current prototype has validated.
+1. Complete the remaining independent reader/visual sign-off before merging PR #49; machine checks and the freshness correction are now verified.
+2. Continue #21 through its open children #28, #29, and #37 when the authoritative proposal layer records each writer and branch; keep #23 implementation gated by its decision.
+3. Keep user-memory and model/vendor-framing comparisons separate from claims the current prototype has validated.
 
 ## Storage
 
