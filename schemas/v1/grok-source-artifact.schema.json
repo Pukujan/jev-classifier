@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/jev-classifier/blob/main/schemas/v1/grok-source-artifact.schema.json",
+  "title": "JEV Grok Source Artifact v1",
+  "description": "Untrusted, provenance-bearing OpenRouter Chat Completions source capture. Never classifier truth.",
+  "type": "object",
+  "required": ["schema_version", "source_kind", "trusted_for_deterministic_labels", "request", "response", "metadata", "content_sha256"],
+  "properties": {
+    "schema_version": {"const": "jev.grok_source.v1"},
+    "source_kind": {"const": "untrusted_research_transcript"},
+    "trusted_for_deterministic_labels": {"const": false},
+    "request": {
+      "type": "object",
+      "required": ["endpoint", "model_requested", "system_instruction", "query", "max_tokens", "temperature", "stream", "web_search"],
+      "properties": {
+        "endpoint": {"const": "https://openrouter.ai/api/v1/chat/completions"},
+        "model_requested": {"type": "string", "minLength": 1},
+        "system_instruction": {"type": "string", "minLength": 1},
+        "query": {"type": "string", "minLength": 1, "maxLength": 8000},
+        "max_tokens": {"const": 1200},
+        "temperature": {"const": 0.0},
+        "stream": {"const": false},
+        "web_search": {
+          "type": "object",
+          "required": ["tool_type", "parameters", "max_tool_calls"],
+          "properties": {
+            "tool_type": {"const": "openrouter:web_search"},
+            "parameters": {
+              "type": "object",
+              "required": ["engine", "max_results", "max_total_results", "max_uses"],
+              "properties": {
+                "engine": {"const": "native"},
+                "max_results": {"const": 5},
+                "max_total_results": {"const": 5},
+                "max_uses": {"const": 1}
+              },
+              "additionalProperties": false
+            },
+            "max_tool_calls": {"const": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["response_id", "provider_request_id", "model_surfaced", "transcript", "citation_status", "citations", "usage", "raw"],
+      "properties": {
+        "response_id": {"type": "string", "minLength": 1},
+        "provider_request_id": {"type": ["string", "null"]},
+        "model_surfaced": {"type": "string", "minLength": 1},
+        "transcript": {"type": "string", "minLength": 1},
+        "citation_status": {"enum": ["annotations_preserved", "no_annotations_returned"]},
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "title", "content", "start_index", "end_index", "annotation"],
+            "properties": {
+              "url": {"type": "string", "format": "uri"},
+              "title": {"type": "string", "minLength": 1},
+              "content": {"type": ["string", "null"]},
+              "start_index": {"type": ["integer", "null"], "minimum": 0},
+              "end_index": {"type": ["integer", "null"], "minimum": 0},
+              "annotation": {"type": "object"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "usage": {"type": ["object", "null"]},
+        "raw": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["retrieved_at"],
+      "properties": {"retrieved_at": {"type": "string", "minLength": 1}},
+      "additionalProperties": false
+    },
+    "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "additionalProperties": false
+}
