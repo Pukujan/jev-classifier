@@ -345,3 +345,35 @@ class TestSettleAndIdentity:
         ])
         out = capsys.readouterr().out
         assert rc == 0 and "CLAIMED-BY-YOU" in out
+
+
+class TestUtf8Decoding:
+    """gh emits UTF-8; the gate must not decode with the platform locale (#44).
+
+    `text=True` alone uses the locale default -- cp1252 on Windows -- which
+    raises on GitHub's UTF-8 comment text inside subprocess's reader thread.
+    stdout then becomes None and the board died on `len(None)`.
+    """
+
+    def test_run_round_trips_non_ascii_output(self):
+        code = (
+            "import sys; sys.stdout.buffer.write("
+            "'caf\\u00e9 \\u2192 \\u4e2d\\n'.encode('utf-8'))"
+        )
+        out = coord_board._run([sys.executable, "-c", code])
+        assert out == "café → 中\n"
+
+    def test_run_pins_explicit_utf8_encoding(self, monkeypatch):
+        import subprocess
+
+        real_run = subprocess.run
+        seen: list[dict] = []
+
+        def spy(cmd, **kwargs):
+            seen.append(kwargs)
+            return real_run(cmd, **kwargs)
+
+        monkeypatch.setattr(coord_board.subprocess, "run", spy)
+        coord_board._run([sys.executable, "-c", "print('ok')"])
+        assert seen and seen[0].get("encoding") == "utf-8"
+        assert seen[0].get("errors") == "replace"

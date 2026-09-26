@@ -158,3 +158,27 @@ def test_merged_pr_heads_unit() -> None:
         "garbage",
     ]}
     assert ops_sync.merged_pr_heads(payload) == {"feat/a-1"}
+
+
+class TestGhUtf8Decoding:
+    """The live gh reads must pin UTF-8 for the same reason as the gate (#44)."""
+
+    def test_fetch_via_gh_pins_explicit_utf8_encoding(self, monkeypatch):
+        seen: list[dict] = []
+
+        class _Done:
+            returncode = 0
+
+            def __init__(self, stdout: str) -> None:
+                self.stdout = stdout
+
+        def fake_run(cmd, **kwargs):
+            seen.append(kwargs)
+            return _Done("[]")
+
+        monkeypatch.setattr(ops_sync.subprocess, "run", fake_run)
+        ops_sync.fetch_via_gh("o/r")
+        assert seen, "expected gh subprocess calls"
+        for kwargs in seen:
+            assert kwargs.get("encoding") == "utf-8", kwargs
+            assert kwargs.get("errors") == "replace", kwargs

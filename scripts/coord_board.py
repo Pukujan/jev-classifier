@@ -62,7 +62,17 @@ class BoardError(RuntimeError):
 
 def _run(cmd: list[str], timeout: int = 120) -> str:
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        # encoding is explicit: text=True alone uses the locale default (cp1252
+        # on Windows), which raises on GitHub's UTF-8 comment text and leaves
+        # stdout None.
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
     except FileNotFoundError as exc:
         raise BoardError(f"{cmd[0]} not found") from exc
     except subprocess.TimeoutExpired as exc:
