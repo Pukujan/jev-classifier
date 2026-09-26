@@ -144,6 +144,8 @@ def fetch_via_gh(repo: str) -> dict[str, Any]:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         return json.loads(proc.stdout) if proc.stdout.strip() else []
 
@@ -185,6 +187,8 @@ def fetch_via_gh(repo: str) -> dict[str, Any]:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         comments = _decode_json_stream(proc.stdout)
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:

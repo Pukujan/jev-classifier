@@ -30,6 +30,7 @@ import argparse
 import json
 import subprocess
 import sys
+from functools import partial
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -62,7 +63,17 @@ class BoardError(RuntimeError):
 
 def _run(cmd: list[str], timeout: int = 120) -> str:
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        # encoding is explicit: text=True alone uses the locale default (cp1252
+        # on Windows), which raises on GitHub's UTF-8 comment text and leaves
+        # stdout None.
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
     except FileNotFoundError as exc:
         raise BoardError(f"{cmd[0]} not found") from exc
     except subprocess.TimeoutExpired as exc:
@@ -176,7 +187,18 @@ def ancestor_refs(refs: list[str]) -> set[str]:
     return out
 
 
-def build_state(repo: str, comments_file: str | None, no_refs: bool):
+def live_claim_issues(state: R.CoordState) -> list[int]:
+    """Issue numbers that still hold a live claim — the settle candidates."""
+    out = set()
+    for c in state.live_claims():
+        n = str(c.attrs.get("issue", ""))
+        if n.isdigit():
+            out.add(int(n))
+    return sorted(out)
+
+
+def build_state(repo: str, comments_file: str | None, no_refs: bool,
+                issue_state=None):
     if comments_file:
         blob = Path(comments_file).read_text(encoding="utf-8")
         comments = [to_fold_comment(item) for item in decode_stream(blob)]
@@ -199,6 +221,22 @@ def build_state(repo: str, comments_file: str | None, no_refs: bool):
         # A claim whose reserved branch merged is released even when the agent
         # never posted state=released (docs/AGENT_PROPOSALS.md claim rule).
         R.settle_claims(state, merged_branches=merged)
+    # The same rule releases a claim whose issue closed. ops_sync has always
+    # passed that signal; the gate did not, so the live board kept showing
+    # claims on delivered work the committed COORD.md had already dropped
+    # (#50). Only issues still holding a live claim are looked up, and
+    # fetch_issue_state degrades to "unknown" on API failure, which settles
+    # nothing rather than guessing.
+    if issue_state is not None:
+        lookup = issue_state
+    elif comments_file or no_refs:
+        lookup = None  # offline modes stay offline: no per-issue API calls
+    else:
+        lookup = partial(fetch_issue_state, repo)
+    if lookup is not None:
+        closed = [n for n in live_claim_issues(state) if lookup(n) == "closed"]
+        if closed:
+            R.settle_claims(state, closed_issues=closed)
     return state, refs, merged
 
 
@@ -341,9 +379,16 @@ def main(argv: list[str] | None = None) -> int:
             h = others[-1]
             print(f"CLAIMED issue={args.check_issue} agent={h.attrs.get('agent')} "
                   f"branch={h.attrs.get('branch')}")
-            if len(others) > 1:
-                print("  !! COLLISION: multiple non-self live claims; escalate to main agent",
-                      file=sys.stderr)
+            # Distinct-holder rule matches records.collisions(): the reserved
+            # branch is the mutex, so prose+coord double rows on ONE branch
+            # are CLAIMED, not a collision (only >1 lock alarms).
+            distinct = {
+                c.attrs.get("branch") or f"agent:{c.attrs.get('agent', '?')}"
+                for c in others
+            }
+            if len(distinct) > 1:
+                print("  !! COLLISION: multiple different locks held here; "
+                      "escalate to main agent", file=sys.stderr)
             return 3
         released = state.released_branches(args.check_issue)
         for ref in refs:
@@ -360,5 +405,23 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def _pin_utf8_stdio() -> None:
+    """Pin stdout/stderr to UTF-8 for redirected output (#52).
+
+    Windows encodes a redirected or piped stdout with the locale default
+    (cp1252), so a single character outside it -- and the board renders agent
+    ids, branches and receipt fields straight from GitHub text -- raises
+    UnicodeEncodeError mid-render. Interactive console output uses the console
+    API and is unaffected, which is why piping is what breaks. errors=replace
+    matches the read side (#44): mangle an unknown glyph, never crash.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):  # detached, closed, or not a TextIO
+            pass
+
+
 if __name__ == "__main__":
+    _pin_utf8_stdio()
     raise SystemExit(main())

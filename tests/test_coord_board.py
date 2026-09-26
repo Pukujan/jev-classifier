@@ -8,6 +8,7 @@ exercised through --comments-file fixtures. REST-shaped comment items mimic
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -345,3 +346,161 @@ class TestSettleAndIdentity:
         ])
         out = capsys.readouterr().out
         assert rc == 0 and "CLAIMED-BY-YOU" in out
+
+
+class TestCollisionSemantics:
+    """#53: holder identity is the reserved branch (the mutex), not the label."""
+
+    def test_prose_plus_coord_on_same_branch_is_not_collision(self):
+        # the exact #35 pattern: one session's legacy prose claim (agent =
+        # shared login) plus its coord marker on ONE branch
+        st = R.fold([
+            {"body": "## Claim\n- Branch: `feat/cgm-docs-35`\n- Primary writer: Pukujan",
+             "author": "Pukujan", "created_at": "2026-09-26T21:00:00Z",
+             "issue": 35, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=35 agent=claude-code-main@desktop-jev35 "
+                     "branch=feat/cgm-docs-35 sha=f9ffdf0 state=active -->",
+             "author": "Pukujan", "created_at": "2026-09-26T21:39:11Z",
+             "issue": 35, "comment_id": 2},
+        ])
+        assert len(st.live_claims()) == 2, "both rows stay visible on the board"
+        assert st.collisions() == {}, (
+            "a git ref cannot have two holders; same-branch double posting "
+            "must not alarm"
+        )
+
+    def test_two_different_branches_still_collide(self):
+        st = R.fold([
+            {"body": "<!-- coord:claim issue=9 agent=a@x branch=feat/a-9 -->",
+             "author": "u", "created_at": "2026-09-26T19:00:00Z", "issue": 9, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=9 agent=b@y branch=feat/b-9 -->",
+             "author": "u", "created_at": "2026-09-26T19:01:00Z", "issue": 9, "comment_id": 2},
+        ])
+        assert 9 in st.collisions()
+
+    def test_branchless_rows_fall_back_to_agent(self):
+        c1 = R.Record("claim", {"issue": "9", "agent": "a@x"}, "u", "t1", 9, 1)
+        c2 = R.Record("claim", {"issue": "9", "agent": "b@y"}, "u", "t2", 9, 2)
+        st = R.CoordState(claims={("9", "a@x"): c1, ("9", "b@y"): c2})
+        assert 9 in st.collisions()
+
+    def test_gate_on_double_posted_branch_says_claimed_not_collision(
+            self, tmp_path, capsys):
+        items = [
+            rest("## Claim\n- Branch: `feat/cgm-docs-35`\n- Primary writer: Pukujan",
+                 1, "2026-09-26T21:00:00Z", issue=35),
+            rest("<!-- coord:claim issue=35 agent=claude-code-main@desktop-jev35 "
+                 "branch=feat/cgm-docs-35 sha=f9ffdf0 -->",
+                 2, "2026-09-26T21:39:11Z", issue=35),
+        ]
+        rc = coord_board.main([
+            "--comments-file", comments_file(tmp_path, items),
+            "--issue-open", "35", "--agent", "someone@else", "--no-refs",
+        ])
+        out = capsys.readouterr()
+        assert rc == 3 and "CLAIMED issue=35" in out.out
+        assert "COLLISION" not in out.err, "alarm must stay reserved for two locks"
+class TestClosedIssueSettle:
+    """The gate must settle a claim whose issue closed (#50).
+
+    The documented claim rule releases a claim when its branch merges or its
+    issue closes. ops_sync has always passed both signals; the gate passed only
+    merged branches, so the live board kept listing claims on delivered work
+    that the committed COORD.md had already dropped.
+    """
+
+    ITEMS = [rest("## Claim\n- Branch: `feat/bias-question-pack`\n"
+                  "- Primary writer: jev-classifier agent",
+                  1, "2026-09-26T18:57:46Z", issue=6)]
+
+    def _build(self, tmp_path: Path, issue_state=None):
+        return coord_board.build_state(
+            "o/r", comments_file(tmp_path, self.ITEMS), True,
+            issue_state=issue_state,
+        )
+
+    def test_closed_issue_claim_is_settled(self, tmp_path):
+        state, _, _ = self._build(tmp_path, lambda n: "closed")
+        assert state.live_claims() == []
+        assert {c.attrs.get("released_by") for c in state.all_claims} == {"closed_issue"}
+
+    def test_open_issue_claim_stays_live(self, tmp_path):
+        state, _, _ = self._build(tmp_path, lambda n: "open")
+        assert len(state.live_claims()) == 1
+
+    def test_unknown_state_neither_blocks_nor_settles(self, tmp_path):
+        # an API failure must never release a claim by guessing
+        state, _, _ = self._build(tmp_path, lambda n: "unknown")
+        assert len(state.live_claims()) == 1
+
+    def test_offline_modes_make_no_state_lookup(self, tmp_path):
+        # default lookup stays None under --comments-file/--no-refs, so the
+        # offline board renders the raw claim without any network call
+        state, _, _ = self._build(tmp_path)
+        assert len(state.live_claims()) == 1
+
+    def test_live_claim_issues_skips_released(self):
+        st = R.fold([
+            {"body": "<!-- coord:claim issue=6 agent=a@l branch=x-6 -->", "author": "x",
+             "created_at": "", "issue": 6, "comment_id": 1},
+            {"body": "<!-- coord:claim issue=7 agent=b@l branch=y-7 state=released -->",
+             "author": "x", "created_at": "", "issue": 7, "comment_id": 2},
+        ])
+        assert coord_board.live_claim_issues(st) == [6]
+
+
+class TestStdoutEncoding:
+    """The gate's own output must survive a redirect on Windows (#52).
+
+    #44 pinned the read side (decoding gh's UTF-8). The write side had the
+    mirror defect: a redirected stdout encodes with the locale default
+    (cp1252), so one non-cp1252 character from GitHub text raised
+    UnicodeEncodeError mid-render. This runs the real CLI as a subprocess with
+    its stdout captured as bytes -- exactly the piping agents do -- and decodes
+    it as UTF-8, which fails loudly if the write side regressed.
+    """
+
+    def test_redirected_output_is_utf8(self, tmp_path):
+        items = [rest("<!-- coord:claim issue=9 agent=café@中 "
+                      "branch=x-9 -->",
+                      1, "2026-09-26T19:00:00Z", issue=9)]
+        proc = subprocess.run(
+            [sys.executable, str(REPO_ROOT / "scripts" / "coord_board.py"),
+             "--comments-file", comments_file(tmp_path, items), "--no-refs"],
+            capture_output=True,
+        )
+        assert proc.returncode == 0, proc.stderr.decode("utf-8", "replace")
+        out = proc.stdout.decode("utf-8")  # must not raise
+        assert "café@中" in out
+
+
+class TestUtf8Decoding:
+    """gh emits UTF-8; the gate must not decode with the platform locale (#44).
+
+    `text=True` alone uses the locale default -- cp1252 on Windows -- which
+    raises on GitHub's UTF-8 comment text inside subprocess's reader thread.
+    stdout then becomes None and the board died on `len(None)`.
+    """
+
+    def test_run_round_trips_non_ascii_output(self):
+        code = (
+            "import sys; sys.stdout.buffer.write("
+            "'caf\\u00e9 \\u2192 \\u4e2d\\n'.encode('utf-8'))"
+        )
+        out = coord_board._run([sys.executable, "-c", code])
+        assert out == "café → 中\n"
+
+    def test_run_pins_explicit_utf8_encoding(self, monkeypatch):
+        import subprocess
+
+        real_run = subprocess.run
+        seen: list[dict] = []
+
+        def spy(cmd, **kwargs):
+            seen.append(kwargs)
+            return real_run(cmd, **kwargs)
+
+        monkeypatch.setattr(coord_board.subprocess, "run", spy)
+        coord_board._run([sys.executable, "-c", "print('ok')"])
+        assert seen and seen[0].get("encoding") == "utf-8"
+        assert seen[0].get("errors") == "replace"

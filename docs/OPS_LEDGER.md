@@ -40,7 +40,7 @@ Default path: `.ops/ops.db`.
 | `current_md_vs_open_issues` | `docs/CURRENT.md` In flight mentions an issue that is not open |
 | `ownership_collision_stub` | Fixture/coord shows >1 active claim on the same resource |
 | `closed_issue_still_claimed` | Closed GitHub issue still has an active coord ownership claim |
-| `coord_claim_collision` | >1 live `coord:claim` (or prose `## Claim`) from different agents on one issue (#22 grammar; see `docs/AGENT_PROPOSALS.md`) |
+| `coord_claim_collision` | >1 live claim holding **different** locks on one issue (holder = reserved branch, falling back to agent when a row has none; #53 — a same-branch prose+coord double-post is one lock, not a collision; see `docs/AGENT_PROPOSALS.md`) |
 | `coord_record_malformed` | A `coord:*` comment marker is missing required fields (fail-closed; fix the comment) |
 | `closed_issue_coord_claim` | A live GitHub-comment claim on a closed issue (auto-settled by `settle_claims`, flagged for audit) |
 
