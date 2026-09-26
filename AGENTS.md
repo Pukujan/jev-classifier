@@ -45,5 +45,6 @@
 
 - Prefer GitHub issues/PRs for ownership and delivery status.
 - Optional local aid: `jev_classifier.coord.CoordStore` (SQLite under `.coord/`, gitignored). See `docs/AGENT_COORD.md`.
+- Optional ops projection: `jev_classifier.ops.OpsStore` (`.ops/ops.db`, gitignored) + committed `ops/ledger/` via `scripts/ops_sync.py`. See `docs/OPS_LEDGER.md`. Does **not** decide proposal winners.
 - Claim issue ownership before pushing product work; use idempotent checkpoint keys; never treat SQLite as authority over GitHub.
 

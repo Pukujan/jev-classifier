@@ -1,0 +1,17 @@
+{
+  "kind": "issue",
+  "number": 5,
+  "title": "Paper-assembly scaffolding (claim JSON → markdown skeleton)",
+  "state": "closed",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/issues/5",
+  "updated_at": "2026-09-26T18:31:39Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [
+    1,
+    3
+  ],
+  "body_excerpt": "## Goal\n\nDeterministic template assembler that turns classify claim JSON records into a medium-quality markdown research-paper skeleton with provenance, lineage, and citations sections.\n\n## Scope\n\n**In**\n\n- Assembler module: claim JSON records → markdown paper skeleton (title/abstract/claims/provenance/lineage/citations).\n- Prose templates are **code/strings only** for v1 — **NO non-JEV LLM** for…"
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "issue",
+  "number": 14,
+  "title": "Long-running JEV research synthesis classifier",
+  "state": "open",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/issues/14",
+  "updated_at": "2026-09-26T18:48:10Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [
+    10,
+    15
+  ],
+  "body_excerpt": "## Goal\n\nDeliver a model-agnostic, mostly deterministic research-synthesis workflow for correlated transcripts and papers. Preserve source lineage, citations, epistemic status, and separate valid time from transaction time. Human-readable papers are assembled from verified structured evidence.\n\n## Non-negotiable rules\n\n- TypeSafe JEV Decisions (typesafe/jev-1.13) is the only model allowed to prod…"
+}

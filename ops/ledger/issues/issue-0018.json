@@ -1,0 +1,17 @@
+{
+  "kind": "issue",
+  "number": 18,
+  "title": "Operational local DB + committed ops ledger for issue logs and discrepancies",
+  "state": "open",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/issues/18",
+  "updated_at": "2026-09-26T18:48:14Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [
+    14,
+    3
+  ],
+  "body_excerpt": "## Goal\n\nAdd an **operational local database** plus a **separate committed storage tree in this repo** that regularly records context, issue logs, and discrepancies — so product and coordination agents can find collisions, stale claims, and GitHub-vs-local disagreements without treating SQLite as authority.\n\n## Scope\n\n**In**\n\n- Local operational SQLite (gitignored path under `.ops/` or reuse `.co…"
+}

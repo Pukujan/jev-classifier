@@ -1,0 +1,19 @@
+{
+  "kind": "issue",
+  "number": 1,
+  "title": "Bootstrap: JEV client smoke + OWL2 claim skeleton + first classification fixture",
+  "state": "closed",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [
+    "collab-go"
+  ],
+  "url": "https://github.com/Pukujan/jev-classifier/issues/1",
+  "updated_at": "2026-09-26T18:26:24Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [
+    1,
+    2
+  ],
+  "body_excerpt": "## Goal\n\nStand up the minimum verifiable path for **jev-classifier**: OpenRouter Decisions (pinned JEV) as the only deterministic judgment engine; OWL2 ontology hooks for epistemic/bitemporal provenance; one end-to-end fixture that classifies a short research fragment into a closed label set with a claim record.\n\n## Scope\n\n**In**\n\n- Repo bootstrap docs (`PROJECT.md`, `AGENTS.md`, research notes) …"
+}

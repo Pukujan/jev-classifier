@@ -1,0 +1,17 @@
+{
+  "kind": "pr",
+  "number": 9,
+  "title": "docs: CURRENT board after bias pack (#6 done)",
+  "state": "closed",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/pull/9",
+  "updated_at": "2026-09-26T18:34:03Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [
+    6,
+    8
+  ],
+  "body_excerpt": "Marks issue #6 / PR #8 complete on `docs/CURRENT.md` and clears the in-flight board.\n\nNo code changes."
+}

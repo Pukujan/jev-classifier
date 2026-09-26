@@ -10,11 +10,13 @@ Updated: 2026-09-26 (America/New_York)
 - Issue #6 bias-detection question pack merged via PR #8 — `main` @ `d47bca5` (full suite **34 passed**).
 - Issue #10 PCM claim-ledger field alignment merged via PR #13 — `main` @ `12f0e2e` (suite **46 passed**).
 - Issue #11 optional live bias-pack smoke merged via PR #16 — `main` @ `e2ae7e4` (suite **49 passed**).
-- Issue #12 multi-source classify + paper e2e merged via PR (this) — synthetic fixtures, mocked JEV, cross-source lineage.
+- Issue #12 multi-source classify + paper e2e merged via PR #17 — `main` @ `641e5b9`.
+- Issue #18 operational local DB + committed ops ledger (this PR) — `.ops/ops.db` + `ops/ledger/` projection + `scripts/ops_sync.py`.
 
 ## In flight
 
-- _(none — board clear for A+B+C product slice)_
+- Issue #15 Grok research-source bot (primary writer: Codex project agent) — not claimed by ops-ledger writer.
+- Issue #18 ops ledger — claimed by jev-classifier product agent (Grok Bot) on `feat/ops-ledger`.
 
 ## Next (queued)
 
@@ -23,4 +25,4 @@ Updated: 2026-09-26 (America/New_York)
 
 ## Authority reminder
 
-GitHub issues/PRs are authority. Local `.coord/` SQLite is an execution aid only (see `docs/AGENT_COORD.md`). Collision/proposal winners are decided by the authoritative agent — product agents propose only.
+GitHub issues/PRs are authority. Local `.coord/` and `.ops/` SQLite DBs are execution aids only (see `docs/AGENT_COORD.md`, `docs/OPS_LEDGER.md`). Committed `ops/ledger/` is a readable projection. Collision/proposal winners are decided by the authoritative agent — product agents propose only.
