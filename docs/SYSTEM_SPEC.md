@@ -1,7 +1,7 @@
 # SYSTEM SPEC — jev-classifier module contracts
 
 ```yaml
-spec_version: 0.1.0
+spec_version: 0.2.0
 status: draft
 updated: 2026-09-26
 owner: authoritative agent (claude-code-main)
@@ -61,24 +61,26 @@ bumping `spec_version` and a ruling from the authoritative agent.
 
 | | |
 |---|---|
-| Code | `src/jev_classifier/sources/grok.py`, `scripts/grok_research.py` (issue #15, in flight) |
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/sources/grok.py`, `scripts/grok_research.py` (issue #15, merged via PR #27) |
 | Role | **non-JEV** (untrusted input producer) |
-| Input | bounded research query (string) + config (model id, result caps) |
+| Input | bounded research query string; client configuration is supplied at construction; result caps are module constants |
 | Output | versioned **SourceArtifact**: exact non-secret request/prompt, requested model, provider-surfaced model, provider/request IDs when available, raw response, citation annotations, usage, retrieval time, deterministic content hash |
 | Invariants | hash stable across repeated canonical serialization; retrieval timestamp is separate metadata, never folded into the hash; no credential ever persisted; malformed/missing identifiers → error or review state, **never invented citations** |
 | Fail-closed | yes |
-| Tests | `tests/test_grok_research.py`, `tests/fixtures/grok/success.json` |
+| Tests | `tests/test_grok_research.py` |
 
 **Boundary:** a SourceArtifact may *suggest* research leads. It may not emit a
 canonical label, score, or claim, and may not call M2/M3 to promote itself.
 
-### M2 — Transcript normalization
+### M2 — Answer normalization
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/normalize.py` |
 | Role | **deterministic** |
-| Input | raw Decisions API response body; or a fragment fixture (`closed_label_set`, `question_id`, `criteria`) |
+| Input | one Decisions answer object, or a response body plus question id and legal options / noul threshold |
 | Output | validated typed answer preserving native probability map + confidence |
 | API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
 | Invariants | answer `type` must match the expected primitive; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
@@ -94,17 +96,27 @@ capability the code lacks.
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/decisions.py` |
 | Role | **JEV ONLY** — the sole permitted source of semantic judgment |
 | Input | `state` (compact structured evidence) + `questions` (non-empty mapping) |
 | Output | raw parsed JSON body (M2 normalizes; this module does **not**) |
 | API | `DecisionsClient(api_key=, base_url=, model=, timeout=)`, `.decide(state=, questions=, model=)`; `DecisionsError(status_code=)` |
-| Invariants | endpoint must resolve to `/api/alpha/decisions`; ambient `OPENROUTER_API_URL`/`OPENROUTER_MODEL` are rejected when they are not Decisions-safe (chat/completions and `opencode.ai` bases skipped); model pinned to `typesafe/jev-1.13` family; `jev-1.13-free` rejected; rolling `~typesafe/jev-latest` only when explicitly requested (canary arm, never the pinned scientific arm); `questions` non-empty; **no `stream=true`, no Chat Completions** |
+| Invariants | defaults to the pinned OpenRouter Decisions URL and `typesafe/jev-1.13`; recognized Chat Completions and OpenCode URLs are skipped; `questions` must be non-empty; provider body is returned raw and is not normalized here; **no `stream=true`, no Chat Completions** |
 | Fail-closed | yes — HTTP ≥400, non-JSON body, non-object root, transport error → `DecisionsError` |
-| Tests | `scripts/smoke_jev.py` (live, opt-in), `tests/test_ontology_and_classify.py` |
+| Tests | `tests/test_decisions_client.py` (mocked/offline) |
+| Smoke | `scripts/smoke_jev.py` (live, opt-in) |
 
-**Verified live** 2026-09-26: `choice=empirical_finding`, `confidence=1.0`,
-surfaced model `typesafe/jev-1.13-20260917`, all four probability keys returned.
+**Configuration gaps:** an explicit URL is accepted when its path ends in
+`/api/alpha/decisions` or `/alpha/decisions`; the client does not allowlist the
+host. The OpenRouter tilde alias `~typesafe/jev-latest` currently falls back to
+the pinned model; a non-tilde `typesafe/jev-*` identifier is accepted only when
+explicitly configured. These are implementation observations, not recommended
+production overrides. Use the pinned default unless a separately reviewed
+canary is intended. The claim builder records the model string surfaced in the
+response but does not compare it with the requested model before storing it.
+The JEV-only restriction is the project policy; these runtime checks are still
+incomplete.
 
 **Question-construction rules (AGENTS.md):** evidence in `state`; judgment in
 `instructions`; every option described in `criteria`; questions atomic (combine
@@ -121,33 +133,43 @@ concern (see #32).
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/classify.py` |
 | Role | **deterministic** |
-| Input | fragment fixture + M2-normalized answer (or a raw claim dict) |
+| Input | `classify_fragment` accepts one fragment fixture plus an optional Decisions client; `validate_claim_record` accepts a raw claim dict; `build_claim_record` accepts claim fields |
 | Output | `ClaimRecord` JSON |
 | API | `build_claim_record(...)`, `validate_claim_record(claim, *, legal_labels, migrate=True)`, `classify_fragment(fragment, *, client=, evidence_path=)`, `migrate_legacy_claim(raw)`, `load_fragment_fixture(path)`, `REQUIRED_CLAIM_KEYS` |
 | Required keys | `label`, `epistemic_status`, `recorded_at`, `evidence`, `model` |
 | Optional keys | `valid_from`, `valid_to`, `supersedes`, `probabilities`, `confidence`, `response_id`, `independence_class`, `id` |
-| Invariants | `label ∈ legal_labels`; `epistemic_status` non-empty string; `recorded_at` non-empty ISO-8601; `evidence` is an object with `fragment_id` and/or `path`; `model` non-empty string; `supersedes` is null or a non-empty string (empty string rejected); `valid_from`/`valid_to` null or non-empty ISO-8601; `independence_class` null or non-empty string |
+| Invariants | `label ∈ legal_labels`; `epistemic_status` non-empty string; `recorded_at` is non-empty string; `evidence` is an object containing `fragment_id` and/or `path` (referential existence is not checked); `model` non-empty string; `supersedes` is null or a non-empty string (empty string rejected); `valid_from`/`valid_to` are null or non-empty strings; `independence_class` null or non-empty string. Timestamp strings are **not parsed** as ISO-8601 and valid-time ordering is not checked. |
 | Migration | legacy camelCase → canonical snake_case; **canonical key wins** over legacy when both present |
 | Fail-closed | yes — missing key, out-of-set label, bad type → `NormalizeError` |
-| Tests | `tests/test_claim_schema.py` |
+| Tests | `tests/test_ontology_and_classify.py` (required keys and out-of-set labels); `tests/test_claim_schema.py` (key set, migration, supersedes shapes). Timestamp syntax and valid-time order have no dedicated test. |
 
 **Confidence ≠ correctness.** The native probability map is preserved verbatim
 and never collapsed into a truth bit or used to fabricate a label.
 
-### M5 — Provenance and bitemporal validation
+### M5 — Provenance and bitemporal fields
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | deterministic Python across `classify.py` (time fields), `ontology/*.ttl` (vocabulary), `paper/assemble.py` (lineage rendering) |
 | Role | **deterministic** |
 | Contract | **valid time ≠ transaction time**, always two distinct axes |
 | Valid time | `valid_from` / `valid_to` — when the claim holds *in the world* |
 | Transaction time | `recorded_at` — when *this record* was written |
-| Lineage | `supersedes` → a revision is a **new individual** pointing at its predecessor; contradictions and superseded claims are preserved, never silently collapsed |
-| Invariants | correlated sources are not merged away; disagreement survives into the assembled paper; every claim traces to at least one SourceFragment via `evidence` |
-| Tests | `tests/test_claim_schema.py` (supersedes shapes), `tests/test_paper_assemble.py` (golden lineage link) |
+| Lineage | `supersedes` is stored as a claim identifier; the validator does not check that the predecessor exists |
+| Invariants | the schema permits separate valid-time fields and recorded time; evidence may contain a fragment id or path, but source existence/linkage is not validated here |
+| Tests | `tests/test_claim_schema.py` (supersedes shapes); `tests/test_multisource_e2e.py` (synthetic multi-claim assembly). Neither test validates timestamp syntax/order or evidence-reference existence. |
+
+This module currently **records fields**; it does not validate ISO-8601 syntax,
+valid-time order, evidence-reference existence, or PROV-O Activity/Agent linkage.
+The assembler renders supplied claim data, but preservation of disagreements or
+limitations is not guaranteed by a dedicated validator.
+The claim builder also records a response model string without checking it
+against the model requested from the Decisions client; the JEV-only rule is
+therefore not enforced end-to-end by this path yet.
 
 **Design ruling (recorded so it is not relitigated):** validity stays **flat**
 (`validFrom`/`validTo` datatype properties). Rationale: no OWL reasoner is
@@ -171,11 +193,12 @@ no `prov:Activity`, no `prov:SoftwareAgent`, so `prov:wasGeneratedBy` /
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `ontology/jev_classifier_claims.ttl` |
 | Role | **deterministic** |
 | Contract | OWL2 Turtle vocabulary for Claim, SourceFragment, EpistemicStatus, bitemporal + lineage properties |
 | Invariants | parses offline via rdflib with **no network fetch** (therefore `rdfs:seeAlso`, never `owl:imports` of a remote document); classes are `prov:`-aligned; epistemic status is a closed vocabulary and **not a truth bit** |
-| Current state | 74 triples; `jcc:Claim`/`jcc:SourceFragment` ⊑ `prov:Entity`; status individuals `Observed` / `Inferred` / `Hypothesized` |
+| Current state | vocabulary defines `jcc:Claim`, `jcc:SourceFragment`, and epistemic status terms; current tests check Turtle parsing, not a full OWL2 reasoner entailment |
 | Tests | `tests/test_ontology_and_classify.py::test_rdflib_parses_claims_ttl`, CI ontology-parse step |
 
 SHACL constraints are **not yet implemented** (no `pyshacl` dependency). Until
@@ -187,23 +210,28 @@ silently.
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/paper/assemble.py` |
 | Role | **deterministic** (templates only; **no LLM**) |
-| Input | sequence of validated ClaimRecords |
+| Input | sequence of claim-like mappings; callers are responsible for full ClaimRecord validation |
 | Output | markdown paper draft |
 | Required sections | `Title`, `Abstract`, `Claims`, `Provenance`, `Lineage`, `Citations` |
 | API | `assemble_paper(...)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
-| Invariants | every claim bullet cites its evidence id; deterministic for a fixed timestamp; visible disagreements and limitations preserved |
+| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. |
 | Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown` |
-| Tests | `tests/test_paper_assemble.py`, `tests/test_multisource_e2e.py` |
+| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow) |
 
-Target quality is **medium**: readable by a human, evidence-backed, honest about
-disagreement. Not peer-reviewed output, and never presented as established fact.
+The output is a **draft skeleton**, not a research paper or evidence synthesis.
+It renders supplied records; it does not independently establish that citations
+support claims or preserve omitted disagreements and limitations. Its
+`Citations` section is an evidence-id-to-claim index, not a bibliography or a
+set of source URLs.
 
 ### C — Coordination
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/coord/store.py`; protocol `docs/AGENT_COORD.md` |
 | Role | **deterministic**, execution aid — **never authority** |
 | API | `CoordStore(path=":memory:")`, `put_checkpoint`, `get_checkpoint`, `claim_ownership`, `release_ownership`, `get_owner`, `log_send`, `list_sends`, `list_collisions`, `resolve_collision`; `CollisionError`; `CheckpointResult`; `OwnershipClaim` |
@@ -221,6 +249,7 @@ mutex has already fired once in production — see §4.
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/ops/store.py`, `scripts/ops_sync.py`; committed projection `ops/ledger/`; docs `docs/OPS_LEDGER.md` |
 | Role | **deterministic** projection — never authority |
 | Contract | `SCHEMA_VERSION = 1`; default DB `.ops/ops.db`; `ops/ledger/` holds `ISSUE_LOG.md`, `DISCREPANCIES.md`, `README.md`, `issues/` |
@@ -235,6 +264,7 @@ point-query gate importing the same records — it must not become a second boar
 
 | | |
 |---|---|
+| Version | `0.1.0` |
 | Code | `src/jev_classifier/bias/packs.py`, `aggregate.py`; `scripts/smoke_bias.py` |
 | Role | **JEV** for the closed questions; **deterministic** for aggregation |
 | Contract | `BiasPack(pack_id, version, questions)`, `BiasQuestion`, `validate_pack`, `legal_options_for`, `aggregate_bias_answers`, `get_pack`; shipped pack `bias_pack_v1` |
@@ -244,10 +274,11 @@ point-query gate importing the same records — it must not become a second boar
 **Bias signals are measured signals** validated against explicit fixtures. They
 are never presented as proof of bias, and never as proof of correctness.
 
-**Known defects (issue #32):** `yes_threshold` dropped at `packs.py:144-148`;
-`"high"` / `"yes_biased"` are dead flag entries; `overconfidence` is a category
-error; three "bias" questions measure the *source text* rather than the
-classifier.
+**Issue #32 reports** defects in the bias pack and score primitive. The current
+aggregate code passes `yes_threshold` to the noul normalizer, so that reported
+threshold defect requires correction at the issue record. Existing signals
+measure source text; they are not validated as a detector of classifier or
+agent bias.
 
 ---
 
@@ -256,12 +287,12 @@ classifier.
 | Module | JEV permitted | Deterministic Python |
 |---|---|---|
 | M1 Source capture | ✗ (untrusted input only) | ✓ hash, ids, timestamps, validation |
-| M2 Normalization | ✗ | ✓ all parsing and fail-closed checks |
+| M2 Answer normalization | ✗ | ✓ parsing and fail-closed checks |
 | M3 Decisions | **✓ sole semantic judge** | ✓ state reduction, option sets, retries |
 | M4 Claim record | ✗ | ✓ schema, validation, migration |
-| M5 Provenance/bitemporal | ✗ | ✓ time axes, hashes, supersession |
-| M6 Ontology/SHACL | ✗ | ✓ parse and shape validation |
-| M7 Paper assembly | ✗ | ✓ templates, sections, citations |
+| M5 Provenance/bitemporal fields | ✗ | ✓ field storage; referential and temporal validation are gaps |
+| M6 Ontology/SHACL | ✗ | ✓ Turtle parse only; SHACL is not implemented |
+| M7 Paper assembly | ✗ | ✓ template rendering from supplied records |
 | C Coordination | ✗ | ✓ claims, checkpoints, collisions |
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
@@ -301,14 +332,15 @@ force-push, comment, and let the prior claim stand. That is invariant 3 and the
 
 ```bash
 python -m pip install -e ".[dev]"
-python -m pytest tests/ -q          # 56 passed at spec_version 0.1.0
-python scripts/smoke_jev.py         # live, opt-in; exit 0
+python -m pytest tests/ -q          # current count is reported by pytest
+python scripts/smoke_jev.py         # live, opt-in; requires OPENROUTER_API_KEY
 ```
 
-CI (`.github/workflows/ci.yml`, required on `main`): offline pytest on 3.11 and
+CI (`.github/workflows/ci.yml`): offline pytest on 3.11 and
 3.12, OWL2 rdflib parse, and a hygiene job (secret scan, 2 MB tracked-file cap,
-2 MB fixture cap). Branch protection is **strict**; force-push and deletion are
-blocked.
+2 MB fixture cap). GitHub branch protection was recorded as strict with
+force-push and deletion blocked in the remote settings snapshot dated
+2026-09-26; local tests do not verify live GitHub settings.
 
 Contract index: [`docs/spec/modules.json`](spec/modules.json) — machine-readable
 projection of §2 and §3. `tests/test_system_spec.py` asserts the prose modules

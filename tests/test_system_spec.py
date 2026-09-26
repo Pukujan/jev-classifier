@@ -49,9 +49,34 @@ def test_index_covers_every_documented_module(index: dict) -> None:
 def test_prose_documents_every_indexed_module(index: dict) -> None:
     text = SPEC_MD.read_text(encoding="utf-8")
     for module in index["modules"]:
-        # Each module appears as a "### <id> —" heading in section 2.
-        assert re.search(rf"^### {re.escape(module['id'])} ", text, re.M), (
-            f"module {module['id']} indexed but not documented in prose"
+        # Each module appears by its machine id and display title.
+        assert re.search(
+            rf"^### {re.escape(module['id'])} — {re.escape(module['title'])}$",
+            text,
+            re.M,
+        ), (
+            f"module {module['id']} title {module['title']!r} missing from prose"
+        )
+
+
+def test_each_module_contract_version_matches_prose(index: dict) -> None:
+    text = SPEC_MD.read_text(encoding="utf-8")
+    for module in index["modules"]:
+        version = module["version"]
+        assert re.fullmatch(r"\d+\.\d+\.\d+", version), (
+            f"{module['id']} has invalid contract version {version!r}"
+        )
+        heading = re.search(
+            rf"^### {re.escape(module['id'])} — {re.escape(module['title'])}$",
+            text,
+            re.M,
+        )
+        assert heading is not None, f"{module['id']} prose heading missing"
+        next_heading = re.search(r"^### ", text[heading.end() :], re.M)
+        section_end = heading.end() + next_heading.start() if next_heading else len(text)
+        section = text[heading.end() : section_end]
+        assert f"| Version | `{version}` |" in section, (
+            f"{module['id']} prose version != index version {version}"
         )
 
 
@@ -162,6 +187,8 @@ def test_branch_protection_strict_recorded(index: dict) -> None:
     assert index["ci"]["branch_protection"] == "strict"
     assert index["ci"]["force_push_blocked"] is True
     assert index["ci"]["deletion_blocked"] is True
+    assert index["ci"]["branch_protection_observed_at"] == "2026-09-26"
+    assert "not checked by local tests" in index["ci"]["branch_protection_source"]
 
 
 def test_cross_cutting_invariants_present(index: dict) -> None:
@@ -186,15 +213,15 @@ def test_every_module_has_at_least_one_test_path(index: dict) -> None:
     for module in index["modules"]:
         tests = module["tests"]
         assert tests, f"{module['id']} names no test"
+        for path in tests:
+            assert (ROOT / path).is_file(), f"{module['id']} test path missing: {path}"
 
 
 def test_landed_module_paths_exist(index: dict) -> None:
     """Modules already on main must point at real files.
 
-    An in_flight module legitimately lives on an unmerged branch (M1's grok
-    capture is on feat/grok-source-bot), so it is exempt — but every merged or
-    partial module is checked strictly, which is what caught the drift this
-    test exists for.
+    An in_flight module may live on an unmerged branch, so it is exempt — but
+    every merged or partial module is checked strictly, which catches drift.
     """
     checked = 0
     for module in index["modules"]:
@@ -215,3 +242,37 @@ def test_in_flight_modules_are_tracked_by_an_issue(index: dict) -> None:
         if module["status"] == "in_flight":
             assert module["issue"], f"{module['id']} in flight but names no issue"
 
+
+def test_source_capture_status_matches_merged_issue(index: dict) -> None:
+    grok = next(m for m in index["modules"] if m["id"] == "M1")
+    assert grok["issue"] == 15
+    assert grok["status"] == "merged"
+
+
+def test_decisions_client_contract_has_offline_client_tests(index: dict) -> None:
+    decisions = next(m for m in index["modules"] if m["id"] == "M3")
+    assert "tests/test_decisions_client.py" in decisions["tests"]
+
+
+def _continuity_record(path: Path, record_type: str) -> dict:
+    text = path.read_text(encoding="utf-8")
+    match = re.search(rf"<!-- continuity:{record_type} (\{{.*?\}}) -->", text, re.S)
+    assert match is not None, f"{path.relative_to(ROOT)} has no {record_type} record"
+    return json.loads(match.group(1))
+
+
+def test_current_points_to_active_pcm_task() -> None:
+    current = _continuity_record(ROOT / "docs" / "CURRENT.md", "current")
+    task_path = ROOT / current["active_task_file"]
+    task = _continuity_record(task_path, "task")
+    assert current["active_task"] == task["id"]
+    assert task["status"] == "active"
+    assert task["issue_url"].endswith("/30")
+
+
+def test_grok_pcm_task_projection_is_completed() -> None:
+    task_path = ROOT / "tasks" / "TASK-JEV-0001-grok-source-bot.md"
+    task = _continuity_record(task_path, "task")
+    assert task["status"] == "completed"
+    assert task["issue_url"].endswith("/15")
+    assert "PR #27 is merged" in task["next_action"]
