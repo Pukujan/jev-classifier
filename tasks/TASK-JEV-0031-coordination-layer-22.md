@@ -98,6 +98,29 @@ evidence class.
 - 2026-09-26T21:44Z — PR #38 merged green: merged-PR settle fix + board refresh.
 - 2026-09-26T21:51Z — PR #39 merged green: spec name correction.
 
+### 2026-09-26 21:58:16 UTC — coordination-flagger
+
+<!-- continuity:checkpoint {"agent":"coordination-flagger","blocked":[],"changed":["none"],"completed":["coordination layer v2 delivered: PRs #36 ae8d7fd, #38 c259310, #39 f98c991; 150 offline tests; live gate exercised; board settled"],"decisions":["no new decisions"],"evidence":["gh pr checks all green; continuity preflight TARGET_VALID; smoke_jev returned typesafe/jev-1.13-20260917 choice+probs"],"next_action":"post collab-go on #14; close #22","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"JEV-0031","timestamp":"2026-09-26T21:58:16Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ee3aa6e30c0604344c01032c4c0db544956f24534f0d75d2f2d5473d94e66221","request_id":"jev0031-delivery-1","schema":"project-continuity.checkpoint-operation.v1","task_id":"JEV-0031"} -->
+
+Completed:
+- coordination layer v2 delivered: PRs #36 ae8d7fd, #38 c259310, #39 f98c991; 150 offline tests; live gate exercised; board settled
+
+Evidence:
+- gh pr checks all green; continuity preflight TARGET_VALID; smoke_jev returned typesafe/jev-1.13-20260917 choice+probs
+
+Decisions:
+- no new decisions
+
+Changed:
+- none
+
+Blocked/uncertain:
+- none
+
+Next:
+- post collab-go on #14; close #22
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → `docs/AGENT_PROPOSALS.md` (mechanics) +
