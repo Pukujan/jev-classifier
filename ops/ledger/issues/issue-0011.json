@@ -1,0 +1,14 @@
+{
+  "kind": "issue",
+  "number": 11,
+  "title": "Optional live bias-pack smoke against JEV",
+  "state": "closed",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/issues/11",
+  "updated_at": "2026-09-26T18:40:32Z",
+  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "linked_issue_numbers": [],
+  "body_excerpt": "## Goal\nOptional live smoke that runs `BIAS_PACK_V1` against pinned JEV (`typesafe/jev-1.13`) once when `OPENROUTER_API_KEY` is present; skip cleanly when absent.\n\n## Scope\n- Add `scripts/smoke_bias.py` and/or a pytest mark that:\n  - Runs only when `OPENROUTER_API_KEY` is set; otherwise exits 0 / skips with a clear message.\n  - Calls OpenRouter Decisions with `BIAS_PACK_V1` questions + a small fi…"
+}

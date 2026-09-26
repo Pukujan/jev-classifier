@@ -21,3 +21,5 @@ build/
 # Local agent coordination DB (execution aid; not authority)
 .coord/
 
+# Local operational DB (execution aid; not authority)
+.ops/
