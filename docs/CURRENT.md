@@ -8,7 +8,8 @@ Updated: 2026-09-26 (America/New_York)
 - Issue #3 multi-agent coordination scaffold merged via PR #4 — `main` @ `2765d50`.
 - Issue #5 paper-assembly scaffolding merged via PR #7 — `main` @ `fe0da95`.
 - Issue #6 bias-detection question pack merged via PR #8 — `main` @ `d47bca5` (full suite **34 passed**).
-- Issue #10 PCM claim-ledger field alignment merged via PR (this) — schema doc, ontology `independenceClass`, legacy-key migrate helpers, supersession validation (suite **46 passed**).
+- Issue #10 PCM claim-ledger field alignment merged via PR #13 — `main` @ `12f0e2e` (suite **46 passed**).
+- Issue #11 optional live bias-pack smoke merged via PR (this) — `scripts/smoke_bias.py` + pytest `live` mark (suite **49 passed** offline+live-when-keyed).
 
 ## In flight
 
@@ -16,8 +17,7 @@ Updated: 2026-09-26 (America/New_York)
 
 ## Next (queued)
 
-1. Issue #11 — optional live bias-pack smoke against pinned `typesafe/jev-1.13`.
-2. Issue #12 — multi-source classify fixture + paper end-to-end (mock JEV).
+1. Issue #12 — multi-source classify fixture + paper end-to-end (mock JEV).
 
 ## Authority reminder
 
