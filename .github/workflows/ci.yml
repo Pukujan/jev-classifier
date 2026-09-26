@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install (editable, dev extras)
+        run: python -m pip install -e ".[dev]"
+
+      - name: Offline test suite (no live API)
+        run: python -m pytest tests/ -q
+
+      - name: Coordination + ops store tests
+        run: python -m pytest tests/test_coord.py -q
+
+      - name: OWL2 ontology parses (rdflib)
+        run: python -c "import rdflib,sys; g=rdflib.Graph(); g.parse('ontology/jev_classifier_claims.ttl', format='turtle'); print('ontology triples:', len(g)); sys.exit(0 if len(g)>0 else 1)"
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No secrets committed
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$|\.env\.[^e]' | grep -v '\.env\.example'; then
+            echo "ERROR: .env-style file tracked by git"; exit 1
+          fi
+          # Fail on obvious live OpenRouter keys in tracked text files
+          if git grep -nIE 'sk-or-v1-[A-Za-z0-9]{20,}' -- . ':!*.example' 2>/dev/null; then
+            echo "ERROR: possible OpenRouter API key committed"; exit 1
+          fi
+          echo "secret scan clean"
+
+      - name: No large binaries committed
+        run: |
+          python - <<'PY'
+          import subprocess, sys
+          files = subprocess.check_output(["git","ls-files"], text=True).split()
+          big = []
+          for f in files:
+              try:
+                  sz = len(open(f, "rb").read())
+              except OSError:
+                  continue
+              if sz > 2_000_000:
+                  big.append((f, sz))
+          if big:
+              for f, sz in big:
+                  print(f"TOO LARGE: {f} ({sz} bytes)")
+              sys.exit("ERROR: tracked file exceeds 2MB; keep datasets external/gitignored")
+          print("size scan clean:", len(files), "tracked files")
+          PY
+
+      - name: Fixtures stay small
+        run: |
+          python - <<'PY'
+          import os, sys
+          root = "tests/fixtures"
+          total = 0
+          if os.path.isdir(root):
+              for dp, _, fns in os.walk(root):
+                  for fn in fns:
+                      total += os.path.getsize(os.path.join(dp, fn))
+          print("fixture bytes:", total)
+          if total > 2_000_000:
+              sys.exit("ERROR: fixtures exceed 2MB total; commit only small offline samples")
+          PY

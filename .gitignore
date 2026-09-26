@@ -16,6 +16,7 @@ build/
 
 # Local research extracts (not for commit)
 .research_cache/
+_research/
 
 
 # Local agent coordination DB (execution aid; not authority)
@@ -23,3 +24,10 @@ build/
 
 # Local operational DB (execution aid; not authority)
 .ops/
+
+# External datasets/downloads (storage watchdog: never commit; reference by name+revision)
+data/
+.cache/
+*.bundle
+*.tar.gz
+*.zip
