@@ -28,3 +28,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+  "live: optional live OpenRouter Decisions calls (skipped without OPENROUTER_API_KEY)",
+]
