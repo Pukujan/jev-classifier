@@ -8,6 +8,7 @@ exercised through --comments-file fixtures. REST-shaped comment items mimic
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -394,6 +395,31 @@ class TestClosedIssueSettle:
              "author": "x", "created_at": "", "issue": 7, "comment_id": 2},
         ])
         assert coord_board.live_claim_issues(st) == [6]
+
+
+class TestStdoutEncoding:
+    """The gate's own output must survive a redirect on Windows (#52).
+
+    #44 pinned the read side (decoding gh's UTF-8). The write side had the
+    mirror defect: a redirected stdout encodes with the locale default
+    (cp1252), so one non-cp1252 character from GitHub text raised
+    UnicodeEncodeError mid-render. This runs the real CLI as a subprocess with
+    its stdout captured as bytes -- exactly the piping agents do -- and decodes
+    it as UTF-8, which fails loudly if the write side regressed.
+    """
+
+    def test_redirected_output_is_utf8(self, tmp_path):
+        items = [rest("<!-- coord:claim issue=9 agent=café@中 "
+                      "branch=x-9 -->",
+                      1, "2026-09-26T19:00:00Z", issue=9)]
+        proc = subprocess.run(
+            [sys.executable, str(REPO_ROOT / "scripts" / "coord_board.py"),
+             "--comments-file", comments_file(tmp_path, items), "--no-refs"],
+            capture_output=True,
+        )
+        assert proc.returncode == 0, proc.stderr.decode("utf-8", "replace")
+        out = proc.stdout.decode("utf-8")  # must not raise
+        assert "café@中" in out
 
 
 class TestUtf8Decoding:

@@ -398,5 +398,23 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def _pin_utf8_stdio() -> None:
+    """Pin stdout/stderr to UTF-8 for redirected output (#52).
+
+    Windows encodes a redirected or piped stdout with the locale default
+    (cp1252), so a single character outside it -- and the board renders agent
+    ids, branches and receipt fields straight from GitHub text -- raises
+    UnicodeEncodeError mid-render. Interactive console output uses the console
+    API and is unaffected, which is why piping is what breaks. errors=replace
+    matches the read side (#44): mangle an unknown glyph, never crash.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):  # detached, closed, or not a TextIO
+            pass
+
+
 if __name__ == "__main__":
+    _pin_utf8_stdio()
     raise SystemExit(main())
