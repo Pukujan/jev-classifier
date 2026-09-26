@@ -184,10 +184,16 @@ transaction-time, or bitemporal construct, and OWL-Time explicitly declines
 ("Valid time: not resolved explicitly"). `jcc:validFrom`/`validTo`/`recordedAt`
 are a deliberate **domain extension** — do not replace them with an import.
 
-**Known gap (issue #31):** the JEV call that *generated* a claim is unmodeled —
-no `prov:Activity`, no `prov:SoftwareAgent`, so `prov:wasGeneratedBy` /
-`wasAssociatedWith` / `used` have no endpoints, and `jcc:modelId` sits on
-`jcc:Claim` rather than on the activity/agent.
+**Closed (issue #31).** The JEV call that *generated* a claim was previously
+unmodeled — no `prov:Activity`, no `prov:SoftwareAgent`, so
+`prov:wasGeneratedBy` / `wasAssociatedWith` / `used` had no endpoints, and
+`jcc:modelId` sat on `jcc:Claim`. The vocabulary now declares
+`jcc:ClassificationActivity` (⊑ `prov:Activity`) and `jcc:ClassifierAgent`
+(⊑ `prov:SoftwareAgent`), wires those three edges, and moves the model id onto
+the activity/agent (`jcc:modelId` = requested, on the agent;
+`jcc:surfacedModelId` = provider-surfaced, on the activity). The `prov:` terms
+are declared locally with `rdfs:seeAlso`, so the offline parse still fetches
+nothing.
 
 ### M6 — Ontology and SHACL checks
 
@@ -196,9 +202,9 @@ no `prov:Activity`, no `prov:SoftwareAgent`, so `prov:wasGeneratedBy` /
 | Version | `0.1.0` |
 | Code | `ontology/jev_classifier_claims.ttl` |
 | Role | **deterministic** |
-| Contract | OWL2 Turtle vocabulary for Claim, SourceFragment, EpistemicStatus, bitemporal + lineage properties |
+| Contract | OWL2 Turtle vocabulary for Claim, SourceFragment, EpistemicStatus, bitemporal + lineage properties, and the ClassificationActivity/ClassifierAgent that produced each claim |
 | Invariants | parses offline via rdflib with **no network fetch** (therefore `rdfs:seeAlso`, never `owl:imports` of a remote document); classes are `prov:`-aligned; epistemic status is a closed vocabulary and **not a truth bit** |
-| Current state | vocabulary defines `jcc:Claim`, `jcc:SourceFragment`, and epistemic status terms; current tests check Turtle parsing, not a full OWL2 reasoner entailment |
+| Current state | vocabulary defines `jcc:Claim`, `jcc:SourceFragment`, `jcc:ClassificationActivity`, `jcc:ClassifierAgent`, and epistemic status terms; current tests check Turtle parsing and the asserted activity/agent edges, not a full OWL2 reasoner entailment |
 | Tests | `tests/test_ontology_and_classify.py::test_rdflib_parses_claims_ttl`, CI ontology-parse step |
 
 SHACL constraints are **not yet implemented** (no `pyshacl` dependency). Until
