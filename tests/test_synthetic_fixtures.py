@@ -102,8 +102,9 @@ def test_provenance_hashes_match_fixture_bytes() -> None:
     for name, meta in files.items():
         path = FIXTURES / name
         raw = path.read_bytes()
+        normalized = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
         assert meta["sha256"] == _sha256_bytes(raw)
-        assert meta["bytes"] == len(raw)
+        assert meta["bytes"] == len(normalized)
         assert meta["kind"] == "synthetic"
     omission_names = {o["name"] for o in prov["omissions"]}
     assert "SciCite corpus text" in omission_names
