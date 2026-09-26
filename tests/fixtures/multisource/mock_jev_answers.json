@@ -1,0 +1,36 @@
+{
+  "msrc-frag-method-a": {
+    "id": "mock-resp-method-a",
+    "model": "typesafe/jev-1.13",
+    "answers": {
+      "claim_kind": {
+        "type": "choice",
+        "choice": "method_claim",
+        "probabilities": {
+          "empirical_finding": 0.08,
+          "method_claim": 0.82,
+          "opinion": 0.05,
+          "other": 0.05
+        },
+        "confidence": 0.82
+      }
+    }
+  },
+  "msrc-frag-result-b": {
+    "id": "mock-resp-result-b",
+    "model": "typesafe/jev-1.13",
+    "answers": {
+      "claim_kind": {
+        "type": "choice",
+        "choice": "empirical_finding",
+        "probabilities": {
+          "empirical_finding": 0.88,
+          "method_claim": 0.06,
+          "opinion": 0.03,
+          "other": 0.03
+        },
+        "confidence": 0.88
+      }
+    }
+  }
+}

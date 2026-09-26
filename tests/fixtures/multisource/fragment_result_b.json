@@ -1,0 +1,17 @@
+{
+  "id": "msrc-frag-result-b",
+  "source": "synthetic:preprint-alpha",
+  "source_id": "src-preprint-alpha",
+  "title": "Alpha study results excerpt",
+  "text": "In Study Alpha (n=80), the treatment arm improved mean symptom score by 4.2 points at day 28 versus 1.1 for control (p=0.008). Secondary endpoints were directionally consistent.",
+  "closed_label_set": ["empirical_finding", "method_claim", "opinion", "other"],
+  "question_id": "claim_kind",
+  "instructions": "Classify the research fragment into exactly one claim kind.",
+  "criteria": {
+    "empirical_finding": "Reports observed data, measurements, or statistical results from a study or experiment.",
+    "method_claim": "Describes a method, procedure, architecture, or how something was done rather than what was observed.",
+    "opinion": "Authorial judgment, speculation, or recommendation without direct empirical support in the fragment.",
+    "other": "Does not clearly fit empirical finding, method claim, or opinion."
+  },
+  "notes": "Synthetic correlated source B (results) for multi-source e2e; same Study Alpha as fragment A."
+}
