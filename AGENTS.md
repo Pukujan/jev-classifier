@@ -40,3 +40,10 @@
 - Pushing to `main`/`master` directly.
 - Live paid experiments beyond a single smoke without an issue.
 - Copying secrets from eval-lab or other repos into this tree.
+
+## Multi-agent coordination
+
+- Prefer GitHub issues/PRs for ownership and delivery status.
+- Optional local aid: `jev_classifier.coord.CoordStore` (SQLite under `.coord/`, gitignored). See `docs/AGENT_COORD.md`.
+- Claim issue ownership before pushing product work; use idempotent checkpoint keys; never treat SQLite as authority over GitHub.
+

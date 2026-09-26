@@ -35,6 +35,11 @@ Build a mostly-deterministic **JEV-based classifier** that turns correlated AI-r
 | 0 | Bootstrap | This plan + AGENTS + research notes + issue #1 draft |
 | 1 | JEV client + smoke | OpenRouter Decisions client; fixture smoke; fail-closed parse |
 | 2 | Ontology + first classify | OWL2 skeleton; first classification fixture with claim record |
-| 3+ | (later issues) | Bias question packs, paper assembly, PCM claim-ledger alignment |
+| 3 | Agent coordination | Local SQLite coord scaffold + AGENT_COORD protocol (GitHub remains authority) |
+| 4 | Paper assembly | Deterministic claim-JSON ? markdown paper skeleton (templates only; no non-JEV LLM for labels) |
+| 5 | Bias packs | Closed JEV choice/noul bias signals; local aggregation; fail-closed fixtures |
+| 6+ | (later issues) | PCM claim-ledger alignment, calibration sets |
 
 Iteration details and verify steps live in `docs/ISSUE_1_DRAFT.md`.
+
+Live next-priority note: `docs/CURRENT.md`. Coordination protocol: `docs/AGENT_COORD.md`.
