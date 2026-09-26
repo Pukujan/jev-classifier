@@ -4,9 +4,13 @@
       "number": 14,
       "title": "Long-running JEV research synthesis classifier",
       "state": "open",
-      "author": {"login": "Pukujan"},
+      "author": {
+        "login": "Pukujan"
+      },
       "assignees": [],
-      "labels": ["epic"],
+      "labels": [
+        "epic"
+      ],
       "body": "Parent initiative. Do not put OPENROUTER_API_KEY=sk-secretvaluehere in logs.",
       "url": "https://github.com/Pukujan/jev-classifier/issues/14",
       "updatedAt": "2026-09-26T18:00:00Z"
@@ -14,8 +18,10 @@
     {
       "number": 15,
       "title": "Grok research-source bot with citation and provenance capture",
-      "state": "open",
-      "author": {"login": "Pukujan"},
+      "state": "closed",
+      "author": {
+        "login": "Pukujan"
+      },
       "assignees": [],
       "labels": [],
       "body": "Leaf under #14. Primary writer: Codex.",
@@ -26,9 +32,17 @@
       "number": 18,
       "title": "Operational local DB + committed ops ledger",
       "state": "open",
-      "author": {"login": "Pukujan"},
-      "assignees": [{"login": "Pukujan"}],
-      "labels": ["ops"],
+      "author": {
+        "login": "Pukujan"
+      },
+      "assignees": [
+        {
+          "login": "Pukujan"
+        }
+      ],
+      "labels": [
+        "ops"
+      ],
       "body": "Parent: #14. Branch feat/ops-ledger.",
       "url": "https://github.com/Pukujan/jev-classifier/issues/18",
       "updatedAt": "2026-09-26T18:47:00Z"
@@ -37,7 +51,9 @@
       "number": 3,
       "title": "Multi-agent coordination scaffold",
       "state": "closed",
-      "author": {"login": "Pukujan"},
+      "author": {
+        "login": "Pukujan"
+      },
       "assignees": [],
       "labels": [],
       "body": "Done.",
@@ -50,7 +66,9 @@
       "number": 20,
       "title": "WIP orphan PR without issue link",
       "state": "open",
-      "author": {"login": "agent-x"},
+      "author": {
+        "login": "agent-x"
+      },
       "assignees": [],
       "labels": [],
       "body": "No issue reference here. api_key=supersecretTOKEN123 should be redacted.",
@@ -62,25 +80,33 @@
       "number": 19,
       "title": "feat: ops ledger (#18)",
       "state": "open",
-      "author": {"login": "Pukujan"},
+      "author": {
+        "login": "Pukujan"
+      },
       "assignees": [],
       "labels": [],
       "body": "Closes #18",
       "url": "https://github.com/Pukujan/jev-classifier/pull/19",
       "updatedAt": "2026-09-26T19:05:00Z",
-      "linked_issue_numbers": [18]
+      "linked_issue_numbers": [
+        18
+      ]
     },
     {
       "number": 4,
       "title": "coord scaffold",
       "state": "closed",
-      "author": {"login": "Pukujan"},
+      "author": {
+        "login": "Pukujan"
+      },
       "assignees": [],
       "labels": [],
       "body": "Closes #3",
       "url": "https://github.com/Pukujan/jev-classifier/pull/4",
       "updatedAt": "2026-09-25T12:30:00Z",
-      "linked_issue_numbers": [3]
+      "linked_issue_numbers": [
+        3
+      ]
     }
   ],
   "current_md": "# CURRENT\n\n## In flight\n\n- Issue #99 phantom work still listed\n- Issue #15 Grok bot\n\n## Next\n\n1. Other things\n",
@@ -103,5 +129,57 @@
       "agent_id": "agent-b",
       "status": "active"
     }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "<!-- coord:claim issue=22 agent=coordination-flagger branch=feat/coordination-layer-22 sha=67eaa8b state=active -->\n## Claim",
+      "created_at": "2026-09-26T19:09:12Z",
+      "user": {
+        "login": "Pukujan"
+      },
+      "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/22"
+    },
+    {
+      "id": 2,
+      "body": "## Claim\n- Leaf: #15\n- Primary writer: Codex project agent\n- Branch: `feat/grok-source-bot`",
+      "created_at": "2026-09-26T18:57:46Z",
+      "user": {
+        "login": "Pukujan"
+      },
+      "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+    },
+    {
+      "id": 3,
+      "body": "<!-- coord:proposal id=P-15-1 author=codex@cloud issue=15 status=open scope=source-capture -->\n## Proposal P-15-1\nNone of it exists unless named as existing.",
+      "created_at": "2026-09-26T18:43:14Z",
+      "user": {
+        "login": "Pukujan"
+      },
+      "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+    },
+    {
+      "id": 4,
+      "body": "<!-- coord:verdict on=P-15-1 by=claude-code-main decision=accepted -->",
+      "created_at": "2026-09-26T18:54:40Z",
+      "user": {
+        "login": "Pukujan"
+      },
+      "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+    },
+    {
+      "id": 5,
+      "body": "<!-- coord:receipt run=r-22-1 task=JEV-0002 pr=29 commit=67eaa8b outcome=merged started=2026-09-26T19:10Z finished=2026-09-26T19:55Z agent_alias=A-7f3c model_alias=M-91ab model_version_alias=V-04ef temperature=unavailable tools=\"gh,pytest x4\" provenance=outcome:runtime_observed;commit:runtime_observed;agent_alias:owner_recorded;model_alias:owner_recorded;temperature:unavailable;tools:agent_declared -->\n**Evidence:** PR #29 checks; run log hash `sha256:1a2b…` (artifact, not inline).",
+      "created_at": "2026-09-26T19:56:00Z",
+      "user": {
+        "login": "Pukujan"
+      },
+      "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/22"
+    }
+  ],
+  "refs": [
+    "feat/coordination-layer-22",
+    "feat/grok-source-bot",
+    "feat/ops-ledger"
   ]
 }

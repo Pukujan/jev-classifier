@@ -32,6 +32,15 @@ jobs:
       - name: Coordination + ops store tests
         run: python -m pytest tests/test_coord.py -q
 
+      - name: Coordination gate CLI smoke (offline, asserts exit codes)
+        run: |
+          python scripts/coord_board.py --comments-file tests/fixtures/coord/comments.json --no-refs
+          python scripts/coord_board.py --comments-file tests/fixtures/coord/comments.json --no-refs --proposal P-15-1 --can-build
+          rc=0
+          python scripts/coord_board.py --comments-file tests/fixtures/coord/comments.json --no-refs --issue-open 6 --agent someone@dev --issue-state closed || rc=$?
+          test "$rc" = "3" || { echo "expected exit 3 on closed issue, got $rc"; exit 1; }
+          echo "coord_board CLI smoke ok"
+
       - name: OWL2 ontology parses (rdflib)
         run: python -c "import rdflib,sys; g=rdflib.Graph(); g.parse('ontology/jev_classifier_claims.ttl', format='turtle'); print('ontology triples:', len(g)); sys.exit(0 if len(g)>0 else 1)"
 

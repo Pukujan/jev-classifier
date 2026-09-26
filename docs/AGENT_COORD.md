@@ -1,5 +1,14 @@
 # Agent coordination protocol
 
+> **v2 update (#22):** the SQLite `ownership` table below is a *local cache*, not
+> a cross-device lock (each machine has its own gitignored `.coord/agents.db`,
+> and `CollisionError` can only fire within one DB). The real mutex is the
+> reserved branch + `coord:claim` comment; the adjudication grammar is
+> `coord:proposal`/`coord:verdict`/`coord:receipt`. See
+> [`AGENT_PROPOSALS.md`](AGENT_PROPOSALS.md) and gate with
+> `python scripts/coord_board.py --issue-open <n> --agent <you>` before any
+> product commit. A `coord:claim` here means a **work lock**, not the epistemic
+> claim records of [`CLAIM_SCHEMA.md`](CLAIM_SCHEMA.md).
 **Authority:** GitHub issues and PRs are the source of truth for work items, ownership, and delivery. The local SQLite store (`jev_classifier.coord.CoordStore`) is an **execution aid only** — a rebuildable projection that helps concurrent agents avoid colliding and retry safely.
 
 ## What the store tracks

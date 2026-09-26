@@ -34,6 +34,8 @@ from jev_classifier.ops.store import (  # noqa: E402
     OpsStore,
 )
 
+from jev_classifier.coord import records as coord_records  # noqa: E402
+
 # Secret-ish patterns that must never appear in ledger output
 _SECRET_PATTERNS = (
     re.compile(r"(?i)(api[_-]?key|secret|token|password|authorization)\s*[:=]\s*\S+"),
@@ -52,6 +54,25 @@ _CURRENT_IN_FLIGHT_RE = re.compile(
     r"(?im)^##\s+In flight\s*$([\s\S]*?)(?=^##\s+|\Z)"
 )
 _ISSUE_NUM_RE = re.compile(r"#(\d+)")
+
+
+def _decode_json_stream(text: str) -> list[Any]:
+    """Parse concatenated JSON arrays/objects (gh api --paginate --jq output).
+
+    One JSON array per page — json.loads() on the whole stream fails past the
+    first page, so paginate output must be decoded item-by-item.
+    """
+    decoder = json.JSONDecoder()
+    items: list[Any] = []
+    idx = 0
+    while idx < len(text):
+        while idx < len(text) and text[idx] in " \n\r\t":
+            idx += 1
+        if idx >= len(text):
+            break
+        value, idx = decoder.raw_decode(text, idx)
+        items.extend(value if isinstance(value, list) else [value])
+    return items
 
 
 def _utc_now() -> str:
@@ -109,6 +130,8 @@ def load_fixture(path: Path) -> dict[str, Any]:
     data.setdefault("pull_requests", [])
     data.setdefault("current_md", "")
     data.setdefault("coord_claims", [])
+    data.setdefault("comments", [])
+    data.setdefault("refs", [])
     return data
 
 
@@ -152,8 +175,26 @@ def fetch_via_gh(repo: str) -> dict[str, Any]:
             "number,title,state,author,assignees,labels,body,url,updatedAt",
         ]
     )
-    return {"issues": issues, "pull_requests": prs}
-
+    comments: list[Any] = []
+    try:
+        proc = subprocess.run(
+            [
+                "gh", "api", "-X", "GET", f"repos/{repo}/issues/comments",
+                "--paginate", "-f", "per_page=100", "--jq", ".",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        comments = _decode_json_stream(proc.stdout)
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        # Auxiliary read: coordination records. Never kill issue/PR sync for it.
+        print(
+            f"ops_sync: comment fetch failed ({exc}); "
+            "continuing without coordination records",
+            file=sys.stderr,
+        )
+    return {"issues": issues, "pull_requests": prs, "comments": comments}
 
 def _norm_login(obj: Any) -> str | None:
     if obj is None:
@@ -244,12 +285,43 @@ def snapshots_from_payload(payload: dict[str, Any]) -> list[IssueSnapshot]:
     return out
 
 
+
+
+def normalize_comments(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Map gh-shaped or REST-shaped comment items to records.fold inputs.
+
+    gh issue comments use createdAt/author.login; REST uses
+    created_at/user.login/issue_url. fold needs body, author, created_at,
+    issue, comment_id.
+    """
+    out: list[dict[str, Any]] = []
+    for item in raw or []:
+        author = item.get("author")
+        if isinstance(author, dict):
+            author = author.get("login")
+        author = author or (item.get("user") or {}).get("login") or "?"
+        issue = item.get("issue")
+        if issue is None:
+            tail = str(item.get("issue_url") or "").rsplit("/", 1)[-1]
+            issue = int(tail) if tail.isdigit() else 0
+        created = item.get("created_at") or item.get("createdAt") or ""
+        out.append({
+            "body": item.get("body") or "",
+            "author": str(author),
+            "created_at": str(created),
+            "issue": int(issue),
+            "comment_id": int(item.get("id") or 0),
+        })
+    return out
 def detect_discrepancies(
     snapshots: list[IssueSnapshot],
     *,
     current_md: str = "",
     coord_claims: list[dict[str, Any]] | None = None,
     coord_db_path: Path | None = None,
+    coord_state: "coord_records.CoordState | None" = None,
+    refs: list[str] | None = None,
+    merged_refs: set[str] | None = None,
 ) -> list[dict[str, str]]:
     """Deterministic discrepancy detectors. Returns list of {kind, subject_type, subject_id, detail}."""
     flags: list[dict[str, str]] = []
@@ -365,6 +437,50 @@ def detect_discrepancies(
                 }
             )
 
+    # 5) GitHub-comment coordination records (#22 proposal/claim/verdict layer)
+    if coord_state is not None:
+        for n, cs in sorted(coord_state.collisions().items()):
+            agents = ", ".join(sorted({c.attrs.get("agent", "?") for c in cs}))
+            flags.append(
+                {
+                    "kind": "coord_claim_collision",
+                    "subject_type": "issue",
+                    "subject_id": str(n),
+                    "detail": (
+                        f"coord claim records on issue #{n} come from multiple "
+                        f"agents ({agents}); one must release or the main agent "
+                        f"arbitrates."
+                    ),
+                }
+            )
+        for iss, cid, err in coord_state.malformed:
+            flags.append(
+                {
+                    "kind": "coord_record_malformed",
+                    "subject_type": "issue",
+                    "subject_id": str(iss),
+                    "detail": f"coord record in comment {cid} is malformed: {err}",
+                }
+            )
+        for c in coord_state.live_claims():
+            try:
+                n = int(c.attrs.get("issue", "0"))
+            except ValueError:
+                continue
+            if n in closed_issue_nums:
+                flags.append(
+                    {
+                        "kind": "closed_issue_coord_claim",
+                        "subject_type": "issue",
+                        "subject_id": str(n),
+                        "detail": (
+                            f"Closed issue #{n} still has a live coord claim by "
+                            f"{c.attrs.get('agent', '?')} (branch "
+                            f"{c.attrs.get('branch', '?')}); post state=released "
+                            f"or let the merged-PR rule release it."
+                        ),
+                    }
+                )
     return flags
 
 
@@ -531,6 +647,103 @@ def write_ledger(
     )
 
 
+
+def render_coord_md(state: "coord_records.CoordState") -> str:
+    """Deterministic, timestamp-free projection of GitHub-comment coordination.
+
+    No sync timestamps or source lines: two syncs over the same comments must
+    produce byte-identical COORD.md (idempotency is asserted in tests).
+    """
+    lines = [
+        "# Coordination board (ops ledger projection)",
+        "",
+        "> Parsed from `coord:proposal` / `coord:verdict` / `coord:claim` comment",
+        "> markers and legacy `## Claim` prose (docs/AGENT_PROPOSALS.md, #22).",
+        "> GitHub comments are the authority; this file is a regenerated projection.",
+        "> `by=` / `agent=` are self-declared under the shared account: evidence,",
+        "> not enforcement. This board does not arbitrate.",
+        "",
+        "## Proposals",
+        "",
+    ]
+    if state.proposals:
+        lines += [
+            "| id | issue | scope | status | decision |",
+            "|----|-------|-------|--------|----------|",
+        ]
+        for pid, p in sorted(state.proposals.items()):
+            v = state.applied_verdicts.get(pid)
+            dec = v.attrs.get("decision", "?") if v else "open"
+            adv = len(state.advisory_verdicts.get(pid, []))
+            if adv:
+                dec += f" (+{adv} advisory)"
+            lines.append(
+                f"| {pid} | #{p.attrs.get('issue', '?')} "
+                f"| {p.attrs.get('scope', '—')} | {p.attrs.get('status', 'open')} "
+                f"| {dec} |"
+            )
+    else:
+        lines.append("_(none)_")
+    lines += ["", "## Live claims", ""]
+    live = state.live_claims()
+    if live:
+        lines += ["| issue | agent | branch | marker |", "|-------|-------|--------|--------|"]
+        for c in sorted(live, key=lambda r: (r.attrs.get("issue", "0"), r.attrs.get("agent", ""))):
+            lines.append(
+                f"| #{c.attrs.get('issue', '?')} | {c.attrs.get('agent', '?')} "
+                f"| `{c.attrs.get('branch', '?')}` | {c.marker} |"
+            )
+    else:
+        lines.append("_(none)_")
+    lines += ["", "## Run receipts", ""]
+    if state.receipts:
+        lines += [
+            "| Run/task | Agent alias | Model alias / version alias | "
+            "Temperature + source | Tools/version/count + source | Outcome / evidence |",
+            "|---|---|---|---|---|---|",
+        ]
+        for run_id, rc in sorted(state.receipts.items()):
+            a = rc.attrs
+            pv = coord_records.provenance_for
+            temp = f"{a.get('temperature', '—')} ({pv(a, 'temperature')})"
+            tools = (f"{a.get('tools', '—')}"
+                     + (f" v{a['tools_version']}" if a.get("tools_version") else "")
+                     + (f" x{a['tools_count']}" if a.get("tools_count") else "")
+                     + f" ({pv(a, 'tools')})")
+            outcome = (f"{a.get('outcome', '?')} ({pv(a, 'outcome')}) "
+                       f"[{a.get('evidence', 'no link')}]")
+            lines.append(
+                f"| {run_id} / {a.get('task', '—')} "
+                f"| {a.get('agent_alias', '—')} ({pv(a, 'agent_alias')}) "
+                f"| {a.get('model_alias', '—')} / {a.get('model_version_alias', '—')} "
+                f"| {temp} | {tools} | {outcome} |"
+            )
+    else:
+        lines.append("_(none)_")
+    lines += ["", "## Collisions", ""]
+    collisions = state.collisions()
+    if collisions:
+        for n, cs in sorted(collisions.items()):
+            agents = ", ".join(sorted({c.attrs.get("agent", "?") for c in cs}))
+            lines.append(f"- issue #{n}: {agents}")
+    else:
+        lines.append("_(none detected)_")
+    if state.malformed:
+        lines += ["", "## Malformed records", ""]
+        for iss, cid, err in state.malformed:
+            lines.append(f"- issue #{iss} comment {cid}: {err}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def write_coord_ledger(
+    ledger_dir: Path, state: "coord_records.CoordState"
+) -> None:
+    ledger_dir.mkdir(parents=True, exist_ok=True)
+    (ledger_dir / "COORD.md").write_text(
+        redact_secrets(render_coord_md(state)), encoding="utf-8"
+    )
+
 def ensure_ledger_readme(ledger_dir: Path) -> None:
     ledger_dir.mkdir(parents=True, exist_ok=True)
     readme = ledger_dir / "README.md"
@@ -591,16 +804,23 @@ def run_sync(
     ledger_dir: Path,
     current_md_path: Path | None,
     coord_db_path: Path | None,
+    write_coord: bool | None = None,
 ) -> dict[str, Any]:
+    if write_coord is None:
+        # Production default: only a live sync may rewrite the committed
+        # board. Tests may opt in explicitly to exercise the projection.
+        write_coord = fixture is None
     source = "fixture" if fixture else "gh"
     if fixture:
         payload = load_fixture(fixture)
         current_md = str(payload.get("current_md") or "")
         coord_claims = list(payload.get("coord_claims") or [])
+        comments = list(payload.get("comments") or [])
     else:
         payload = fetch_via_gh(repo)
         current_md = ""
         coord_claims = []
+        comments = list(payload.get("comments") or [])
         if current_md_path and current_md_path.is_file():
             current_md = current_md_path.read_text(encoding="utf-8")
         # live mode: still allow empty coord_claims; file path handled in detect
@@ -630,6 +850,15 @@ def run_sync(
                 linked_issue_numbers=s.linked_issue_numbers,
             )
 
+    coord_state = coord_records.fold(normalize_comments(comments))
+    # Merging/closing releases a claim even without an explicit
+    # state=released comment (docs/AGENT_PROPOSALS.md claim rule): settled
+    # rows leave the Live claims table, so the committed board never ships
+    # permanent stale rows on delivered issues.
+    coord_records.settle_claims(
+        coord_state,
+        closed_issues={s.number for s in snapshots if not s.is_pr and s.state == "closed"},
+    )
     with OpsStore(db_path) as store:
         run_id = store.begin_sync_run(source=source)
         try:
@@ -640,6 +869,7 @@ def run_sync(
                 current_md=current_md,
                 coord_claims=coord_claims,
                 coord_db_path=coord_db_path,
+                coord_state=coord_state,
             )
             for f in flags:
                 store.add_discrepancy(
@@ -657,6 +887,12 @@ def run_sync(
                 source=source,
                 sync_run_id=run_id,
             )
+            if comments and write_coord:
+                # Rewrite the committed coordination board only from live
+                # GitHub state. Fixture mode (CI, tests) must never touch
+                # ops/ledger/COORD.md even when the fixture carries comments;
+                # tests pass a temp --ledger-dir and assert there instead.
+                write_coord_ledger(ledger_dir, coord_state)
             issue_count = sum(1 for s in snapshots if not s.is_pr)
             pr_count = sum(1 for s in snapshots if s.is_pr)
             store.finish_sync_run(
