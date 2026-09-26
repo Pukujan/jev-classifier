@@ -84,7 +84,7 @@ canonical label, score, or claim, and may not call M2/M3 to promote itself.
 | Output | validated typed answer preserving native probability map + confidence |
 | API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
 | Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
-| Fail-closed | yes — out-of-set, missing, wrong-typed, or malformed → `NormalizeError`, never a guessed label |
+| Fail-closed | yes — missing required answer values, a supplied wrong `type`, wrong-typed values, out-of-set choices/probability keys, or malformed answers → `NormalizeError`; an omitted optional `type` is accepted |
 | Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py` |
 
 **Known gap (issue #32):** the declared `score` primitive is **not implemented**

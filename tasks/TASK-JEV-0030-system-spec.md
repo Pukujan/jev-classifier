@@ -27,6 +27,8 @@ and known gaps explicit. Reconcile stale #15/PR #27 status projections.
 - 2026-09-26: Independent review found answer `type` is optional in the current
   normalizers. Corrected the spec/index to match and added focused tests for
   absent `type`; PR #34 remains open pending merge.
+- 2026-09-26: Re-review clarified that the fail-closed row means missing
+  required answer values, not the optional `type` field.
 
 ### 2026-09-26 21:10:08 UTC — claude-code-main
 
