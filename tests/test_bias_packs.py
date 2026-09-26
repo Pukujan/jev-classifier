@@ -9,6 +9,8 @@ import pytest
 
 from jev_classifier.bias import (
     BIAS_PACK_V1,
+    BiasPack,
+    BiasQuestion,
     apply_normalized_answers,
     get_pack,
     legal_options_for,
@@ -107,3 +109,141 @@ def test_jev_questions_map_is_well_formed() -> None:
         assert body["type"] == q.type
         if q.type == "choice":
             assert set(body["criteria"].keys()) == set(q.criteria.keys())
+
+
+# --- Issue #32: score primitive wiring + flag-surface hygiene ---
+
+
+def _score_pack() -> BiasPack:
+    return BiasPack(
+        pack_id="score_pack",
+        version="0.1.0",
+        description="score plumbing fixture",
+        questions=(
+            BiasQuestion(
+                id="hedge_confidence_mismatch",
+                type="score",
+                signal="hedge_confidence_mismatch",
+                instructions=(
+                    "Does the claim's hedging language disagree with the "
+                    "classifier's own stated confidence?"
+                ),
+                legend=("aligned", "mild_mismatch", "severe_mismatch"),
+                flags_on=("severe_mismatch",),
+            ),
+        ),
+    )
+
+
+def test_score_question_is_wired_through_the_pack() -> None:
+    pack = _score_pack()
+    validate_pack(pack)
+    assert legal_options_for(pack, "hedge_confidence_mismatch") == frozenset(
+        {"aligned", "mild_mismatch", "severe_mismatch"}
+    )
+    qs = pack.as_jev_questions()
+    assert qs["hedge_confidence_mismatch"]["type"] == "score"
+    assert qs["hedge_confidence_mismatch"]["legend"] == [
+        "aligned",
+        "mild_mismatch",
+        "severe_mismatch",
+    ]
+
+
+def test_score_question_aggregates_and_raises_its_declared_flag() -> None:
+    pack = _score_pack()
+    answers = {
+        "hedge_confidence_mismatch": {
+            "type": "score",
+            "score": "severe_mismatch",
+            "probabilities": {
+                "aligned": 0.05,
+                "mild_mismatch": 0.2,
+                "severe_mismatch": 0.75,
+            },
+            "confidence": 0.7,
+        }
+    }
+    record = apply_normalized_answers(pack, answers, model="typesafe/jev-1.13")
+    d = record.to_dict()
+    sig = d["signals"]["hedge_confidence_mismatch"]
+    assert sig["type"] == "score"
+    assert sig["score"] == "severe_mismatch"
+    assert sig["legend"] == ["aligned", "mild_mismatch", "severe_mismatch"]
+    assert sig["confidence"] == 0.7
+    assert d["raised_flags"] == ["hedge_confidence_mismatch"]
+
+
+def test_score_question_without_legend_fails_closed() -> None:
+    with pytest.raises(NormalizeError, match="legend"):
+        validate_pack(
+            BiasPack(
+                pack_id="p",
+                version="1",
+                description="d",
+                questions=(BiasQuestion(id="s", type="score", instructions="x"),),
+            )
+        )
+
+
+def test_score_out_of_rubric_fails_closed_in_aggregate() -> None:
+    bad = {"hedge_confidence_mismatch": {"type": "score", "score": "nope"}}
+    with pytest.raises(NormalizeError, match="not in"):
+        apply_normalized_answers(_score_pack(), bad)
+
+
+def test_flags_on_value_must_be_a_legal_value() -> None:
+    # The old defect was a hardcoded flag set holding values no question could
+    # return. Declaring flags per question makes that drift a validation error.
+    with pytest.raises(NormalizeError, match="not a legal value"):
+        validate_pack(
+            BiasPack(
+                pack_id="p",
+                version="1",
+                description="d",
+                questions=(
+                    BiasQuestion(
+                        id="q",
+                        type="choice",
+                        instructions="x",
+                        criteria={"a": "A", "b": "B"},
+                        flags_on=("high",),
+                    ),
+                ),
+            )
+        )
+
+
+def test_pack_v1_declared_flags_are_all_legal() -> None:
+    pack = get_pack()
+    for q in pack.questions:
+        legal = legal_options_for(pack, q.id)
+        for value in q.flags_on:
+            assert value in legal, f"{q.id}: {value!r} not in {sorted(legal)}"
+
+
+def test_noul_signal_records_the_threshold_used() -> None:
+    pack = get_pack()
+    record = apply_normalized_answers(pack, _answers_ok(), yes_threshold=0.6)
+    assert record.to_dict()["signals"]["overconfidence"]["yes_threshold"] == 0.6
+
+
+def test_question_type_surface_includes_score() -> None:
+    import typing
+
+    from jev_classifier.bias.packs import QuestionType
+
+    assert "score" in typing.get_args(QuestionType)
+
+
+def test_overconfidence_question_measures_classifier_calibration() -> None:
+    # The category error (#32): the question used to ask whether the *claim text*
+    # was stated with certainty beyond its support — a property of the evidence.
+    # It must now be a calibration measure of the classifier's own confidence.
+    q = next(q for q in get_pack().questions if q.id == "overconfidence")
+    text = q.instructions.lower()
+    assert "classifier" in text
+    assert "confidence" in text
+    assert "is the claim stated with certainty" not in text
+
+

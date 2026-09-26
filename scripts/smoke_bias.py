@@ -61,11 +61,20 @@ def _safe_summary(record: dict) -> dict:
                 "confidence": sig.get("confidence"),
                 "probability_keys": sorted((sig.get("probabilities") or {}).keys()),
             }
+        elif sig.get("type") == "score":
+            signals_out[qid] = {
+                "type": "score",
+                "score": sig.get("score"),
+                "legend": sig.get("legend"),
+                "confidence": sig.get("confidence"),
+                "probability_keys": sorted((sig.get("probabilities") or {}).keys()),
+            }
         elif sig.get("type") == "noul":
             signals_out[qid] = {
                 "type": "noul",
                 "label": sig.get("label"),
                 "p_yes": sig.get("p_yes"),
+                "yes_threshold": sig.get("yes_threshold"),
             }
     return {
         "pack_id": record.get("pack_id"),
@@ -82,12 +91,13 @@ def run_live_bias_smoke() -> dict:
 
     Raises DecisionsError / NormalizeError on failure (fail closed).
     """
-    from jev_classifier.bias import apply_normalized_answers, get_pack
+    from jev_classifier.bias import apply_normalized_answers, get_pack, legal_options_for
     from jev_classifier.decisions import DecisionsClient
     from jev_classifier.normalize import (
         NormalizeError,
         extract_choice_from_response,
         extract_noul_from_response,
+        extract_score_from_response,
     )
 
     pack = get_pack("bias_pack_v1")
@@ -107,8 +117,6 @@ def run_live_bias_smoke() -> dict:
             raise NormalizeError(f"answers missing question_id {q.id!r}", kind="parse_error")
         # Re-validate via extract helpers (also checks legal sets for choice)
         if q.type == "choice":
-            from jev_classifier.bias import legal_options_for
-
             extracted = extract_choice_from_response(
                 raw,
                 question_id=q.id,
@@ -120,12 +128,31 @@ def run_live_bias_smoke() -> dict:
                 "probabilities": extracted.get("probabilities"),
                 "confidence": extracted.get("confidence"),
             }
-        else:
+        elif q.type == "score":
+            if not q.legend:
+                raise NormalizeError(
+                    f"score question {q.id!r} missing legend", kind="parse_error"
+                )
+            extracted = extract_score_from_response(
+                raw,
+                question_id=q.id,
+                legal_scores=q.legend,
+            )
+            answers[q.id] = {
+                "type": "score",
+                "score": extracted["score"],
+                "legend": extracted.get("legend"),
+                "probabilities": extracted.get("probabilities"),
+                "confidence": extracted.get("confidence"),
+            }
+        elif q.type == "noul":
             extracted = extract_noul_from_response(raw, question_id=q.id)
             answers[q.id] = {
                 "type": "noul",
                 "p_yes": extracted["p_yes"],
             }
+        else:
+            raise NormalizeError(f"{q.id}: bad type {q.type!r}", kind="parse_error")
 
     model = body.get("model") if isinstance(body.get("model"), str) else client.model
     record = apply_normalized_answers(
