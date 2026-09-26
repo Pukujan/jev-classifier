@@ -257,7 +257,8 @@ mutex has already fired once in production — see §4.
 | Invariants | sync is **idempotent** for a given fixture; discrepancy detectors are deterministic and fail-closed (unknown → flagged, never guessed); **no secrets** in ledger output |
 | Tests | `tests/test_ops.py` (incl. `test_no_secrets_in_ledger_output`) |
 
-`ops/ledger/` is the **only committed board**. `coord_ledger.py` (#22) is a
+`ops/ledger/` is the **only committed board**. `scripts/coord_board.py` (#22,
+merged via PR #36; the earlier name `coord_ledger.py` shipped nowhere) is a
 point-query gate importing the same records — it must not become a second board.
 
 ### B — Bias signals
