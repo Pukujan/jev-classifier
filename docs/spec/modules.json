@@ -1,0 +1,294 @@
+{
+  "spec_version": "0.1.0",
+  "status": "draft",
+  "updated": "2026-09-26",
+  "parent_issue": 21,
+  "leaf_issue": 30,
+  "jev_only_rule": {
+    "endpoint": "https://openrouter.ai/api/alpha/decisions",
+    "pinned_model": "typesafe/jev-1.13",
+    "canary_model": "~typesafe/jev-latest",
+    "primitives_declared": ["choice", "score", "noul"],
+    "primitives_implemented": ["choice", "noul"],
+    "note": "score is declared in AGENTS.md/PROJECT.md but unimplemented; see issue #32."
+  },
+  "modules": [
+    {
+      "id": "M1",
+      "name": "source_capture",
+      "role": "non-jev",
+      "code": ["src/jev_classifier/sources/grok.py", "scripts/grok_research.py"],
+      "tests": ["tests/test_grok_research.py"],
+      "fail_closed": true,
+      "issue": 15,
+      "status": "in_flight",
+      "contract": {
+        "input": ["query", "config"],
+        "output": ["SourceArtifact"],
+        "invariants": [
+          "content_hash_stable_across_canonical_serialization",
+          "retrieval_time_is_separate_metadata_not_in_hash",
+          "no_credential_persisted",
+          "never_invents_citations"
+        ]
+      }
+    },
+    {
+      "id": "M2",
+      "name": "transcript_normalization",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/normalize.py"],
+      "tests": ["tests/test_normalize.py", "tests/test_normalize_noul.py"],
+      "fail_closed": true,
+      "issue": null,
+      "status": "merged",
+      "contract": {
+        "input": ["decisions_response_body", "fragment_fixture"],
+        "output": ["validated_typed_answer"],
+        "invariants": [
+          "answer_type_matches_primitive",
+          "choice_in_legal_options",
+          "probability_keys_within_legal_set",
+          "legal_options_nonempty",
+          "preserves_native_probability_map",
+          "preserves_confidence"
+        ]
+      }
+    },
+    {
+      "id": "M3",
+      "name": "jev_semantic_decisions",
+      "role": "jev",
+      "code": ["src/jev_classifier/decisions.py"],
+      "tests": ["scripts/smoke_jev.py", "tests/test_ontology_and_classify.py"],
+      "fail_closed": true,
+      "issue": null,
+      "status": "merged",
+      "contract": {
+        "input": ["state", "questions"],
+        "output": ["raw_parsed_json_body"],
+        "invariants": [
+          "endpoint_resolves_to_alpha_decisions",
+          "rejects_chat_completions_base",
+          "rejects_opencode_base",
+          "model_pinned_to_jev_1_13_family",
+          "rejects_jev_1_13_free",
+          "rolling_latest_only_when_explicit",
+          "questions_nonempty",
+          "no_stream",
+          "does_not_normalize_answers"
+        ]
+      }
+    },
+    {
+      "id": "M4",
+      "name": "claim_record_build_validate",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/classify.py"],
+      "tests": ["tests/test_claim_schema.py"],
+      "fail_closed": true,
+      "issue": null,
+      "status": "merged",
+      "contract": {
+        "input": ["fragment_fixture", "normalized_answer", "raw_claim_dict"],
+        "output": ["ClaimRecord"],
+        "required_keys": ["label", "epistemic_status", "recorded_at", "evidence", "model"],
+        "optional_keys": ["valid_from", "valid_to", "supersedes", "probabilities", "confidence", "response_id", "independence_class", "id"],
+        "invariants": [
+          "label_in_legal_labels",
+          "epistemic_status_nonempty_string",
+          "recorded_at_nonempty_iso8601",
+          "evidence_object_with_fragment_id_or_path",
+          "model_nonempty_string",
+          "supersedes_null_or_nonempty_string",
+          "empty_supersedes_string_rejected",
+          "valid_from_valid_to_null_or_nonempty_iso8601",
+          "independence_class_null_or_nonempty_string",
+          "canonical_key_wins_over_legacy_on_migration",
+          "confidence_is_not_correctness"
+        ]
+      }
+    },
+    {
+      "id": "M5",
+      "name": "provenance_bitemporal_validation",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/classify.py", "ontology/jev_classifier_claims.ttl", "src/jev_classifier/paper/assemble.py"],
+      "tests": ["tests/test_claim_schema.py", "tests/test_paper_assemble.py"],
+      "fail_closed": true,
+      "issue": 31,
+      "status": "partial",
+      "contract": {
+        "input": ["ClaimRecord"],
+        "output": ["validated_bitemporal_claim"],
+        "invariants": [
+          "valid_time_distinct_from_transaction_time",
+          "valid_from_valid_to_are_valid_time",
+          "recorded_at_is_transaction_time",
+          "revision_is_new_individual_via_supersedes",
+          "contradictions_preserved_not_collapsed",
+          "correlated_sources_not_merged_away",
+          "every_claim_traces_to_source_fragment_via_evidence"
+        ],
+        "design_rulings": [
+          "flat_validity_kept_no_reasoner_installed",
+          "supersession_models_multi_period_structurally",
+          "prov_o_supplies_no_valid_time_construct",
+          "owl_time_declines_valid_time",
+          "validFrom_validTo_recordedAt_are_domain_extension"
+        ],
+        "known_gap": "JEV generating activity unmodeled; jcc:modelId on Claim not agent/activity"
+      }
+    },
+    {
+      "id": "M6",
+      "name": "ontology_shacl_checks",
+      "role": "deterministic",
+      "code": ["ontology/jev_classifier_claims.ttl"],
+      "tests": ["tests/test_ontology_and_classify.py"],
+      "fail_closed": true,
+      "issue": 31,
+      "status": "partial",
+      "contract": {
+        "input": ["ontology_ttl"],
+        "output": ["parsed_graph"],
+        "invariants": [
+          "parses_offline_via_rdflib_no_network_fetch",
+          "uses_seeAlso_never_owl_imports_remote",
+          "classes_prov_aligned",
+          "epistemic_status_closed_vocabulary_not_truth_bit"
+        ],
+        "current_state": {
+          "triples": 74,
+          "entity_classes": ["jcc:Claim", "jcc:SourceFragment"],
+          "status_individuals": ["jcc:Observed", "jcc:Inferred", "jcc:Hypothesized"]
+        },
+        "known_gap": "SHACL not implemented; no pyshacl dependency; adding it needs a leaf issue"
+      }
+    },
+    {
+      "id": "M7",
+      "name": "deterministic_paper_assembly",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/paper/assemble.py"],
+      "tests": ["tests/test_paper_assemble.py", "tests/test_multisource_e2e.py"],
+      "fail_closed": true,
+      "issue": null,
+      "status": "merged",
+      "contract": {
+        "input": ["validated_ClaimRecords"],
+        "output": ["markdown_paper_draft"],
+        "required_sections": ["Title", "Abstract", "Claims", "Provenance", "Lineage", "Citations"],
+        "invariants": [
+          "no_llm_in_assembler",
+          "every_claim_bullet_cites_evidence_id",
+          "deterministic_for_fixed_timestamp",
+          "disagreements_and_limitations_visible",
+          "empty_claims_fail_closed",
+          "missing_evidence_id_fails_closed",
+          "missing_required_section_detected"
+        ],
+        "quality_target": "medium_readable_human_evidence_backed_not_peer_reviewed_never_established_fact"
+      }
+    },
+    {
+      "id": "C",
+      "name": "coordination",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/coord/store.py"],
+      "tests": ["tests/test_coord.py"],
+      "fail_closed": true,
+      "issue": 22,
+      "status": "in_flight",
+      "authority": false,
+      "contract": {
+        "tables": ["checkpoints", "ownership", "send_log", "collision_flags"],
+        "invariants": [
+          "checkpoint_idempotent_by_key",
+          "same_agent_reclaim_is_not_collision",
+          "different_agent_claim_raises_and_flags",
+          "github_wins_on_disagreement",
+          "rebuildable_disposable"
+        ],
+        "known_limitation": "local gitignored file plus shared GitHub account means CollisionError cannot fire cross-device; issue #22 adds reserved-branch mutex"
+      }
+    },
+    {
+      "id": "O",
+      "name": "ops_ledger",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/ops/store.py", "scripts/ops_sync.py"],
+      "tests": ["tests/test_ops.py"],
+      "fail_closed": true,
+      "issue": 18,
+      "status": "merged",
+      "authority": false,
+      "contract": {
+        "schema_version": 1,
+        "default_db_path": ".ops/ops.db",
+        "committed_projection": ["ops/ledger/ISSUE_LOG.md", "ops/ledger/DISCREPANCIES.md", "ops/ledger/README.md", "ops/ledger/issues/"],
+        "invariants": [
+          "sync_idempotent_for_fixture",
+          "discrepancy_detectors_deterministic_fail_closed",
+          "unknown_flagged_never_guessed",
+          "no_secrets_in_ledger_output",
+          "ops_ledger_is_only_committed_board"
+        ]
+      }
+    },
+    {
+      "id": "B",
+      "name": "bias_signals",
+      "role": "jev_plus_deterministic",
+      "code": ["src/jev_classifier/bias/packs.py", "src/jev_classifier/bias/aggregate.py", "scripts/smoke_bias.py"],
+      "tests": ["tests/test_bias_packs.py", "tests/test_smoke_bias.py"],
+      "fail_closed": true,
+      "issue": 32,
+      "status": "partial",
+      "contract": {
+        "packs_shipped": ["bias_pack_v1"],
+        "invariants": [
+          "every_question_closed_with_legal_option_set",
+          "pack_id_and_version_required",
+          "unknown_pack_raises",
+          "live_smoke_skips_without_key",
+          "signals_are_measured_not_proof_of_bias",
+          "signals_never_proof_of_correctness"
+        ],
+        "design_rulings": [
+          "sycophancy_requires_two_calls_delta_computed_locally",
+          "position_bias_is_a_harness_not_a_question"
+        ],
+        "known_defects": [
+          "yes_threshold_dropped_at_packs_py_144_148",
+          "high_and_yes_biased_are_dead_flag_entries",
+          "overconfidence_is_category_error",
+          "three_bias_questions_measure_source_text_not_classifier",
+          "score_primitive_unimplemented"
+        ]
+      }
+    }
+  ],
+  "cross_cutting_invariants": [
+    "fail_closed_everywhere",
+    "confidence_is_not_correctness",
+    "github_is_authority",
+    "secrets_never_persist",
+    "storage_stays_lean",
+    "project_does_not_stop"
+  ],
+  "ci": {
+    "workflow": ".github/workflows/ci.yml",
+    "required_contexts": ["test (3.11)", "test (3.12)", "hygiene"],
+    "branch_protection": "strict",
+    "force_push_blocked": true,
+    "deletion_blocked": true,
+    "hygiene": ["secret_scan", "tracked_file_cap_2mb", "fixture_cap_2mb"]
+  },
+  "verification": {
+    "install": "python -m pip install -e \".[dev]\"",
+    "tests": "python -m pytest tests/ -q",
+    "tests_passing_at_spec_version": 56,
+    "live_smoke": "python scripts/smoke_jev.py"
+  }
+}
