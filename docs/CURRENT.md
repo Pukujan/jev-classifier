@@ -50,8 +50,9 @@ projections — never a second source of truth. If SQLite and GitHub disagree,
   agent implements. Scope now includes the owner's append-only **run-receipt
   telemetry** with opaque aliases and per-field provenance marking.
 - **#30** Versioned system spec — claimed by `claude-code-main` on
-  `feat/system-spec-30`; module-contract corrections and offline verification
-  are complete on that issue-linked branch, and a PR is being prepared.
+  `feat/system-spec-30`; PR #34 is open with module-contract corrections and
+  verification complete. Its CI passed on Python 3.11/3.12 and hygiene; review
+  and merge remain.
 
 ## Adjudicated (accepted, sequenced)
 
