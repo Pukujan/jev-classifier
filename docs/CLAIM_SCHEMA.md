@@ -62,6 +62,11 @@ If both legacy and canonical keys are present, the **canonical** value wins.
 | ``supersedes`` | ``jcc:supersedes`` |
 | ``independence_class`` | ``jcc:independenceClass`` |
 | ``evidence`` | ``jcc:evidence`` → ``jcc:SourceFragment`` |
-| ``model`` | ``jcc:modelId`` |
+| ``model`` | ``jcc:modelId`` (on ``jcc:ClassifierAgent``) |
 
 ``jcc:Claim`` / ``jcc:SourceFragment`` subclass ``prov:Entity`` for lean PROV hooks.
+The generating JEV call is modelled as ``jcc:ClassificationActivity``
+(⊑ ``prov:Activity``) associated with a ``jcc:ClassifierAgent``
+(⊑ ``prov:SoftwareAgent``), so the model id hangs on the agent rather than on
+the produced claim; the provider-surfaced id, when returned, is
+``jcc:surfacedModelId`` on the activity.
