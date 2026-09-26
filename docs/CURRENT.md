@@ -11,12 +11,11 @@ Updated: 2026-09-26 (America/New_York)
 - Issue #10 PCM claim-ledger field alignment merged via PR #13 — `main` @ `12f0e2e` (suite **46 passed**).
 - Issue #11 optional live bias-pack smoke merged via PR #16 — `main` @ `e2ae7e4` (suite **49 passed**).
 - Issue #12 multi-source classify + paper e2e merged via PR #17 — `main` @ `641e5b9`.
-- Issue #18 operational local DB + committed ops ledger (this PR) — `.ops/ops.db` + `ops/ledger/` projection + `scripts/ops_sync.py`.
+- Issue #18 operational local DB + committed ops ledger merged via PR #19 — `main` @ `7e3daa7` (suite **56 passed**). Ledger: `ops/ledger/`; sync: `python scripts/ops_sync.py`.
 
 ## In flight
 
-- Issue #15 Grok research-source bot (primary writer: Codex project agent) — not claimed by ops-ledger writer.
-- Issue #18 ops ledger — claimed by jev-classifier product agent (Grok Bot) on `feat/ops-ledger`.
+- Issue #15 Grok research-source bot (primary writer: Codex project agent).
 
 ## Next (queued)
 

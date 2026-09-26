@@ -1,0 +1,17 @@
+{
+  "kind": "pr",
+  "number": 19,
+  "title": "Operational local DB + committed ops ledger (#18)",
+  "state": "closed",
+  "author": "Pukujan",
+  "assignees": [],
+  "labels": [],
+  "url": "https://github.com/Pukujan/jev-classifier/pull/19",
+  "updated_at": "2026-09-26T18:51:38Z",
+  "synced_at": "2026-09-26T18:51:49.137611+00:00",
+  "linked_issue_numbers": [
+    18,
+    14
+  ],
+  "body_excerpt": "Closes #18\n\n## Summary\nOperational local SQLite (`.ops/ops.db`, gitignored) plus committed `ops/ledger/` projection so agents can see issue logs and discrepancies without treating SQLite as authority.\n\n## Changes\n- `src/jev_classifier/ops/` — `OpsStore` schema: `issue_snapshots`, `discrepancy_flags`, `sync_runs`\n- `ops/ledger/` — committed `ISSUE_LOG.md`, `DISCREPANCIES.md`, `README.md`, per-item…"
+}

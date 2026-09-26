@@ -8,7 +8,7 @@
   "labels": [],
   "url": "https://github.com/Pukujan/jev-classifier/issues/12",
   "updated_at": "2026-09-26T18:42:40Z",
-  "synced_at": "2026-09-26T18:51:05.897461+00:00",
+  "synced_at": "2026-09-26T18:51:49.137611+00:00",
   "linked_issue_numbers": [],
   "body_excerpt": "## Goal\nMulti-source classify fixture + paper end-to-end: ≥2 correlated synthetic source fragments → multiple claims → paper assemble with lineage across sources. Offline pytest green with mocked JEV answers (no live API required for e2e).\n\n## Scope\n- Synthetic fixtures preferred (do not block on HuggingFace). Pull a small public HF sample only if useful and license-clear.\n- At least two correlat…"
 }
