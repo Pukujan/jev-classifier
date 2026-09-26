@@ -6,6 +6,11 @@ Build a mostly-deterministic **JEV-based classifier** that turns correlated AI-r
 
 ## Scope
 
+- Grok/OpenRouter capture is source-only: preserve a bounded research transcript
+  and citations as untrusted evidence. TypeSafe JEV remains the sole model
+  allowed to produce deterministic classifier judgments; local code owns
+  validation, aggregation, and reporting.
+
 - Typed JEV decisions (`choice` / `score` / `noul`) over compact structured state derived from transcripts/papers.
 - OWL2 ontology skeleton for claims, provenance (PROV-aligned), epistemic status, and bitemporal validity.
 - Deterministic local code for control flow, aggregation, validation, thresholds, supersession links, and paper assembly scaffolding.
@@ -43,3 +48,5 @@ Build a mostly-deterministic **JEV-based classifier** that turns correlated AI-r
 Iteration details and verify steps live in `docs/ISSUE_1_DRAFT.md`.
 
 Live next-priority note: `docs/CURRENT.md`. Coordination protocol: `docs/AGENT_COORD.md`.
+
+<!-- continuity:project {"schema":"project-continuity.project.v1","protocol_version":"0.1.0-draft","id":"jev-classifier","title":"jev-classifier"} -->

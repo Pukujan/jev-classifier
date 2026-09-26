@@ -16,6 +16,8 @@ Updated: 2026-09-26 (America/New_York)
 ## In flight
 
 - Issue #15 Grok research-source bot (primary writer: Codex project agent).
+  The source capture is an untrusted, citation-preserving artifact; JEV remains
+  the only deterministic classifier model.
 
 ## Next (queued)
 
@@ -25,3 +27,5 @@ Updated: 2026-09-26 (America/New_York)
 ## Authority reminder
 
 GitHub issues/PRs are authority. Local `.coord/` and `.ops/` SQLite DBs are execution aids only (see `docs/AGENT_COORD.md`, `docs/OPS_LEDGER.md`). Committed `ops/ledger/` is a readable projection. Collision/proposal winners are decided by the authoritative agent — product agents propose only.
+
+<!-- continuity:current {"schema":"project-continuity.current.v1","protocol_version":"0.1.0-draft","active_task":"JEV-0001","active_task_file":"tasks/TASK-JEV-0001-grok-source-bot.md"} -->
