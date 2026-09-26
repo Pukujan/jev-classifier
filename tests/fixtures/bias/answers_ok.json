@@ -1,0 +1,43 @@
+{
+  "source_authority_inflation": {
+    "type": "choice",
+    "choice": "inflated",
+    "confidence": 0.81,
+    "probabilities": {
+      "absent": 0.05,
+      "mild": 0.1,
+      "inflated": 0.8,
+      "unknown": 0.05
+    }
+  },
+  "recency_bias": {
+    "type": "choice",
+    "choice": "present",
+    "confidence": 0.7,
+    "probabilities": {
+      "absent": 0.1,
+      "mild": 0.15,
+      "present": 0.7,
+      "unknown": 0.05
+    }
+  },
+  "confirmation_cherry_pick": {
+    "type": "choice",
+    "choice": "mild",
+    "confidence": 0.55,
+    "probabilities": {
+      "absent": 0.25,
+      "mild": 0.5,
+      "present": 0.2,
+      "unknown": 0.05
+    }
+  },
+  "anthropomorphism": {
+    "type": "noul",
+    "p_yes": 0.82
+  },
+  "overconfidence": {
+    "type": "noul",
+    "noul": 0.61
+  }
+}
