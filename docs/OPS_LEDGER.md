@@ -9,6 +9,7 @@ ownership, and delivery. Two local/projection layers help agents stay oriented:
 | Ops SQLite | `.ops/ops.db` (gitignored) | No | Live snapshots, sync runs, discrepancy flags |
 | Committed ledger | `ops/ledger/` | No (projection) | Readable board + discrepancy report for agents on GitHub |
 | Coord SQLite | `.coord/agents.db` (gitignored) | No | Ownership claims / checkpoints (see `docs/AGENT_COORD.md`) |
+| Coordination board | `ops/ledger/COORD.md` (#22) | No (projection) | Live claims / proposals / verdicts / run receipts parsed from GitHub comments |
 
 ## Hard rules
 
@@ -39,6 +40,9 @@ Default path: `.ops/ops.db`.
 | `current_md_vs_open_issues` | `docs/CURRENT.md` In flight mentions an issue that is not open |
 | `ownership_collision_stub` | Fixture/coord shows >1 active claim on the same resource |
 | `closed_issue_still_claimed` | Closed GitHub issue still has an active coord ownership claim |
+| `coord_claim_collision` | >1 live `coord:claim` (or prose `## Claim`) from different agents on one issue (#22 grammar; see `docs/AGENT_PROPOSALS.md`) |
+| `coord_record_malformed` | A `coord:*` comment marker is missing required fields (fail-closed; fix the comment) |
+| `closed_issue_coord_claim` | A live GitHub-comment claim on a closed issue (auto-settled by `settle_claims`, flagged for audit) |
 
 These are **hints**. Resolving them is a human/authoritative-agent matter.
 
@@ -61,11 +65,16 @@ The sync:
 2. Upserts into OpsStore and records a `sync_runs` row.
 3. Runs discrepancy detectors (optionally reading `.coord/agents.db`).
 4. Rewrites `ops/ledger/ISSUE_LOG.md`, `DISCREPANCIES.md`, and `issues/*.json`.
+5. Rewrites `ops/ledger/COORD.md` — only in live (`gh`) mode; fixture runs
+   never touch the committed board (`write_coord` defaults to live-only).
+   Claim rows whose branch merged or issue closed are settled out of Live
+   claims automatically (`released_by=merged_pr|closed_issue`).
 
 ## How other agents should read the ledger
 
 1. Open `ops/ledger/ISSUE_LOG.md` for a quick open-issue / open-PR board.
-2. Open `ops/ledger/DISCREPANCIES.md` for collision / stale-claim hints.
+2. Open `ops/ledger/DISCREPANCIES.md` for collision / stale-claim hints, and
+   `ops/ledger/COORD.md` for live claims, proposal decisions, and run receipts.
 3. Drill into `ops/ledger/issues/*.json` when needed.
 4. Confirm against live GitHub before claiming work or merging.
 5. Comment on the relevant GitHub issue when acting — do not treat the ledger

@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "body": "<!-- coord:claim issue=22 agent=coordination-flagger branch=feat/coordination-layer-22 sha=67eaa8b state=active -->\n## Claim",
+    "created_at": "2026-09-26T19:09:12Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/22"
+  },
+  {
+    "id": 2,
+    "body": "## Claim\n- Leaf: #15\n- Primary writer: Codex project agent\n- Branch: `feat/grok-source-bot`",
+    "created_at": "2026-09-26T18:57:46Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+  },
+  {
+    "id": 3,
+    "body": "<!-- coord:proposal id=P-15-1 author=codex@cloud issue=15 status=open scope=source-capture -->\n## Proposal P-15-1\nNone of it exists unless named as existing.",
+    "created_at": "2026-09-26T18:43:14Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+  },
+  {
+    "id": 4,
+    "body": "<!-- coord:verdict on=P-15-1 by=claude-code-main decision=accepted -->",
+    "created_at": "2026-09-26T18:54:40Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/15"
+  },
+  {
+    "id": 5,
+    "body": "<!-- coord:receipt run=r-22-1 task=JEV-0002 pr=29 commit=67eaa8b outcome=merged started=2026-09-26T19:10Z finished=2026-09-26T19:55Z agent_alias=A-7f3c model_alias=M-91ab model_version_alias=V-04ef temperature=unavailable tools=\"gh,pytest x4\" provenance=outcome:runtime_observed;commit:runtime_observed;agent_alias:owner_recorded;model_alias:owner_recorded;temperature:unavailable;tools:agent_declared -->\n**Evidence:** PR #29 checks; run log hash `sha256:1a2b\u2026` (artifact, not inline).",
+    "created_at": "2026-09-26T19:56:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/Pukujan/jev-classifier/issues/22"
+  }
+]
