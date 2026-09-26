@@ -30,4 +30,13 @@ git diff --check
 
 The first command validates the adapter contract and manifest hashes. The target script checks the nine required README headings and local Markdown links. `git diff --check` checks patch whitespace. These commands do not check remote-link availability, factual truth, narrative comprehension, narrow-screen rendering, or research quality. Complete `docs/README_REVIEW.md` separately; it remains unchecked until a human reviewer records a result.
 
-The helper is ignored build material. If `.cache/cgm-pinned` is absent, clone the helper and check out the exact commit above before running the first command; do not validate against a moving branch.
+The helper is ignored build material. From the repository root in PowerShell, create the cache and check out the exact pinned commit before validating:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .cache | Out-Null
+git clone https://github.com/Pukujan/content-generation-modules.git .cache/cgm-pinned
+git -C .cache/cgm-pinned checkout f85e88bc00362c53061d95ac7811bd9c6ada8e32
+git -C .cache/cgm-pinned rev-parse HEAD
+```
+
+The final command must print `f85e88bc00362c53061d95ac7811bd9c6ada8e32`. Do not validate against a moving branch.

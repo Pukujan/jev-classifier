@@ -8,7 +8,7 @@
 - `readme-contract.json` copies the required story order for the target.
 - `docs/README_GENERATION.md` records the exact pinned CGM authoring modules, image workflow provenance limits, and reproducible validation entry points.
 
-The delivered image files predate their saved prompt notes. Those notes are reconstructed prompt intent, not verbatim original prompts. The ignored pinned helper can be rebuilt at the commit recorded in `system-version.json`.
+The delivered image files predate their saved prompt notes. Those notes are reconstructed prompt intent, not verbatim original prompts. The ignored pinned helper bootstrap and its commit check are in [the generation record](../docs/README_GENERATION.md).
 
 Run the pinned helper validator from the repository root:
 
