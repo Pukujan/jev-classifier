@@ -1,0 +1,32 @@
+{
+  "pack_id": "bias_pack_v1",
+  "pack_version": "1.0.0",
+  "legal_options": {
+    "source_authority_inflation": [
+      "absent",
+      "mild",
+      "inflated",
+      "unknown"
+    ],
+    "recency_bias": [
+      "absent",
+      "mild",
+      "present",
+      "unknown"
+    ],
+    "confirmation_cherry_pick": [
+      "absent",
+      "mild",
+      "present",
+      "unknown"
+    ],
+    "anthropomorphism": [
+      "yes",
+      "no"
+    ],
+    "overconfidence": [
+      "yes",
+      "no"
+    ]
+  }
+}

@@ -118,3 +118,84 @@ def extract_choice_from_response(
         "model": model,
         "response_id": body.get("id") if isinstance(body.get("id"), str) else None,
     }
+
+
+def normalize_noul_answer(
+    answer: Any,
+    *,
+    question_id: str = "noul",
+    yes_threshold: float = 0.5,
+) -> dict[str, Any]:
+    """Validate a noul answer; fail closed on malformed values.
+
+    OpenRouter noul returns P(yes) as the primary value (no separate confidence).
+    We preserve p_yes and derive a closed yes/no label locally via threshold.
+    """
+    body = _require_mapping(answer, f"answers.{question_id}")
+    ans_type = body.get("type")
+    if ans_type is not None and ans_type != "noul":
+        raise NormalizeError(
+            f"answers.{question_id}: expected type=noul, got {ans_type!r}",
+            kind="parse_error",
+        )
+
+    # Accept common shapes: {"noul": 0.7} or {"value": 0.7} or {"p_yes": 0.7}
+    raw = None
+    for key in ("noul", "p_yes", "value", "probability"):
+        if key in body:
+            raw = body[key]
+            break
+    if raw is None:
+        raise NormalizeError(
+            f"answers.{question_id}: missing noul/p_yes value",
+            kind="parse_error",
+        )
+    if not isinstance(raw, (int, float)) or isinstance(raw, bool):
+        raise NormalizeError(
+            f"answers.{question_id}: noul value must be numeric P(yes)",
+            kind="parse_error",
+        )
+    p_yes = float(raw)
+    if p_yes < 0.0 or p_yes > 1.0:
+        raise NormalizeError(
+            f"answers.{question_id}: noul P(yes)={p_yes} out of [0,1]",
+            kind="parse_error",
+        )
+    label = "yes" if p_yes >= yes_threshold else "no"
+    return {
+        "type": "noul",
+        "p_yes": p_yes,
+        "label": label,
+        "yes_threshold": float(yes_threshold),
+    }
+
+
+def extract_noul_from_response(
+    response: Any,
+    *,
+    question_id: str,
+    yes_threshold: float = 0.5,
+) -> dict[str, Any]:
+    """Pull and normalize one noul answer from a Decisions response body."""
+    body = _require_mapping(response, "response")
+    answers = body.get("answers")
+    answers_map = _require_mapping(answers, "answers")
+    if question_id not in answers_map:
+        raise NormalizeError(
+            f"answers missing question_id {question_id!r}",
+            kind="parse_error",
+        )
+    normalized = normalize_noul_answer(
+        answers_map[question_id],
+        question_id=question_id,
+        yes_threshold=yes_threshold,
+    )
+    model = body.get("model")
+    if model is not None and not isinstance(model, str):
+        raise NormalizeError("response.model must be a string when present", kind="parse_error")
+    return {
+        **normalized,
+        "model": model,
+        "response_id": body.get("id") if isinstance(body.get("id"), str) else None,
+    }
+

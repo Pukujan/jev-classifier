@@ -1,0 +1,24 @@
+{
+  "claim": {
+    "id": "C1",
+    "label": "empirical_finding",
+    "epistemic_status": "Inferred",
+    "text": "The system felt confident and decided to prefer the Nature paper because it is prestigious and very recent."
+  },
+  "sources": [
+    {
+      "id": "src_old_strong",
+      "year": 2019,
+      "venue": "workshop",
+      "strength": "strong",
+      "stance": "disconfirming"
+    },
+    {
+      "id": "src_new_weak",
+      "year": 2026,
+      "venue": "Nature",
+      "strength": "weak",
+      "stance": "confirming"
+    }
+  ]
+}
