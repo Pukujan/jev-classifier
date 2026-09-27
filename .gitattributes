@@ -27,3 +27,8 @@ docs/HOLDOUT_PROTOCOL.md text eol=lf
 # Docs-manifest fixtures: reviewed_sha256 in manifest_ok.json is of LF bytes,
 # so the same cross-platform stability rule applies (Issue #63).
 tests/fixtures/docs/** text eol=lf
+
+# Reference-paper corpus manifest: the committed blob is canonical LF JSON and
+# tests/test_reference_papers_manifest.py hashes those LF bytes, so an unpinned
+# Windows checkout rewrites it to CRLF and fails two tests that pass in CI (#92).
+datasets/reference_papers.json text eol=lf
