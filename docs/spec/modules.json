@@ -1,15 +1,23 @@
 {
-  "spec_version": "0.2.0",
+  "spec_version": "0.3.0",
   "status": "draft",
-  "updated": "2026-09-26",
+  "updated": "2026-09-27",
   "parent_issue": 21,
   "leaf_issue": 30,
   "jev_only_rule": {
     "endpoint": "https://openrouter.ai/api/alpha/decisions",
     "pinned_model": "typesafe/jev-1.13",
     "canary_model": "~typesafe/jev-latest",
-    "primitives_declared": ["choice", "score", "noul"],
-    "primitives_implemented": ["choice", "score", "noul"],
+    "primitives_declared": [
+      "choice",
+      "score",
+      "noul"
+    ],
+    "primitives_implemented": [
+      "choice",
+      "score",
+      "noul"
+    ],
     "note": "All three declared primitives are implemented in normalize.py. score landed in #32 (fail-closed rubric validation; native probabilities/confidence preserved)."
   },
   "modules": [
@@ -19,14 +27,24 @@
       "title": "Source capture",
       "version": "0.1.0",
       "role": "non-jev",
-      "code": ["src/jev_classifier/sources/grok.py", "scripts/grok_research.py"],
-      "tests": ["tests/test_grok_research.py"],
+      "code": [
+        "src/jev_classifier/sources/grok.py",
+        "scripts/grok_research.py"
+      ],
+      "tests": [
+        "tests/test_grok_research.py"
+      ],
       "fail_closed": true,
       "issue": 15,
       "status": "merged",
       "contract": {
-        "input": ["bounded_query", "client_configuration_at_construction"],
-        "output": ["SourceArtifact"],
+        "input": [
+          "bounded_query",
+          "client_configuration_at_construction"
+        ],
+        "output": [
+          "SourceArtifact"
+        ],
         "invariants": [
           "content_hash_stable_across_canonical_serialization",
           "retrieval_time_is_separate_metadata_not_in_hash",
@@ -41,7 +59,9 @@
       "title": "Answer normalization",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/normalize.py"],
+      "code": [
+        "src/jev_classifier/normalize.py"
+      ],
       "tests": [
         "tests/test_normalize.py",
         "tests/test_normalize_noul.py",
@@ -51,8 +71,13 @@
       "issue": 32,
       "status": "merged",
       "contract": {
-        "input": ["decisions_answer_object", "response_body_with_question_id_and_options_or_threshold"],
-        "output": ["validated_typed_answer"],
+        "input": [
+          "decisions_answer_object",
+          "response_body_with_question_id_and_options_or_threshold"
+        ],
+        "output": [
+          "validated_typed_answer"
+        ],
         "invariants": [
           "answer_type_matches_primitive_when_present",
           "choice_in_legal_options",
@@ -72,15 +97,24 @@
       "title": "JEV semantic decisions",
       "version": "0.1.0",
       "role": "jev",
-      "code": ["src/jev_classifier/decisions.py"],
-      "tests": ["tests/test_decisions_client.py"],
+      "code": [
+        "src/jev_classifier/decisions.py"
+      ],
+      "tests": [
+        "tests/test_decisions_client.py"
+      ],
       "smoke": "scripts/smoke_jev.py",
       "fail_closed": true,
       "issue": null,
       "status": "merged",
       "contract": {
-        "input": ["state", "questions"],
-        "output": ["raw_parsed_json_body"],
+        "input": [
+          "state",
+          "questions"
+        ],
+        "output": [
+          "raw_parsed_json_body"
+        ],
         "invariants": [
           "defaults_to_openrouter_alpha_decisions_endpoint",
           "recognized_chat_completions_and_opencode_urls_are_skipped",
@@ -104,16 +138,42 @@
       "title": "Claim record build + validate",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/classify.py"],
-      "tests": ["tests/test_ontology_and_classify.py", "tests/test_claim_schema.py"],
+      "code": [
+        "src/jev_classifier/classify.py"
+      ],
+      "tests": [
+        "tests/test_ontology_and_classify.py",
+        "tests/test_claim_schema.py"
+      ],
       "fail_closed": true,
       "issue": null,
       "status": "merged",
       "contract": {
-        "input": ["fragment_and_client_for_classify_fragment", "raw_claim_dict_for_validation", "fields_for_build_claim_record"],
-        "output": ["ClaimRecord"],
-        "required_keys": ["label", "epistemic_status", "recorded_at", "evidence", "model"],
-        "optional_keys": ["valid_from", "valid_to", "supersedes", "probabilities", "confidence", "response_id", "independence_class", "id"],
+        "input": [
+          "fragment_and_client_for_classify_fragment",
+          "raw_claim_dict_for_validation",
+          "fields_for_build_claim_record"
+        ],
+        "output": [
+          "ClaimRecord"
+        ],
+        "required_keys": [
+          "label",
+          "epistemic_status",
+          "recorded_at",
+          "evidence",
+          "model"
+        ],
+        "optional_keys": [
+          "valid_from",
+          "valid_to",
+          "supersedes",
+          "probabilities",
+          "confidence",
+          "response_id",
+          "independence_class",
+          "id"
+        ],
         "invariants": [
           "label_in_legal_labels",
           "epistemic_status_nonempty_string",
@@ -135,14 +195,25 @@
       "title": "Provenance and bitemporal fields",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/classify.py", "ontology/jev_classifier_claims.ttl", "src/jev_classifier/paper/assemble.py"],
-      "tests": ["tests/test_claim_schema.py", "tests/test_multisource_e2e.py"],
+      "code": [
+        "src/jev_classifier/classify.py",
+        "ontology/jev_classifier_claims.ttl",
+        "src/jev_classifier/paper/assemble.py"
+      ],
+      "tests": [
+        "tests/test_claim_schema.py",
+        "tests/test_multisource_e2e.py"
+      ],
       "fail_closed": true,
       "issue": 31,
       "status": "partial",
       "contract": {
-        "input": ["claim_record_dict"],
-        "output": ["claim_record_with_unvalidated_time_and_evidence_references"],
+        "input": [
+          "claim_record_dict"
+        ],
+        "output": [
+          "claim_record_with_unvalidated_time_and_evidence_references"
+        ],
         "invariants": [
           "valid_time_distinct_from_transaction_time",
           "valid_from_valid_to_fields_designated_as_valid_time",
@@ -167,14 +238,22 @@
       "title": "Ontology and SHACL checks",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["ontology/jev_classifier_claims.ttl"],
-      "tests": ["tests/test_ontology_and_classify.py"],
+      "code": [
+        "ontology/jev_classifier_claims.ttl"
+      ],
+      "tests": [
+        "tests/test_ontology_and_classify.py"
+      ],
       "fail_closed": true,
       "issue": 31,
       "status": "partial",
       "contract": {
-        "input": ["ontology_ttl"],
-        "output": ["parsed_graph"],
+        "input": [
+          "ontology_ttl"
+        ],
+        "output": [
+          "parsed_graph"
+        ],
         "invariants": [
           "parses_offline_via_rdflib_no_network_fetch",
           "uses_seeAlso_never_owl_imports_remote",
@@ -182,9 +261,19 @@
           "epistemic_status_closed_vocabulary_not_truth_bit"
         ],
         "current_state": {
-          "entity_classes": ["jcc:Claim", "jcc:SourceFragment"],
-          "activity_classes": ["jcc:ClassificationActivity", "jcc:ClassifierAgent"],
-          "status_individuals": ["jcc:Observed", "jcc:Inferred", "jcc:Hypothesized"]
+          "entity_classes": [
+            "jcc:Claim",
+            "jcc:SourceFragment"
+          ],
+          "activity_classes": [
+            "jcc:ClassificationActivity",
+            "jcc:ClassifierAgent"
+          ],
+          "status_individuals": [
+            "jcc:Observed",
+            "jcc:Inferred",
+            "jcc:Hypothesized"
+          ]
         },
         "known_gap": "SHACL not implemented; no pyshacl dependency; adding it needs a leaf issue"
       }
@@ -193,17 +282,33 @@
       "id": "M7",
       "name": "deterministic_paper_assembly",
       "title": "Deterministic paper assembly",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/paper/assemble.py"],
-      "tests": ["tests/test_paper_assemble.py", "tests/test_multisource_e2e.py"],
+      "code": [
+        "src/jev_classifier/paper/assemble.py"
+      ],
+      "tests": [
+        "tests/test_paper_assemble.py",
+        "tests/test_multisource_e2e.py"
+      ],
       "fail_closed": true,
       "issue": null,
       "status": "merged",
       "contract": {
-        "input": ["sequence_of_claim_mappings_with_required_keys"],
-        "output": ["markdown_paper_draft"],
-        "required_sections": ["Title", "Abstract", "Claims", "Provenance", "Lineage", "Citations"],
+        "input": [
+          "sequence_of_claim_mappings_with_required_keys"
+        ],
+        "output": [
+          "markdown_paper_draft"
+        ],
+        "required_sections": [
+          "Title",
+          "Abstract",
+          "Claims",
+          "Provenance",
+          "Lineage",
+          "Citations"
+        ],
         "invariants": [
           "no_llm_in_assembler",
           "every_claim_bullet_cites_evidence_id",
@@ -214,8 +319,53 @@
           "missing_evidence_id_fails_closed",
           "missing_required_section_detected"
         ],
-        "quality_target": "medium_readable_human_evidence_backed_not_peer_reviewed_never_established_fact"
-      }
+        "quality_target": "medium_readable_human_evidence_backed_not_peer_reviewed_never_established_fact",
+        "optional_sections": [
+          "Synthesis"
+        ],
+        "api": "assemble_paper(..., topics=None), validate_paper_markdown(...), REQUIRED_SECTIONS, AssembleError"
+      },
+      "notes": "topics= adds an optional Synthesis section between Abstract and Claims; required_sections stays the fixed six (test-pinned both ways)."
+    },
+    {
+      "id": "M8",
+      "name": "claim_consolidation",
+      "title": "Cross-source claim consolidation",
+      "version": "0.1.0",
+      "role": "deterministic",
+      "code": [
+        "src/jev_classifier/consolidate.py"
+      ],
+      "tests": [
+        "tests/test_consolidate.py"
+      ],
+      "fail_closed": true,
+      "issue": 69,
+      "status": "merged",
+      "contract": {
+        "input": [
+          "validated claim record mappings",
+          "explicit evaluation instant"
+        ],
+        "output": [
+          "topic records (about/state/labels/distinct_sources/current/retired)"
+        ],
+        "invariants": [
+          "correlation_is_by_explicit_about_key_never_by_wording",
+          "agreement_requires_same_label_from_distinct_sources",
+          "conflict_preserves_every_live_label_and_current_claim_id",
+          "current_holds_resolution_is_bitemporal_valid_window_plus_supersedes",
+          "evaluation_instant_is_required_no_hidden_clock",
+          "no_model_call_no_text_similarity_no_network"
+        ],
+        "known_gap": "claims must already carry an about subject; no module assigns it yet, so ingestion-side subjecting is unimplemented"
+      },
+      "states": [
+        "agreement",
+        "conflict",
+        "single-source",
+        "unknown"
+      ]
     },
     {
       "id": "C",
@@ -223,14 +373,23 @@
       "title": "Coordination",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/coord/store.py"],
-      "tests": ["tests/test_coord.py"],
+      "code": [
+        "src/jev_classifier/coord/store.py"
+      ],
+      "tests": [
+        "tests/test_coord.py"
+      ],
       "fail_closed": true,
       "issue": 22,
       "status": "in_flight",
       "authority": false,
       "contract": {
-        "tables": ["checkpoints", "ownership", "send_log", "collision_flags"],
+        "tables": [
+          "checkpoints",
+          "ownership",
+          "send_log",
+          "collision_flags"
+        ],
         "invariants": [
           "checkpoint_idempotent_by_key",
           "same_agent_reclaim_is_not_collision",
@@ -247,8 +406,13 @@
       "title": "Ops ledger",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/ops/store.py", "scripts/ops_sync.py"],
-      "tests": ["tests/test_ops.py"],
+      "code": [
+        "src/jev_classifier/ops/store.py",
+        "scripts/ops_sync.py"
+      ],
+      "tests": [
+        "tests/test_ops.py"
+      ],
       "fail_closed": true,
       "issue": 18,
       "status": "merged",
@@ -256,7 +420,12 @@
       "contract": {
         "schema_version": 1,
         "default_db_path": ".ops/ops.db",
-        "committed_projection": ["ops/ledger/ISSUE_LOG.md", "ops/ledger/DISCREPANCIES.md", "ops/ledger/README.md", "ops/ledger/issues/"],
+        "committed_projection": [
+          "ops/ledger/ISSUE_LOG.md",
+          "ops/ledger/DISCREPANCIES.md",
+          "ops/ledger/README.md",
+          "ops/ledger/issues/"
+        ],
         "invariants": [
           "sync_idempotent_for_fixture",
           "discrepancy_detectors_deterministic_fail_closed",
@@ -288,7 +457,9 @@
       "issue": 32,
       "status": "merged",
       "contract": {
-        "packs_shipped": ["bias_pack_v1"],
+        "packs_shipped": [
+          "bias_pack_v1"
+        ],
         "invariants": [
           "every_question_closed_with_legal_option_set",
           "pack_id_and_version_required",
@@ -320,14 +491,24 @@
         "schemas/context_stimulus_manifest.schema.json",
         "src/jev_classifier/reference/validate.py"
       ],
-      "tests": ["tests/test_reference_schema.py"],
+      "tests": [
+        "tests/test_reference_schema.py"
+      ],
       "fail_closed": true,
       "issue": 37,
       "status": "merged",
       "contract": {
-        "input": ["reference_claim_graph_document", "privacy_safe_context_stimulus_manifest"],
-        "output": ["validated_records_or_ReferenceSchemaError"],
-        "formats": ["json_schema_draft_2020_12", "python_cross_record_validation"],
+        "input": [
+          "reference_claim_graph_document",
+          "privacy_safe_context_stimulus_manifest"
+        ],
+        "output": [
+          "validated_records_or_ReferenceSchemaError"
+        ],
+        "formats": [
+          "json_schema_draft_2020_12",
+          "python_cross_record_validation"
+        ],
         "invariants": [
           "claim_resolves_to_immutable_paper_and_source_version",
           "evidence_span_nonempty_with_byte_end_exceeding_start",
@@ -347,6 +528,46 @@
         ],
         "known_gap": "SHACL not implemented; the cross-record invariants SHACL would express are enforced in Python instead. Adding pyshacl needs its own leaf issue (see M6)."
       }
+    },
+    {
+      "id": "E",
+      "name": "claim_level_evaluation",
+      "title": "Claim-level evaluation",
+      "version": "0.1.0",
+      "role": "deterministic",
+      "code": ["src/jev_classifier/eval/metric.py", "scripts/eval_claims.py"],
+      "tests": ["tests/test_eval_metric.py"],
+      "fail_closed": true,
+      "issue": 66,
+      "status": "merged",
+      "contract": {
+        "input": ["validated_reference_claim_graph_from_module_R", "sequence_of_predicted_claims"],
+        "output": ["score_report_with_primary_prf_per_paper_prf_citation_coverage_and_ontology_status"],
+        "metric_version": "claim_metric_v1",
+        "match_rule": "span_containment_v1",
+        "invariants": [
+          "match_requires_paper_source_and_epistemic_status_agreement",
+          "predicted_span_must_be_contained_in_reference_span",
+          "matching_is_one_to_one_smallest_span_wins_ties_by_claim_id",
+          "spanless_or_inverted_span_is_a_miss_never_an_exclusion",
+          "graph_validated_through_module_R_and_malformed_graph_rejected",
+          "identical_inputs_produce_identical_output",
+          "no_network_call_and_no_label_production",
+          "citation_coverage_reported_separately_never_folded_into_primary_f1"
+        ],
+        "design_rulings": [
+          "metric_is_pre_registered_before_any_reference_paper_exists",
+          "containment_not_overlap_so_one_prediction_cannot_claim_several_references",
+          "lexical_similarity_and_llm_judge_are_prohibited_substitutes",
+          "epistemic_status_compares_case_insensitively_at_the_schema_pipeline_boundary"
+        ],
+        "known_gaps": [
+          "classify.py_emits_fragment_id_and_path_not_byte_spans_so_its_predictions_score_as_misses_until_a_span_emitting_leaf_lands",
+          "measured_a_whole_fragment_span_is_wider_than_a_sentence_level_reference_span_so_containment_still_fails_emitting_a_span_is_not_enough_it_must_be_as_tight_as_the_human_span",
+          "schema_uses_lowercase_epistemic_values_while_classify_py_emits_capitalized_ones",
+          "shacl_validity_reported_as_not_implemented_not_measured"
+        ]
+      }
     }
   ],
   "cross_cutting_invariants": [
@@ -359,13 +580,21 @@
   ],
   "ci": {
     "workflow": ".github/workflows/ci.yml",
-    "required_contexts": ["test (3.11)", "test (3.12)", "hygiene"],
+    "required_contexts": [
+      "test (3.11)",
+      "test (3.12)",
+      "hygiene"
+    ],
     "branch_protection": "strict",
     "branch_protection_observed_at": "2026-09-26",
     "branch_protection_source": "remote GitHub repository settings snapshot; not checked by local tests",
     "force_push_blocked": true,
     "deletion_blocked": true,
-    "hygiene": ["secret_scan", "tracked_file_cap_2mb", "fixture_cap_2mb"]
+    "hygiene": [
+      "secret_scan",
+      "tracked_file_cap_2mb",
+      "fixture_cap_2mb"
+    ]
   },
   "verification": {
     "install": "python -m pip install -e \".[dev]\"",

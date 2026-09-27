@@ -1,9 +1,9 @@
 # SYSTEM SPEC — jev-classifier module contracts
 
 ```yaml
-spec_version: 0.2.0
+spec_version: 0.3.0
 status: draft
-updated: 2026-09-26
+updated: 2026-09-27
 owner: authoritative agent (claude-code-main)
 parent_issue: 21
 leaf_issue: 30
@@ -44,7 +44,9 @@ assembly. JEV does not generate narrative, summaries, or citations.
                                                                         │
                           [7] Paper assembly ◀── [6] Ontology/SHACL ◀── [5] Provenance
                              (deterministic)        (deterministic)       /bitemporal
-                                                                          (deterministic)
+                                ▲                                          (deterministic)
+                          [8] Claim consolidation (deterministic): correlate claims by
+                             subject, resolve which one currently holds, keep conflicts
 
 Cross-cutting: [C] Coordination (SQLite aid) · [O] Ops ledger (projection) · [B] Bias signals
 ```
@@ -219,22 +221,44 @@ silently.
 
 | | |
 |---|---|
-| Version | `0.1.0` |
+| Version | `0.2.0` |
 | Code | `src/jev_classifier/paper/assemble.py` |
 | Role | **deterministic** (templates only; **no LLM**) |
-| Input | sequence of claim-like mappings; callers are responsible for full ClaimRecord validation |
+| Input | sequence of claim-like mappings; optional `topics` (M8 topic records); callers are responsible for full ClaimRecord validation |
 | Output | markdown paper draft |
 | Required sections | `Title`, `Abstract`, `Claims`, `Provenance`, `Lineage`, `Citations` |
-| API | `assemble_paper(...)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
-| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. |
-| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown` |
-| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow) |
+| Optional sections | `Synthesis` — rendered between `Abstract` and `Claims` **only** when `topics=` is passed |
+| API | `assemble_paper(..., topics=None)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
+| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. Topic records are shape-checked (keys + closed state vocabulary) and never recomputed here. |
+| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown`; a malformed topic record raises rather than being dropped |
+| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow); `tests/test_consolidate.py` (Synthesis section, ordering, conflict survival, malformed-topic rejection) |
 
 The output is a **draft skeleton**, not a research paper or evidence synthesis.
 It renders supplied records; it does not independently establish that citations
 support claims or preserve omitted disagreements and limitations. Its
 `Citations` section is an evidence-id-to-claim index, not a bibliography or a
 set of source URLs.
+
+### M8 — Cross-source claim consolidation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/consolidate.py` (issue #69, in flight) |
+| Role | **deterministic** — no model call, no text similarity, no network |
+| Input | validated claim record mappings + an explicit evaluation instant (`at`) |
+| Output | topic records: `about`, `state`, `labels`, `distinct_sources`, `evaluated_at`, `current`, `retired`, `claim_ids` |
+| Topic states | `agreement` (same label, ≥2 distinct sources) · `conflict` (differing live labels) · `single-source` · `unknown` (no currently-valid claim) |
+| API | `consolidate_claims(claims, *, at)`, `topic_digest(topic)`, `TOPIC_STATES`, `ConsolidationError` |
+| Invariants | correlation is by the explicit `about` key — never by wording; agreement requires *distinct* evidence sources (same source twice is repetition, not corroboration); conflict preserves every live label and claim id and never resolves 2-vs-1 by majority; current-holds resolution is bitemporal (`valid_from`/`valid_to` window plus `supersedes` chains); the evaluation instant is a required argument, because a hidden clock would make identical inputs drift day to day |
+| Fail-closed | yes — missing `about`, duplicate ids, dangling or cyclic `supersedes`, inverted or naive/unparseable timestamps, mixed naive-and-aware timezones, and an all-anonymous batch each raise `ConsolidationError` |
+| Tests | `tests/test_consolidate.py` (agreement/conflict/bitemporal/fail-closed paths, digest wording, Synthesis rendering into M7) |
+
+**Known gap:** no module assigns `about` to a claim yet, so subjecting on the
+ingestion side is unimplemented. Until something does, consolidation runs on
+records whose callers supplied a subject. It does not replace M5 (which records
+time fields without ordering them) or M7 (which renders topics without
+recomputing them).
 
 ### C — Coordination
 
@@ -328,6 +352,51 @@ content into a case; private material is referenced only by an opaque
 
 ---
 
+### E — Claim-level evaluation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/eval/metric.py`, `scripts/eval_claims.py` |
+| Role | **deterministic** |
+| Input | a validated reference claim graph (module `R`) plus a sequence of predicted claims |
+| Output | a score report: primary claim-level micro P/R/F1, per-paper P/R/F1, citation coverage, ontology status |
+| Contract | metric version `claim_metric_v1`; matching rule `span_containment_v1` |
+| Invariants | a predicted claim matches a reference claim only when paper id, source id, and epistemic status agree *and* the predicted span is contained in the reference span; matching is one-to-one with the smallest span winning and ties broken by claim id; a prediction with no usable span, an inverted span, or a non-integer offset is a **miss**, never an exclusion; the graph is validated through module `R` and a malformed graph is rejected rather than partially scored; identical inputs produce identical output |
+| Fail-closed | yes — an unscoreable prediction counts against the metric; a malformed graph raises `ReferenceSchemaError` |
+| Tests | `tests/test_eval_metric.py` |
+
+**The metric is pre-registered (issue #66).** The matching rule is the
+deliverable, and it is frozen before any reference paper exists so the 0.80
+target is measured by a definition nobody could have tuned. A result that does
+not name `claim_metric_v1` is not a valid pre-registered result.
+
+**Containment, not overlap.** Overlap would let one sprawling prediction take
+credit for several reference claims at once, inflating recall without fidelity.
+A span wider than the reference span is therefore a miss, not a partial match.
+
+**Two honest gaps are reported as numbers, not hidden.** First, `classify.py`
+emits `evidence: {fragment_id, path}` and does not produce byte spans, so every
+such prediction is a miss under this rule; the report exposes the usable-span
+count so the gap is visible rather than papered over with a source-level
+fallback. Worse, and measured rather than assumed: even a prediction that covers
+a whole fragment still fails containment, because the fragment span is *wider*
+than a sentence-level reference span. Emitting a span is not enough — the span
+must be at least as tight as the human's. Until the pipeline localizes evidence,
+the primary metric is 0 by construction, and `predictions_with_usable_span`
+distinguishes a run that failed for lack of a span from one that failed for lack
+of precision. Second, module `R` uses lowercase epistemic values while
+`classify.py` emits capitalized ones, so the status comparison normalizes case
+and the report records that it did. Reconciling either vocabulary is a separate
+leaf.
+
+**No substitutes.** Lexical similarity as a proxy for claim fidelity and any
+LLM-as-judge are prohibited by the parent program ruling (5849173786) and are
+not implemented; a test asserts neither is imported. The harness makes no
+network call and produces no label — it scores already-structured claims.
+
+---
+
 ## 3. Role table (JEV vs deterministic)
 
 | Module | JEV permitted | Deterministic Python |
@@ -339,10 +408,12 @@ content into a case; private material is referenced only by an opaque
 | M5 Provenance/bitemporal fields | ✗ | ✓ field storage; referential and temporal validation are gaps |
 | M6 Ontology/SHACL | ✗ | ✓ Turtle parse only; SHACL is not implemented |
 | M7 Paper assembly | ✗ | ✓ template rendering from supplied records |
+| M8 Claim consolidation | ✗ | ✓ correlation, bitemporal resolution, conflict preservation |
 | C Coordination | ✗ | ✓ claims, checkpoints, collisions |
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
 | R Reference claim schema | ✗ | ✓ JSON Schema + cross-record validation |
+| E Claim-level evaluation | ✗ | ✓ matching, P/R/F1, coverage; no model call |
 
 No module assigns a non-JEV model a deterministic-output role. If a future leaf
 proposes one, it is rejected by this table — escalate to the authoritative agent.
