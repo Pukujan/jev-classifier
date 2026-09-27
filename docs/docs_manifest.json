@@ -4,7 +4,7 @@
   "excluded_paths": [
     {
       "path": ".env",
-      "reason": "secrets — never inventoried, displayed, or committed"
+      "reason": "secrets \u2014 never inventoried, displayed, or committed"
     },
     {
       "path": ".coord",
@@ -40,7 +40,7 @@
       "id": "index",
       "path": "docs/INDEX.md",
       "title": "Documentation index and folder tree",
-      "summary": "Reader-first entry point: what to read for a given goal, a curated folder tree, and the authority order.",
+      "summary": "Reader-first navigation, a curated folder tree, the authority order, and the managed-document checker.",
       "audience": "newcomer",
       "status": "shipped",
       "owner_issue": 63,
@@ -54,8 +54,6 @@
       "related": [
         "epistemic-system",
         "human-review-checklist",
-        "human-naming",
-        "issue-log-format",
         "holdout-protocol"
       ],
       "canonical_sources": [
@@ -70,7 +68,7 @@
       ],
       "review_state": "unreviewed",
       "reviewed_commit": "uncommitted",
-      "reviewed_sha256": "11cb8a92b946ab2784b04d1b107620f4351638e03238640b54d2fb6918b9b07e"
+      "reviewed_sha256": "f3780c993dfba3d6229241e0da8b94151c5ba3ada2e751434f98403ae1177c60"
     },
     {
       "id": "epistemic-system",
@@ -154,7 +152,7 @@
       "id": "human-review-checklist",
       "path": "docs/HUMAN_REVIEW_CHECKLIST.md",
       "title": "Human review checklist",
-      "summary": "Reader-usefulness rubric (first-time reader, evidence and boundaries, navigation and accessibility) recorded separately from automated checks.",
+      "summary": "Optional reader-usefulness and visual QA questions, kept separate from automated merge gates.",
       "audience": "reviewer",
       "status": "shipped",
       "owner_issue": 63,
@@ -209,7 +207,7 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "ca1ef7ad918617da3b834d1789eb90cb64537502db210b1a186e1b95ece0440d"
     },
     {
@@ -238,7 +236,7 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "e1835dca7a093b83704debc7cf753017e55fd1b7aca8a99edfb3242eb9e2eddc"
     },
     {
@@ -305,7 +303,7 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "b70452b711af538a0e2121070a84f865136e1ec58aa8a6d16dc7a820e55e2311"
     },
     {
@@ -447,7 +445,7 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "568a4211f195d72fe4592df061f6037c19e20626ce6570510747ec1aa3821a02"
     },
     {
@@ -469,7 +467,7 @@
       ],
       "canonical_sources": [],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "1b2e15a201cc4ba8f1db20108a1f387e666fdd47fe2553cf5feed11fcf1a0d6c"
     },
     {
@@ -502,7 +500,7 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "0f18adab77c35c08ea8fa04d83d52d96e6bf942bb53d960dda4e9022fd0ef6cd"
     },
     {
@@ -524,7 +522,7 @@
       ],
       "canonical_sources": [],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_commit": "uncommitted",
       "reviewed_sha256": "16acf1f9d3d341ccb66d0f865ba63647f288003f1266183bfb5d4fd1374a298b"
     },
     {
@@ -593,6 +591,406 @@
       "review_state": "unreviewed",
       "reviewed_commit": "e7dc72e7763356c7d543806ad78254d3f6d76aa2",
       "reviewed_sha256": "c32c03e73e7602e238514d5d318020fa84a980c97ba85642b427d6e9065b909a"
+    },
+    {
+      "id": "brand-direction",
+      "path": "docs/BRAND_DIRECTION.md",
+      "title": "Brand direction",
+      "summary": "Target voice, preferred terms, and visual direction for project-facing documentation.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "brand",
+        "voice",
+        "visual"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "3987070f002a76aabe4d29fc3675849dd64d5232955b4196d0206af245b41eb8"
+    },
+    {
+      "id": "content-research",
+      "path": "docs/CONTENT_RESEARCH.md",
+      "title": "Content research and evidence map",
+      "summary": "Evidence map behind README claims, editorial choices, and the limits each source leaves open.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "evidence",
+        "readme",
+        "research"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "9d750ddd06e3877727f85f28bf4e51a00d6c3b1d59e7ac7681746036167f768d"
+    },
+    {
+      "id": "holdout-evaluation",
+      "path": "docs/HOLDOUT_EVALUATION.md",
+      "title": "Holdout evaluation",
+      "summary": "Quality targets, split requirements, and evaluation limits; not a report of achieved scores.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "holdout",
+        "evaluation",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "d52410edf2fe9a044e05ac803f22aea59a98548eb289d991988def1b4e81b9ad"
+    },
+    {
+      "id": "image-guide",
+      "path": "docs/IMAGE_GUIDE.md",
+      "title": "Image generation and use",
+      "summary": "Image roles, accessibility, provenance, review notes, and reuse guidance for README assets.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "image",
+        "accessibility",
+        "assets"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "1408b1656fa7fdcbbdc9dc347baf7a05b360c79cd7a63c3a336e48768158b06c"
+    },
+    {
+      "id": "migrating-to-0-2",
+      "path": "docs/MIGRATING_TO_0.2.md",
+      "title": "Content Generation Modules 0.2 guide",
+      "summary": "Repository guidance for the CGM 0.2 human-facing README contract.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4ad3a8f0daff7332ca8326c6d36440a5b7c56d0ebf76f6f08f3910e91650c989"
+    },
+    {
+      "id": "migrating-to-0-3",
+      "path": "docs/MIGRATING_TO_0.3.md",
+      "title": "Content Generation Modules 0.3 guide",
+      "summary": "Repository guidance for CGM 0.3 scan-first writing and target-specific visual direction.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "b8f591d9c932dbbbcb47a7c8b284f7bcce6e2eccc7a0e774ae54769508f0e89d"
+    },
+    {
+      "id": "migrating-to-0-4",
+      "path": "docs/MIGRATING_TO_0.4.md",
+      "title": "Content Generation Modules 0.4 guide",
+      "summary": "Repository guidance for the pinned CGM 0.4.0 draft contract.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "686a237d1f5cc6216cb0c95e0612cdbbd48f8377180109073072f296c17882d0"
+    },
+    {
+      "id": "prior-work",
+      "path": "docs/PRIOR_WORK.md",
+      "title": "Prior work and references",
+      "summary": "Repository prior work and references that shape the README evidence boundary.",
+      "audience": "newcomer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "prior-work",
+        "references",
+        "provenance"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "1fb5ada5c08a1c3b952271cc0c0d8cf525d8925c2271cdda8e0cc4a1e0385590"
+    },
+    {
+      "id": "provenance-and-citation",
+      "path": "docs/PROVENANCE_AND_CITATION.md",
+      "title": "Provenance and citation guide",
+      "summary": "How to record a bounded claim, source, support, limit, source revision, and time.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "provenance",
+        "citation",
+        "evidence"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "bbc4805e0de5b3532e18d6a347e4c07e4dd85e43b02a756893de02c470b1f5b9"
+    },
+    {
+      "id": "readme-generation",
+      "path": "docs/README_GENERATION.md",
+      "title": "README generation and validation record",
+      "summary": "Pinned CGM authoring modules, image-generation limits, and reproducible README checks.",
+      "audience": "maintainer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "generation",
+        "validation"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "829c23497ecb7d2e1695c9f1841fb2f10b8a245b4430b0b36bd3921a71b45aee"
+    },
+    {
+      "id": "readme-playbook",
+      "path": "docs/README_PLAYBOOK.md",
+      "title": "README playbook",
+      "summary": "Reader-first source mapping and project-story drafting steps for future documentation changes.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "playbook",
+        "writing"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "e6d72deb16ddfbf8f00cadde3bce3ff65a8a7fbe5f572baa0cceed5025e28b5d"
+    },
+    {
+      "id": "readme-quality-pdd",
+      "path": "docs/README_QUALITY_PDD.md",
+      "title": "Product definition for the README",
+      "summary": "Product-definition checks for the README audience, promise, and claim boundaries.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "product",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "5e3de2177e6b2209e78cf6cda29a41f1b6f0450155f8f902bf26e3199be411d1"
+    },
+    {
+      "id": "readme-quality-sdd",
+      "path": "docs/README_QUALITY_SDD.md",
+      "title": "System design for the README",
+      "summary": "System-flow and boundary choices used to explain the product at reader height.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "system",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "610515a285ad6fb49a6cf1d0ba8a5960ed3097d78152cab22556033b35354d09"
+    },
+    {
+      "id": "readme-quality-tdd",
+      "path": "docs/README_QUALITY_TDD.md",
+      "title": "Test design for human-facing project claims",
+      "summary": "Automated checks and optional reader tasks for changes to human-facing project claims.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "tests",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0de0d0eca7e4fb2eef38363180da4a86daab35bbf8bdb23e5047e55396aa71ec"
+    },
+    {
+      "id": "readme-review",
+      "path": "docs/README_REVIEW.md",
+      "title": "README human review checklist",
+      "summary": "Optional reader and visual QA checklist; separate sign-off is not a merge gate.",
+      "audience": "reviewer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "review",
+        "accessibility"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f7d84fe730ca50db47fd74e5d2229a77faadc8310f59be06506996f31d344b4c"
+    },
+    {
+      "id": "reverse-analysis-pcm-and-adopters",
+      "path": "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
+      "title": "Reverse analysis of PCM and related repository examples",
+      "summary": "Source-grounded comparison of PCM and adopter documentation approaches.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "reverse-analysis",
+        "pcm",
+        "adopters"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "95334a7b49bef1e6347567c492cd99824260308f9012e58f8dbb227c0b831009"
     }
   ]
 }

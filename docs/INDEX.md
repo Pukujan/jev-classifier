@@ -12,17 +12,17 @@ skip to what you need.
 | If you want to… | Read | Who it is for |
 |---|---|---|
 | Understand what the project is allowed to claim, in plain language | [`EPISTEMIC_SYSTEM.md`](EPISTEMIC_SYSTEM.md) | newcomer, reviewer |
+| Get the short project purpose, limits, and setup path | [`../PROJECT.md`](../PROJECT.md) | newcomer, developer |
 | See the exact module contracts and which parts use a model | [`SYSTEM_SPEC.md`](SYSTEM_SPEC.md) | contributor, maintainer |
 | Know who decides what when agents disagree | [`AUTHORITY.md`](AUTHORITY.md) | contributor, agent |
 | Read or write a claim record | [`CLAIM_SCHEMA.md`](CLAIM_SCHEMA.md) | contributor |
 | Find the machine-readable module catalog | [`spec/modules.json`](spec/modules.json) | agent, tooling |
-| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
-| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
-| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Use an optional reader-usefulness checklist | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
 | Write issue titles, commit subjects, PR titles, or new file names in plain human words | [`HUMAN_NAMING.md`](HUMAN_NAMING.md) | agent, contributor |
-| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
-| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
 | See which reference papers are selected, and their rights | [`DATASET_CARD.md`](DATASET_CARD.md) | contributor, reviewer |
+| Understand the README's evidence map and editorial choices | [`CONTENT_RESEARCH.md`](CONTENT_RESEARCH.md) | contributor, maintainer |
+| Find prior-work analysis and source comparisons | [`PRIOR_WORK.md`](PRIOR_WORK.md) and [`REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md`](REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md) | contributor |
+| Rebuild or verify the README workflow | [`README_GENERATION.md`](README_GENERATION.md) and [`README_PLAYBOOK.md`](README_PLAYBOOK.md) | contributor, agent |
 | Understand how the hidden holdout is frozen and kept out of development | [`HOLDOUT_PROTOCOL.md`](HOLDOUT_PROTOCOL.md) | contributor, reviewer |
 
 ## Folder tree (curated)
@@ -48,10 +48,23 @@ jev-classifier/
 │   ├── OPS_LEDGER.md              ops projection protocol
 │   ├── DATASETS.md                fixtures and licensing
 │   ├── DATASET_CARD.md            reference-paper selection and rights
+│   ├── BRAND_DIRECTION.md         target voice and visual direction
+│   ├── CONTENT_RESEARCH.md        README evidence map and editorial choices
+│   ├── HOLDOUT_EVALUATION.md      quality goals and evaluation limits
 │   ├── HOLDOUT_PROTOCOL.md        how the hidden holdout is frozen and kept out
 │   ├── GROK_SOURCE.md             source-capture adapter
+│   ├── IMAGE_GUIDE.md             image roles, accessibility, and reuse
 │   ├── RESEARCH_NOTES.md          bootstrap notes (non-normative)
+│   ├── PRIOR_WORK.md              prior work and research references
+│   ├── PROVENANCE_AND_CITATION.md evidence and citation practice
+│   ├── README_GENERATION.md       pinned CGM workflow and verification
+│   ├── README_PLAYBOOK.md         reader-first project-story workflow
+│   ├── README_QUALITY_*.md        product, design, and test quality notes
+│   ├── README_REVIEW.md           optional reader/visual QA checklist
+│   ├── REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md prior-work comparison
+│   ├── MIGRATING_TO_0.*.md        CGM contract migration notes
 │   ├── ISSUE_1_DRAFT.md           historical draft
+│   ├── HUMAN_NAMING.md            plain-human titles for issues, commits, PRs, files
 │   ├── HUMAN_REVIEW_CHECKLIST.md  reader-usefulness review rubric
 │   ├── CURRENT.md                 live continuity card (rewritten per task)
 │   ├── docs_manifest.json         machine-readable inventory of the above
@@ -90,8 +103,9 @@ python scripts/validate_docs.py --no-freshness   # skip the file-hash check
 ```
 
 *(shipped)* The manifest, schema, and validator are on `main` as of issue #63.
-*(partial)* Orphan detection — flagging an in-scope document that is not
-registered — is **not** implemented; only registered documents are checked.
+The validator also scans `docs/*.md` and fails when an in-scope document is not
+registered. `docs/CURRENT.md` is the sole documented exception because it is
+rewritten as a continuity projection on each task.
 
 ## What this page does not establish
 

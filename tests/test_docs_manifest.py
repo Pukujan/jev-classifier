@@ -528,4 +528,3 @@ def test_repository_manifest_inventories_every_doc_page() -> None:
     validate_manifest(load_manifest(MANIFEST_PATH), check_freshness=True)
     listed = {d["path"] for d in load_manifest(MANIFEST_PATH)["documents"]}
     assert "docs/SYSTEM_SPEC.md" in listed
-
