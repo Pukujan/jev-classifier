@@ -33,6 +33,7 @@ def test_claim_schema_doc_exists_and_lists_pcm_fields() -> None:
         "recorded_at",
         "supersedes",
         "independence_class",
+        "about",
     ):
         assert key in text
     assert "PCM" in text

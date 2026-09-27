@@ -143,7 +143,8 @@
       ],
       "tests": [
         "tests/test_ontology_and_classify.py",
-        "tests/test_claim_schema.py"
+        "tests/test_claim_schema.py",
+        "tests/test_subject_assignment.py"
       ],
       "fail_closed": true,
       "issue": null,
@@ -172,7 +173,8 @@
           "confidence",
           "response_id",
           "independence_class",
-          "id"
+          "id",
+          "about"
         ],
         "invariants": [
           "label_in_legal_labels",
@@ -185,7 +187,10 @@
           "valid_from_valid_to_null_or_nonempty_string_without_order_check",
           "independence_class_null_or_nonempty_string",
           "canonical_key_wins_over_legacy_on_migration",
-          "confidence_is_not_correctness"
+          "confidence_is_not_correctness",
+          "subject_taxonomy_nonempty_closed_list",
+          "about_set_only_for_in_taxonomy_jev_choice",
+          "unknown_subject_leaves_about_unset"
         ]
       }
     },
@@ -358,7 +363,7 @@
           "evaluation_instant_is_required_no_hidden_clock",
           "no_model_call_no_text_similarity_no_network"
         ],
-        "known_gap": "claims must already carry an about subject; no module assigns it yet, so ingestion-side subjecting is unimplemented"
+        "known_gap": "subject assignment now lives in classify_fragment (M4, issue #72): closed subject_taxonomy + JEV choice (+ unknown); unknown leaves about unset"
       },
       "states": [
         "agreement",
@@ -535,14 +540,24 @@
       "title": "Claim-level evaluation",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/eval/metric.py", "scripts/eval_claims.py"],
-      "tests": ["tests/test_eval_metric.py"],
+      "code": [
+        "src/jev_classifier/eval/metric.py",
+        "scripts/eval_claims.py"
+      ],
+      "tests": [
+        "tests/test_eval_metric.py"
+      ],
       "fail_closed": true,
       "issue": 66,
       "status": "merged",
       "contract": {
-        "input": ["validated_reference_claim_graph_from_module_R", "sequence_of_predicted_claims"],
-        "output": ["score_report_with_primary_prf_per_paper_prf_citation_coverage_and_ontology_status"],
+        "input": [
+          "validated_reference_claim_graph_from_module_R",
+          "sequence_of_predicted_claims"
+        ],
+        "output": [
+          "score_report_with_primary_prf_per_paper_prf_citation_coverage_and_ontology_status"
+        ],
         "metric_version": "claim_metric_v1",
         "match_rule": "span_containment_v1",
         "invariants": [

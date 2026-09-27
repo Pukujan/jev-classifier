@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -37,8 +38,13 @@ PCM_CLAIM_KEYS = frozenset(
         "independence_class",
         "response_id",
         "notes",
+        "about",
     }
 )
+
+# Closed-taxonomy subject assignment (#72): JEV chooses from taxonomy + unknown.
+SUBJECT_QUESTION_ID = "subject_about"
+UNKNOWN_SUBJECT = "unknown"
 
 # Legacy / camelCase → canonical snake_case (PCM-friendly). Canonical wins on clash.
 LEGACY_CLAIM_KEY_ALIASES: dict[str, str] = {
@@ -76,6 +82,89 @@ def normalize_claim_record(raw: Mapping[str, Any]) -> dict[str, Any]:
     return migrate_legacy_claim(raw)
 
 
+def _slug_subject_token(text: str) -> str:
+    """Lowercase alnum slug; deterministic, no NLP."""
+    cleaned = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+    return cleaned
+
+
+def _slug_tokens(text: str) -> set[str]:
+    slug = _slug_subject_token(text)
+    return {t for t in slug.split("_") if t}
+
+
+def require_subject_taxonomy(fragment: Mapping[str, Any]) -> list[str]:
+    """Return the closed subject taxonomy; empty/missing fails closed."""
+    raw = fragment.get("subject_taxonomy")
+    if not isinstance(raw, list) or not raw:
+        raise NormalizeError(
+            "subject_taxonomy must be a non-empty list of strings",
+            kind="parse_error",
+        )
+    if not all(isinstance(x, str) and x.strip() and x != UNKNOWN_SUBJECT for x in raw):
+        raise NormalizeError(
+            "subject_taxonomy entries must be non-empty strings and must not "
+            f"include {UNKNOWN_SUBJECT!r}",
+            kind="parse_error",
+        )
+    if len(set(raw)) != len(raw):
+        raise NormalizeError(
+            "subject_taxonomy entries must be unique",
+            kind="parse_error",
+        )
+    return list(raw)
+
+
+def derive_subject_candidates(fragment: Mapping[str, Any]) -> list[str]:
+    """Map title/section metadata onto the closed taxonomy (deterministic).
+
+    A taxonomy term is a candidate when every slug token of the term appears in
+    the slug tokens of ``section`` and/or ``title``. Order follows the taxonomy
+    list. No free-text extraction, no embeddings.
+    """
+    taxonomy = require_subject_taxonomy(fragment)
+    meta_tokens: set[str] = set()
+    for key in ("section", "title"):
+        val = fragment.get(key)
+        if isinstance(val, str) and val.strip():
+            meta_tokens |= _slug_tokens(val)
+    candidates: list[str] = []
+    for term in taxonomy:
+        term_tokens = _slug_tokens(term)
+        if term_tokens and term_tokens <= meta_tokens:
+            candidates.append(term)
+    return candidates
+
+
+def subject_choice_options(taxonomy: list[str]) -> list[str]:
+    """Closed choice set for the subject question: taxonomy + unknown."""
+    return list(taxonomy) + [UNKNOWN_SUBJECT]
+
+
+def build_subject_question(fragment: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the atomic JEV choice question for subject assignment."""
+    taxonomy = require_subject_taxonomy(fragment)
+    candidates = derive_subject_candidates(fragment)
+    criteria: dict[str, str] = {}
+    for term in taxonomy:
+        hint = " (suggested by fragment title/section metadata)" if term in candidates else ""
+        criteria[term] = (
+            f"The fragment is about the closed-taxonomy subject {term!r}.{hint}"
+        )
+    criteria[UNKNOWN_SUBJECT] = (
+        "The fragment's subject cannot be placed in the closed taxonomy from "
+        "the given metadata; leave about unset rather than guess."
+    )
+    return {
+        "type": "choice",
+        "instructions": fragment.get(
+            "subject_instructions",
+            "Choose exactly one subject from the closed taxonomy, or unknown.",
+        ),
+        "criteria": criteria,
+    }
+
+
 def load_fragment_fixture(path: str | Path) -> dict[str, Any]:
     import json
 
@@ -88,6 +177,23 @@ def load_fragment_fixture(path: str | Path) -> dict[str, Any]:
     labels = data["closed_label_set"]
     if not isinstance(labels, list) or not labels or not all(isinstance(x, str) for x in labels):
         raise ValueError("closed_label_set must be a non-empty list of strings")
+    # Subject taxonomy is required for closed-set about assignment (#72).
+    try:
+        taxonomy = require_subject_taxonomy(data)
+    except NormalizeError as exc:
+        raise ValueError(str(exc)) from exc
+    committed = data.get("subject_candidates")
+    if committed is not None:
+        if not isinstance(committed, list) or not all(isinstance(x, str) for x in committed):
+            raise ValueError("subject_candidates must be a list of strings when present")
+        if any(x not in taxonomy for x in committed):
+            raise ValueError("subject_candidates must be a subset of subject_taxonomy")
+        derived = derive_subject_candidates(data)
+        if list(committed) != derived:
+            raise ValueError(
+                "subject_candidates must match derive_subject_candidates(title/section); "
+                f"fixture has {committed!r}, derived {derived!r}"
+            )
     return data
 
 
@@ -165,6 +271,13 @@ def validate_claim_record(
                 "independence_class must be a non-empty string or null",
                 kind="parse_error",
             )
+    if "about" in body and body["about"] is not None:
+        about = body["about"]
+        if not isinstance(about, str) or not about.strip():
+            raise NormalizeError(
+                "about must be a non-empty string when set",
+                kind="parse_error",
+            )
 
     return dict(body)
 
@@ -184,6 +297,7 @@ def build_claim_record(
     response_id: str | None = None,
     independence_class: str | None = None,
     claim_id: str | None = None,
+    about: str | None = None,
 ) -> dict[str, Any]:
     ts = recorded_at or datetime.now(timezone.utc).isoformat()
     record: dict[str, Any] = {
@@ -202,6 +316,8 @@ def build_claim_record(
     }
     if claim_id is not None:
         record["id"] = claim_id
+    if about is not None:
+        record["about"] = about
     return record
 
 
@@ -212,6 +328,11 @@ def classify_fragment(
     evidence_path: str | None = None,
 ) -> dict[str, Any]:
     """Call JEV choice on a fragment fixture dict; return a claim JSON record.
+
+    Asks two atomic choice questions in one Decisions call: claim kind (existing)
+    and subject/about from the closed ``subject_taxonomy`` (+ ``unknown``). An
+    in-taxonomy subject is written to ``about``; ``unknown`` leaves ``about``
+    unset so M8 can reject honestly. Out-of-set answers fail closed.
 
     Fail closed: DecisionsError / NormalizeError propagate; never fabricates labels.
     """
@@ -224,6 +345,11 @@ def classify_fragment(
             kind="parse_error",
         )
 
+    taxonomy = require_subject_taxonomy(fragment)
+    subject_options = frozenset(subject_choice_options(taxonomy))
+    subject_question = build_subject_question(fragment)
+    candidates = derive_subject_candidates(fragment)
+
     questions = {
         qid: {
             "type": "choice",
@@ -232,13 +358,17 @@ def classify_fragment(
                 "Classify the research fragment into exactly one closed label.",
             ),
             "criteria": dict(criteria),
-        }
+        },
+        SUBJECT_QUESTION_ID: subject_question,
     }
     state = {
         "fragment_id": fragment.get("id"),
         "fragment": fragment["text"],
         "source": fragment.get("source"),
         "title": fragment.get("title"),
+        "section": fragment.get("section"),
+        "subject_taxonomy": list(taxonomy),
+        "subject_candidates": list(candidates),
     }
 
     svc = client or DecisionsClient()
@@ -252,11 +382,20 @@ def classify_fragment(
         question_id=qid,
         legal_options=legal,
     )
-    model = normalized.get("model") or svc.model
+    subject_norm = extract_choice_from_response(
+        raw,
+        question_id=SUBJECT_QUESTION_ID,
+        legal_options=subject_options,
+    )
+    model = normalized.get("model") or subject_norm.get("model") or svc.model
     evidence = {
         "fragment_id": fragment.get("id"),
         "path": evidence_path,
     }
+    about: str | None = None
+    subject_choice = subject_norm["choice"]
+    if subject_choice != UNKNOWN_SUBJECT:
+        about = subject_choice
     claim = build_claim_record(
         label=normalized["choice"],
         model=model,
@@ -265,5 +404,6 @@ def classify_fragment(
         confidence=normalized.get("confidence"),
         epistemic_status="Inferred",
         response_id=normalized.get("response_id"),
+        about=about,
     )
     return validate_claim_record(claim, legal_labels=legal)
