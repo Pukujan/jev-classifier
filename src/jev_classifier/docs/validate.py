@@ -33,6 +33,12 @@ MANIFEST_SCHEMA = "docs_manifest.schema.json"
 MANIFEST_PATH = REPO_ROOT / "docs" / "docs_manifest.json"
 TREE_PAGE = REPO_ROOT / "docs" / "INDEX.md"
 
+# Markdown files under ``docs/`` that are deliberately not inventoried. The
+# continuity card is rewritten on every task, so any digest recorded for it
+# would be stale on the next commit. (``docs/docs_manifest.json`` is not a
+# markdown file and so is not scanned.)
+NOT_INVENTORIED_DOCUMENTS = frozenset({"docs/CURRENT.md"})
+
 MANIFEST_SCHEMA_ID = "jev-classifier.docs-manifest.v1"
 
 MANIFEST_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
@@ -280,6 +286,20 @@ def _within_root(base: Path, candidate: Path) -> bool:
     return True
 
 
+def _uninventoried_documents(base: Path, listed: set[str]) -> list[str]:
+    """Return ``docs/*.md`` files the manifest neither lists nor exempts."""
+    directory = base / "docs"
+    if not directory.is_dir():
+        return []
+    out: list[str] = []
+    for candidate in sorted(directory.glob("*.md")):
+        relative = candidate.relative_to(base).as_posix()
+        if relative in listed or relative in NOT_INVENTORIED_DOCUMENTS:
+            continue
+        out.append(relative)
+    return out
+
+
 def _validate_document_shape(document: Any, label: str) -> Mapping[str, Any]:
     body = _require_mapping(document, label)
     _reject_unknown_keys(body, _DOCUMENT_KEYS, label)
@@ -326,8 +346,9 @@ def validate_manifest(
     """Validate one managed documentation manifest; raise on the first violation.
 
     Checks shape, identity uniqueness, parent resolution, on-disk path and
-    source resolution, exclusion of private/excluded paths, the tree page, the
-    reviewed digest, relative markdown links, and the private-path scan.
+    source resolution, exclusion of private/excluded paths, uninventoried
+    documents, the tree page, the reviewed digest, relative markdown links, and
+    the private-path scan.
     """
     base = Path(root).resolve() if root is not None else REPO_ROOT
 
@@ -473,3 +494,17 @@ def validate_manifest(
                     f"document {path!r} links to missing target {target!r}",
                     kind="broken_link",
                 )
+
+    # The reverse of the dangling-reference check: a document that exists but
+    # has no manifest entry. Without this, a page can land and never be
+    # inventoried, and nothing fails (docs/DATASET_CARD.md did exactly that
+    # between #71 and #76). Runs last so it cannot mask a more specific error
+    # about a document the manifest does list.
+    uninventoried = _uninventoried_documents(base, set(seen_paths))
+    if uninventoried:
+        raise DocsManifestError(
+            f"documentation exists but is not in the manifest: "
+            f"{', '.join(uninventoried)}; add a document entry for each, or "
+            f"record the path in NOT_INVENTORIED_DOCUMENTS with a reason",
+            kind="uninventoried_document",
+        )
