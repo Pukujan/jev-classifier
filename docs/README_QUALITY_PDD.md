@@ -14,7 +14,7 @@ A researcher sees several AI-generated accounts of a study and needs to trace ea
 
 ## Bounded promise
 
-The README promises a readable path to one-fragment JEV classification and a structured draft record. It does not promise correct science, multi-source synthesis quality, or validated bias detection.
+The README promises a readable path to one-fragment JEV classification and a structured draft record, plus a bounded deterministic consolidation step for records that already have explicit topics. It does not promise automatic extraction from multiple raw transcripts, correct science, paper-level synthesis quality, or validated bias detection.
 
 ## Acceptance intent
 

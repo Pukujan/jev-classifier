@@ -12,7 +12,7 @@
   "preferred_terms": {
     "source capture": "untrusted source collection",
     "JEV judgment": "closed semantic classification",
-    "paper draft": "six-section structural draft",
+    "paper draft": "six-section structural draft with an optional deterministic Synthesis section",
     "bias signal": "measured signal, not proof"
   },
   "avoid": [

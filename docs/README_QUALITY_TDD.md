@@ -9,11 +9,11 @@
 - Prompt-record and asset-manifest hashes match the committed images.
 - A heading and bold-anchor scan communicates the reader problem, current capability, boundary, and next action.
 
-The pinned helper checks only its declared structure, schema, evidence identity, citation presence, and hashes. The target script checks local links and section presence. Neither proves research accuracy, citation quality, or reader comprehension.
+The pinned helper checks only its declared structure, schema, evidence identity, citation presence, and hashes. The target script checks local links, required section order, and each contract-required reference link. Neither it nor the manifest validator proves research accuracy, citation quality, or reader comprehension.
 
 ## Human review tasks
 
-Give the README to a reader without the issue or conversation. Ask them to:
+Optional reader QA can give the README to a reader without the issue or conversation. Ask them to:
 
 1. Explain what one unit of classification is.
 2. Distinguish untrusted source capture from the JEV classifier role.

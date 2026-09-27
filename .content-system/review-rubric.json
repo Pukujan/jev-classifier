@@ -32,5 +32,5 @@
       "weight": 2
     }
   ],
-  "decision_rule": "Accept only if claim safety and model-role clarity pass, every required section and local link resolves, and no review dimension is below 3/5; automated structure checks do not replace human review."
+  "decision_rule": "Merge readiness requires the pinned CGM contract validator, target headings and required-reference/link checks, a current-source audit, the docs-manifest validator, and required repository CI to pass on a current branch. Separate reader/visual observations are optional QA, not an approval gate; do not claim unrecorded observations."
 }

@@ -25,10 +25,11 @@ Run from the repository root with Python available:
 ```powershell
 python .cache/cgm-pinned/scripts/validate_content_system.py --root .cache/cgm-pinned --adapter .content-system --project-root .
 python scripts/validate_readme_docs.py --root .
+python scripts/validate_docs.py
 git diff --check
 ```
 
-The first command validates the adapter contract and manifest hashes. The target script checks the nine required README headings and local Markdown links. `git diff --check` checks patch whitespace. These commands do not check remote-link availability, factual truth, narrative comprehension, narrow-screen rendering, or research quality. Complete `docs/README_REVIEW.md` separately; it remains unchecked until a human reviewer records a result.
+The first command validates the adapter contract and manifest hashes. The target script checks the nine required README headings, contract-required references, and local Markdown links. `python scripts/validate_docs.py` checks the managed-documents manifest and its links/hashes. `git diff --check` checks patch whitespace. These commands do not check remote-link availability, factual truth, narrative comprehension, narrow-screen rendering, or research quality. `docs/README_REVIEW.md` is optional reader/visual QA; the owner waived separate sign-off as a merge gate. Leave it unchecked unless an actual reviewer records a result.
 
 The helper is ignored build material. From the repository root in PowerShell, create the cache and check out the exact pinned commit before validating:
 

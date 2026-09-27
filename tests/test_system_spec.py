@@ -18,7 +18,8 @@ SPEC_MD = ROOT / "docs" / "SYSTEM_SPEC.md"
 SPEC_JSON = ROOT / "docs" / "spec" / "modules.json"
 
 # Module ids the spec must cover, per docs/SYSTEM_SPEC.md section 2.
-EXPECTED_MODULES = {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "C", "O", "B"}
+# Module ids the spec must cover, per docs/SYSTEM_SPEC.md section 2.
+EXPECTED_MODULES = {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "C", "O", "B", "R", "E"}
 
 # Only JEV may produce deterministic classifier output (AGENTS.md hard rule).
 JEV_ROLES = {"jev", "jev_plus_deterministic"}
@@ -133,17 +134,15 @@ def test_jev_endpoint_and_pin_match_code(index: dict) -> None:
     assert rule["pinned_model"] == DEFAULT_MODEL
 
 
-def test_declared_vs_implemented_primitives_record_the_score_gap(index: dict) -> None:
-    """score is declared but unimplemented; the index must say so, not hide it."""
+def test_declared_vs_implemented_primitives_agree(index: dict) -> None:
+    """Every declared primitive must be implemented; #32 closed the score gap."""
     rule = index["jev_only_rule"]
-    assert "score" in rule["primitives_declared"]
-    assert "score" not in rule["primitives_implemented"]
-    assert rule["primitives_implemented"] == ["choice", "noul"]
-    assert "32" in str(rule["note"]) or "#32" in rule["note"]
+    assert set(rule["primitives_declared"]) == {"choice", "score", "noul"}
+    assert set(rule["primitives_implemented"]) == set(rule["primitives_declared"])
 
 
-def test_score_primitive_still_absent_from_code(index: dict) -> None:
-    """Guard: if score lands, this test fails so the index gets updated too."""
+def test_score_primitive_lands_with_the_index(index: dict) -> None:
+    """Guard: score presence in code and in the index must move together."""
     import jev_classifier.normalize as norm
 
     has_score = hasattr(norm, "normalize_score_answer")
@@ -152,6 +151,7 @@ def test_score_primitive_still_absent_from_code(index: dict) -> None:
         "normalize_score_answer presence disagrees with primitives_implemented; "
         "update docs/spec/modules.json (see issue #32)"
     )
+    assert has_score, "normalize_score_answer must exist once score is declared"
 
 
 def test_ops_schema_version_matches_code(index: dict) -> None:

@@ -21,7 +21,7 @@ A citation provides traceability, not truth. The author must still ensure the so
 
 ## Temporal distinction
 
-The claim record can carry valid_from and valid_to fields for when a claim applies, and recorded_at for when the project recorded the version. The current code does not yet parse and order timestamps or check that referenced source records exist. Do not describe this as a validated bitemporal query service.
+The legacy M5 claim record can carry `valid_from` and `valid_to` fields for when a claim applies, and `recorded_at` for when the project recorded the version. That path does not parse timestamp strings, check valid-time ordering, or resolve its evidence pointers. Other modules have narrower checks: M8 consolidation validates bitemporal inputs and supersession chains, while the reference-graph validator checks source spans and cross-record links. These checks do not make the project a general bitemporal query service.
 
 ## Provenance boundary
 

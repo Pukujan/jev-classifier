@@ -1,7 +1,7 @@
 """Coordination record parsing: `coord:*` HTML-comment markers plus legacy prose claims.
 
 Single source of truth for the machine-readable layer of the agent coordination
-protocol (docs/AGENT_COORD.md, docs/AGENT_PROPOSALS.md). Four record types are
+protocol (docs/AGENT_COORD.md, docs/AGENT_PROPOSALS.md). Five record types are
 carried in GitHub issue comments:
 
   coord:proposal  design option awaiting adjudication   (id, author, issue, scope, status, depends)
@@ -10,6 +10,12 @@ carried in GitHub issue comments:
   coord:receipt   append-only run receipt (#22 owner telemetry direction)
                   (run, outcome, task, pr, commit, started, finished, agent_alias,
                    model_alias, model_version_alias, temperature, provenance)
+  coord:message   agent-to-agent operational message (#61 Stage 1)
+                  (id, task, from, kind, to, reply_to, idem, note)
+
+Messages are transport evidence, never authority: they cannot claim work,
+adjudicate, label, or merge (arbiter ruling on #61). Delivery is at-least-once;
+readers deduplicate by stable message id — fold keeps one row per id.
 
 Plus a legacy/fallback path: agents already claim with prose (`## Claim` heading
 with a `Branch:` line). Those are parsed into synthetic claim records tagged
@@ -36,7 +42,19 @@ from datetime import datetime, timezone
 
 MARKER_RE = re.compile(r"<!--\s*coord:(\w+)\s+(.*?)\s*-->", re.DOTALL)
 ATTR_RE = re.compile(r'(\w+)=("([^"]*)"|\S+)')
-RECORD_TYPES = ("proposal", "verdict", "claim", "receipt")
+RECORD_TYPES = ("proposal", "verdict", "claim", "receipt", "message")
+
+# Fixed message-kind vocabulary (#61 Stage 1): unknown kinds are rejected so a
+# typo can't invent a transport semantic nobody reads. Messages carry requests,
+# handoffs, status, answers, conflict reports, and acks — never authority.
+MESSAGE_KINDS = frozenset({
+    "request",   # ask another agent for something task-scoped
+    "handoff",   # transfer ownership/work context
+    "status",    # progress/checkpoint notification
+    "answer",    # response to a request (links via reply_to)
+    "conflict",  # report a contradiction/collision for adjudication
+    "ack",       # receipt/acceptance of a message
+})
 
 # Verdicts with by= outside this roster are advisory. Roster entries are
 # ROLES: live ids are per-session (`role@device`), so is_authoritative matches
@@ -131,6 +149,8 @@ class Record:
             return f"issue:{self.attrs.get('issue') or self.issue}"
         if self.rtype == "receipt":
             return self.attrs.get("run", "")
+        if self.rtype == "message":
+            return self.attrs.get("id", "")
         return self.attrs.get("issue", "")
 
     def as_dict(self) -> dict[str, object]:
@@ -188,6 +208,24 @@ def parse_prose_claim(
                   issue=issue, comment_id=comment_id, marker="prose")
 
 
+def _check_provenance(attrs: dict[str, str], comment_id: int, rtype: str) -> None:
+    """Validate a per-field provenance string against PROVENANCE_VOCAB.
+
+    `provenance=field:source;field:source` (or one blanket token). Unknown
+    sources are rejected so a typo cannot smuggle an unlabeled field into a
+    receipt or message record.
+    """
+    for token in re.split(r"[;,\s]+", attrs.get("provenance", "")):
+        if not token:
+            continue
+        source = token.rpartition(":")[2]
+        if source not in PROVENANCE_VOCAB:
+            raise RecordError(
+                f"coord:{rtype} provenance '{token}' not in "
+                f"{sorted(PROVENANCE_VOCAB)} (comment {comment_id})"
+            )
+
+
 def parse_comment(
     body: str,
     *,
@@ -229,18 +267,28 @@ def parse_comment(
                 raise RecordError(
                     f"coord:receipt missing run=/outcome= (comment {comment_id})"
                 )
-            # Per-field provenance: `provenance=model:provider_returned;
-            # temperature:unavailable`, or one blanket token. Unknown sources
-            # are rejected so a typo cannot smuggle an unlabeled field in.
-            for token in re.split(r"[;,\s]+", attrs.get("provenance", "")):
-                if not token:
-                    continue
-                source = token.rpartition(":")[2]
-                if source not in PROVENANCE_VOCAB:
+            _check_provenance(attrs, comment_id, "receipt")
+        elif rtype == "message":
+            # Agent-to-agent message envelope (#61 Stage 1, verdict
+            # 5851128354). Required: id, task, from, kind. Optional: to,
+            # reply_to, thread, idem (idempotency key), note. At-least-once
+            # delivery: readers dedupe by id. Kind must be in the fixed
+            # vocabulary; provenance uses the #22 per-field tokens. A message
+            # carries no authority: it never claims, adjudicates, labels, or
+            # merges.
+            for required in ("id", "task", "from", "kind"):
+                if required not in attrs:
                     raise RecordError(
-                        f"coord:receipt provenance '{token}' not in "
-                        f"{sorted(PROVENANCE_VOCAB)} (comment {comment_id})"
+                        f"coord:message missing {required}= (comment {comment_id})"
                     )
+            kind = attrs["kind"].strip().lower()
+            if kind not in MESSAGE_KINDS:
+                raise RecordError(
+                    f"coord:message kind '{attrs['kind']}' not in "
+                    f"{sorted(MESSAGE_KINDS)} (comment {comment_id})"
+                )
+            attrs["kind"] = kind
+            _check_provenance(attrs, comment_id, "message")
         else:
             required = {"proposal": "id", "claim": "issue"}[rtype]
             if required not in attrs:
@@ -276,6 +324,7 @@ class CoordState:
     advisory_verdicts: dict[str, list[Record]] = field(default_factory=dict)
     claims: dict[tuple[str, str], Record] = field(default_factory=dict)  # (issue, who) -> latest
     receipts: dict[str, Record] = field(default_factory=dict)            # run id -> latest
+    messages: dict[str, Record] = field(default_factory=dict)            # msg id -> latest
     malformed: list[tuple[int, int, str]] = field(default_factory=list)  # issue, comment_id, error
 
     @property
@@ -448,6 +497,8 @@ def fold(
                  claiming one issue therefore keep two rows and collisions()
                  fires; the same holder re-claiming replaces its own row.
     - receipts:  keyed by run id; append-only stream folded to latest per run.
+    - messages:  keyed by message id; at-least-once delivery means the same
+                 id may be posted twice — fold keeps the latest row per id.
     """
     state = CoordState()
     ordered = sorted(comments, key=lambda c: (c.get("created_at", ""), int(c.get("comment_id", 0))))
@@ -479,4 +530,6 @@ def fold(
                 state.claims[(rec.key, who)] = rec
             elif rec.rtype == "receipt":
                 state.receipts[rec.key] = rec
+            elif rec.rtype == "message":
+                state.messages[rec.key] = rec
     return state

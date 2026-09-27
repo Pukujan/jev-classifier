@@ -1,6 +1,6 @@
 # README human review checklist
 
-This checklist is an acceptance aid for issue #35. Automated validators cannot answer these questions.
+This checklist is an optional reader/visual QA aid for issue #35. Automated validators cannot answer these questions, and the owner waived separate sign-off as a merge gate. Keep the checklist unchecked unless a person records the review and result.
 
 ## First-time reader
 
@@ -28,4 +28,4 @@ This checklist is an acceptance aid for issue #35. Automated validators cannot a
 
 ## Status
 
-The checklist is provided for an independent reviewer. Do not mark it complete without recording the reviewer and review result.
+The checklist may be used by any reader who wants to report these observations. It is not a required merge approval; do not mark it complete without recording who reviewed it and what they found.

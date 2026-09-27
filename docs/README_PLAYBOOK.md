@@ -39,4 +39,4 @@ Use the repository's synthetic fixture to explain one-fragment and mocked multi-
 
 Read only the section headings, first sentences, bold anchors, and link text. The outline should still explain the reader's problem, current promise, mechanism, boundary, and next action. The local checker verifies headings, reference files, image links, and relative README links. It cannot review whether the prose is true or helpful.
 
-Before publishing, complete [README_REVIEW.md](README_REVIEW.md). A citation gives a route to evidence; a human still decides whether the wording matches it.
+Use [README_REVIEW.md](README_REVIEW.md) as optional reader/visual QA. For this README, the owner waived separate sign-off as a merge gate; automated contract, source-fact, link, manifest, and repository checks govern merge readiness. Do not claim a review that did not happen. A citation gives a route to evidence; a human still decides whether the wording matches it.

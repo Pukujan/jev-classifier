@@ -11,6 +11,7 @@ from jev_classifier.normalize import (
     NormalizeError,
     normalize_choice_answer,
     normalize_noul_answer,
+    normalize_score_answer,
 )
 
 
@@ -54,12 +55,24 @@ def apply_normalized_answers(
                 legal_options=legal_options_for(pack, q.id),
                 question_id=q.id,
             )
-        else:
+        elif q.type == "score":
+            if not q.legend:
+                raise NormalizeError(
+                    f"score question {q.id!r} missing legend", kind="parse_error"
+                )
+            normalized[q.id] = normalize_score_answer(
+                raw,
+                legal_scores=q.legend,
+                question_id=q.id,
+            )
+        elif q.type == "noul":
             normalized[q.id] = normalize_noul_answer(
                 raw,
                 question_id=q.id,
                 yes_threshold=yes_threshold,
             )
+        else:
+            raise NormalizeError(f"{q.id}: bad type {q.type!r}", kind="parse_error")
     agg = aggregate_bias_answers(pack, normalized)
     return BiasSignalRecord(
         pack_id=agg["pack_id"],

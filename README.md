@@ -14,19 +14,20 @@ Today the repository can classify a single supplied fragment. Its two-fragment e
 
 This is a model-role-separated research classifier prototype for researchers and maintainers who want structured claim records and a traceable draft. Python handles parsing, validation, aggregation, timestamps, and rendering. Only TypeSafe JEV may supply semantic classifier judgments. Source-generating models may supply untrusted transcripts; their text is not a label or scientific ground truth.
 
-The current source adapter uses Grok through OpenRouter. Model-agnostic source adapters and richer cross-source synthesis remain goals, not shipped capabilities. The role image is a visual explanation of the boundary, not evidence that capture and classification are already joined automatically.
+The current source adapter uses Grok through OpenRouter. Model-agnostic source adapters remain a goal. A bounded deterministic consolidation path is shipped for already-classified claim records with explicit topics; automatically turning multiple raw transcripts into those records and topics remains a goal. The role image is a visual explanation of the boundary, not evidence that capture and classification are already joined automatically.
 
 ## What you can make or use
 
 | Output or workflow | Current status |
 | --- | --- |
-| A versioned, bounded source transcript with citation annotations and a content hash | Shipped in code; one capped live smoke returned HTTP 404, with no retry or live artifact, so provider availability remains unverified. [Source module](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/sources/grok.py) · [Recorded smoke result](https://github.com/Pukujan/jev-classifier/issues/15#issuecomment-5849375676) |
-| A typed claim record for one fragment using a closed JEV choice | Shipped for the single-fragment path. [Classifier](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/classify.py) |
-| Validated choice and yes/no answers | Shipped; score normalization is not implemented. [Normalizer](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/normalize.py) · [open gap #32](https://github.com/Pukujan/jev-classifier/issues/32) |
-| A six-section Markdown paper draft from supplied claim records | Shipped as a deterministic skeleton, not a research synthesis. [Assembler](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/paper/assemble.py) |
+| A versioned, bounded source transcript with citation annotations and a content hash | Shipped in code; one capped live smoke returned HTTP 404, with no retry or live artifact, so provider availability remains unverified. [Source module](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/sources/grok.py) · [Recorded smoke result](https://github.com/Pukujan/jev-classifier/issues/15#issuecomment-5849375676) |
+| A typed claim record for one fragment using a closed JEV choice | Shipped for the single-fragment path. [Classifier](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/classify.py) |
+| Validated choice, score, and yes/no answers | Shipped; scores use a closed ordered rubric and fail closed when a provider legend disagrees. [Normalizer](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/normalize.py) · [score and bias-pack fix, PR #58](https://github.com/Pukujan/jev-classifier/pull/58) |
+| Bounded cross-source consolidation | Shipped for already-formed claim records grouped by explicit topic; it preserves conflicts and resolves current claims at a supplied time. It does not classify multiple raw transcripts or infer their topics. [Consolidator](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/consolidate.py) · [Assembler](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/paper/assemble.py) |
+| A six-section Markdown paper draft from supplied claim records | Shipped as a deterministic skeleton, with an optional `Synthesis` section when the caller supplies topic records; it does not write narrative research prose. [Assembler](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/paper/assemble.py) |
 | Small offline claim-type and contradiction fixtures | Shipped as deterministic, hand-authored synthetic examples modeled on label shapes; no upstream corpus text or benchmark result is included. [Dataset card](https://github.com/Pukujan/jev-classifier/blob/122e4742b260c8e63fc35b2916adb8eb6dfd1e96/docs/DATASETS.md) · [Generator](https://github.com/Pukujan/jev-classifier/blob/122e4742b260c8e63fc35b2916adb8eb6dfd1e96/scripts/generate_synthetic_fixtures.py) |
-| A two-fragment example | Experimentally supported only by synthetic text and mocked JEV answers. [Test](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/tests/test_multisource_e2e.py) |
-| Paper-level quality targets | Planned under [issue #21](https://github.com/Pukujan/jev-classifier/issues/21); no holdout score is reported. |
+| A two-fragment example | Experimentally supported only by synthetic text and mocked JEV answers. [Test](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/tests/test_multisource_e2e.py) |
+| Paper-level evaluation setup | Ten candidate papers and the deterministic `claim_metric_v1` are selected and recorded. Reverse-analysis annotations, a frozen holdout evaluation, 30 qualifying iterations, and the 0.80 claim-level F1 target remain incomplete. See the [dataset card](docs/DATASET_CARD.md), [metric PR #66](https://github.com/Pukujan/jev-classifier/pull/66), and [quality program #21](https://github.com/Pukujan/jev-classifier/issues/21). |
 
 ## How it works
 
@@ -40,9 +41,9 @@ D --> E[Render draft skeleton]
 
 1. A source adapter can capture a bounded research response. The captured words and citations remain untrusted input.
 2. A caller supplies one fragment, its allowed labels, and a short description for every label.
-3. The classifier sends that fragment to the OpenRouter Decisions endpoint configured for TypeSafe JEV. The normalizer rejects malformed or out-of-set answers instead of inventing a label.
-4. Python records the returned label, epistemic status, evidence pointer, model field, probability map when present, and transaction time. Optional valid-time fields are separate, but timestamp order and evidence-reference existence are not checked yet.
-5. The assembler renders supplied records into Title, Abstract, Claims, Provenance, Lineage, and Citations sections. It does not write a narrative synthesis or establish that citations support claims.
+3. The classifier sends that fragment to the OpenRouter Decisions endpoint configured for TypeSafe JEV. Choice, ordered-rubric score, and yes/no normalizers reject malformed or out-of-set answers instead of inventing a judgment.
+4. The legacy per-fragment record builder stores the returned label, epistemic status, evidence pointer, model field, probability map when present, and transaction time. That path does not parse timestamp strings or resolve evidence references. Separate reference-graph validation checks source spans and cross-record links, while the cross-source consolidator validates its own bitemporal inputs.
+5. The assembler renders the six required sections and can add a deterministic `Synthesis` section when the caller supplies topic records. It does not write narrative research prose, choose the topics, or establish that citations support claims.
 
 ![A researcher links a paper excerpt to a structured claim card, showing separate source and judgment roles.](assets/marketing/keep-model-roles-clear.jpg)
 
@@ -50,10 +51,11 @@ D --> E[Render draft skeleton]
 
 A field being present is not a guarantee about the evidence behind it. A citation makes a claim traceable; it does not make the claim true.
 
-- The JEV-only classifier rule is a project boundary, but returned model identity is not yet checked against the request on every path. See the [fragment classifier](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/classify.py) and [Decisions client](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/src/jev_classifier/decisions.py).
-- The ontology is a small OWL2 vocabulary; tests parse its Turtle, but there is no SHACL validator or full OWL reasoner. See the [ontology](https://github.com/Pukujan/jev-classifier/blob/f9ffdf018a03d9af4272fec688546de582afe196/ontology/jev_classifier_claims.ttl).
+- In the legacy per-fragment path, returned model identity is not yet checked against the requested identity end to end. See the [fragment classifier](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/classify.py) and [Decisions client](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/decisions.py).
+- The ontology is a small OWL2 vocabulary; tests parse its Turtle and assert the current activity/agent edges, but there is no SHACL validator or full OWL reasoner. See the [ontology](https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/ontology/jev_classifier_claims.ttl).
+- Cross-source consolidation only operates on supplied claim records with explicit topics. It preserves disagreements, but does not extract or classify claims from raw transcripts.
 - Current bias checks are structured signals from closed JEV questions. They are not a validated detector of model or agent bias.
-- Real-paper claim fidelity, the hidden holdout, ten-paper reverse analysis, and 30 development iterations are planned in [issue #21](https://github.com/Pukujan/jev-classifier/issues/21). The requested 0.80 claim-level F1 is a target, not a measured result.
+- Ten candidate papers and a pre-registered metric are available, but reverse-analysis annotations, the hidden holdout evaluation, and 30 qualifying iterations are still outstanding under [issue #21](https://github.com/Pukujan/jev-classifier/issues/21). The requested 0.80 claim-level F1 is a target, not a measured result.
 - The longer [system specification](docs/SYSTEM_SPEC.md) describes additional implementation gaps. Its technical contract remains owned by its issue.
 
 ## Image generation and use
@@ -81,7 +83,7 @@ The images are explanatory editorial illustrations. Their exact visible copy, ge
 
 This project reuses the [Project Continuity Modules](https://github.com/Pukujan/project-continuity-modules) as a helper for continuity and evidence-led records; PCM is not the classifier's authority or a runtime dependency. The [PROV-O model](https://www.w3.org/TR/prov-o/) is a reference for representing entities, activities, agents, and derivation, while the project's actual vocabulary and validation scope are narrower.
 
-The repository's [Grok source-capture work](https://github.com/Pukujan/jev-classifier/issues/15), [JEV and provenance specification](docs/SYSTEM_SPEC.md), and [quality-program issue](https://github.com/Pukujan/jev-classifier/issues/21) are the direct project history. Reuse the evidence boundary, not an assumption that future synthesis is already complete.
+The repository's [Grok source-capture work](https://github.com/Pukujan/jev-classifier/issues/15), [JEV and provenance specification](docs/SYSTEM_SPEC.md), [prior-work map](docs/PRIOR_WORK.md), and [quality-program issue](https://github.com/Pukujan/jev-classifier/issues/21) are the direct project history. Reuse the evidence boundary, not an assumption that automatic transcript-to-paper synthesis is complete.
 
 ## Try it
 

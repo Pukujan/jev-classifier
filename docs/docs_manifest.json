@@ -1,0 +1,884 @@
+{
+  "schema": "jev-classifier.docs-manifest.v1",
+  "manifest_version": "1.0.0",
+  "excluded_paths": [
+    {
+      "path": ".env",
+      "reason": "secrets — never inventoried, displayed, or committed"
+    },
+    {
+      "path": ".coord",
+      "reason": "local coordination database (gitignored, rebuildable projection)"
+    },
+    {
+      "path": ".ops",
+      "reason": "local ops database (gitignored, rebuildable projection)"
+    },
+    {
+      "path": ".cache",
+      "reason": "local caches, including pinned external tool checkouts"
+    },
+    {
+      "path": ".worktrees",
+      "reason": "temporary task worktrees"
+    },
+    {
+      "path": "node_modules",
+      "reason": "dependency installs, not documentation"
+    },
+    {
+      "path": "data",
+      "reason": "external datasets kept out of git; referenced by name and revision"
+    },
+    {
+      "path": ".research_cache",
+      "reason": "external research cache (gitignored)"
+    }
+  ],
+  "documents": [
+    {
+      "id": "index",
+      "path": "docs/INDEX.md",
+      "title": "Documentation index and folder tree",
+      "summary": "Reader-first navigation, a curated folder tree, the authority order, and the managed-document checker.",
+      "audience": "newcomer",
+      "status": "shipped",
+      "owner_issue": 63,
+      "parent": null,
+      "keywords": [
+        "navigation",
+        "index",
+        "tree",
+        "start"
+      ],
+      "related": [
+        "epistemic-system",
+        "human-review-checklist"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "script",
+          "ref": "scripts/validate_docs.py"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/docs_manifest.schema.json"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "ce04bbc46db1565a195839dacca24b9105a63425c79cf752a24c696c8b4ebe23"
+    },
+    {
+      "id": "epistemic-system",
+      "path": "docs/EPISTEMIC_SYSTEM.md",
+      "title": "Epistemic system: what the project may claim",
+      "summary": "Plain-language guide separating source facts, JEV judgments, inferences, unknowns and proposals, with limits and a verification path.",
+      "audience": "newcomer",
+      "status": "shipped",
+      "owner_issue": 63,
+      "parent": null,
+      "keywords": [
+        "epistemics",
+        "provenance",
+        "uncertainty",
+        "valid-time",
+        "limits"
+      ],
+      "related": [
+        "system-spec",
+        "claim-schema",
+        "index"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "docs/SYSTEM_SPEC.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/CLAIM_SCHEMA.md"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/reference_claim_graph.schema.json"
+        },
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/reference/validate.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "3fa208abc111ee3fa8bf7589fcb3dcc2fe747de8a6483d3f39e0209e41d05d52"
+    },
+    {
+      "id": "system-spec",
+      "path": "docs/SYSTEM_SPEC.md",
+      "title": "System specification: module contracts",
+      "summary": "The normative module contracts: boundaries, which roles are JEV and which are deterministic Python, and the invariants each module must hold.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": 30,
+      "parent": null,
+      "keywords": [
+        "spec",
+        "contracts",
+        "modules",
+        "invariants",
+        "roles"
+      ],
+      "related": [
+        "epistemic-system",
+        "claim-schema",
+        "index"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "docs/spec/modules.json"
+        },
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/classify.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "ea3631a2cf352278530e14da9a31034004a91d57",
+      "reviewed_sha256": "eaffab8cd00352b4692ce9b9744885e8f88313787f1c92908b5c42b6e785a7fd"
+    },
+    {
+      "id": "human-review-checklist",
+      "path": "docs/HUMAN_REVIEW_CHECKLIST.md",
+      "title": "Human review checklist",
+      "summary": "Optional reader-usefulness and visual QA questions, kept separate from automated merge gates.",
+      "audience": "reviewer",
+      "status": "shipped",
+      "owner_issue": 63,
+      "parent": null,
+      "keywords": [
+        "review",
+        "readability",
+        "accessibility",
+        "checklist"
+      ],
+      "related": [
+        "index",
+        "epistemic-system"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "script",
+          "ref": "scripts/validate_docs.py"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/INDEX.md"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "b150fc805450fd6c536827686785fdeacac038ac80d929945dbe3673c13d0e1c"
+    },
+    {
+      "id": "authority",
+      "path": "docs/AUTHORITY.md",
+      "title": "Authority and the claim protocol",
+      "summary": "Who decides when agents disagree, and the reserved-branch claim protocol that prevents two writers on one leaf.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": null,
+      "parent": null,
+      "keywords": [
+        "authority",
+        "arbiter",
+        "claim",
+        "protocol"
+      ],
+      "related": [
+        "agent-proposals",
+        "agent-coord"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/records.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "ca1ef7ad918617da3b834d1789eb90cb64537502db210b1a186e1b95ece0440d"
+    },
+    {
+      "id": "agent-coord",
+      "path": "docs/AGENT_COORD.md",
+      "title": "Agent coordination aid",
+      "summary": "The optional local SQLite coordination aid: checkpoints, ownership, collisions. Never authoritative over GitHub.",
+      "audience": "agent",
+      "status": "shipped",
+      "owner_issue": 22,
+      "parent": null,
+      "keywords": [
+        "coordination",
+        "checkpoint",
+        "ownership",
+        "collision"
+      ],
+      "related": [
+        "agent-proposals",
+        "authority"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/store.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "e1835dca7a093b83704debc7cf753017e55fd1b7aca8a99edfb3242eb9e2eddc"
+    },
+    {
+      "id": "agent-proposals",
+      "path": "docs/AGENT_PROPOSALS.md",
+      "title": "Proposal, verdict and receipt mechanics",
+      "summary": "The comment grammar for proposals, verdicts, claims and receipts, and how the board folds them deterministically.",
+      "audience": "agent",
+      "status": "shipped",
+      "owner_issue": 22,
+      "parent": null,
+      "keywords": [
+        "proposal",
+        "verdict",
+        "receipt",
+        "grammar",
+        "board"
+      ],
+      "related": [
+        "authority",
+        "agent-coord"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/records.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/coord_board.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "073e3bce56037c6bd6d50efb25f712c9b53312419393705a09132a086c17b985"
+    },
+    {
+      "id": "claim-schema",
+      "path": "docs/CLAIM_SCHEMA.md",
+      "title": "Claim ledger schema",
+      "summary": "The claim-record fields: label, epistemic status, evidence, model, provenance and bitemporal dates.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": null,
+      "parent": null,
+      "keywords": [
+        "claim",
+        "schema",
+        "evidence",
+        "provenance"
+      ],
+      "related": [
+        "epistemic-system",
+        "system-spec"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/classify.py"
+        },
+        {
+          "kind": "spec",
+          "ref": "ontology/jev_classifier_claims.ttl"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "b70452b711af538a0e2121070a84f865136e1ec58aa8a6d16dc7a820e55e2311"
+    },
+    {
+      "id": "datasets",
+      "path": "docs/DATASETS.md",
+      "title": "Datasets and fixtures",
+      "summary": "Which fixtures are synthetic, what they are for, and the licensing and storage rules for external data.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": null,
+      "parent": null,
+      "keywords": [
+        "datasets",
+        "fixtures",
+        "licensing",
+        "storage"
+      ],
+      "related": [
+        "system-spec"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "test",
+          "ref": "tests/fixtures/reference/claim_graph_ok.json"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "e4a1930ef6945ee81c3f005071b1722a2bb30bcb3ead70e457c7d846af713063"
+    },
+    {
+      "id": "dataset-card",
+      "path": "docs/DATASET_CARD.md",
+      "title": "Reference paper dataset card",
+      "summary": "The ten selected reference papers, why each is included, its version, and the rights note for that version.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 29,
+      "parent": null,
+      "keywords": [
+        "dataset",
+        "reference-papers",
+        "selection",
+        "rights"
+      ],
+      "related": [
+        "datasets",
+        "epistemic-system"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "datasets/reference_papers.json"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/reference_papers.schema.json"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/validate_reference_papers.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
+      "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc"
+    },
+    {
+      "id": "grok-source",
+      "path": "docs/GROK_SOURCE.md",
+      "title": "Grok source capture",
+      "summary": "The untrusted source-capture adapter: it may produce source material only, never a label or canonical claim.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 15,
+      "parent": null,
+      "keywords": [
+        "grok",
+        "source",
+        "capture",
+        "untrusted"
+      ],
+      "related": [
+        "system-spec",
+        "epistemic-system"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/sources/grok.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/grok_research.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "568a4211f195d72fe4592df061f6037c19e20626ce6570510747ec1aa3821a02"
+    },
+    {
+      "id": "issue-1-draft",
+      "path": "docs/ISSUE_1_DRAFT.md",
+      "title": "Issue 1 draft (historical)",
+      "summary": "The original bootstrap issue draft, kept for lineage. Not normative.",
+      "audience": "maintainer",
+      "status": "unknown",
+      "owner_issue": 1,
+      "parent": null,
+      "keywords": [
+        "historical",
+        "bootstrap",
+        "draft"
+      ],
+      "related": [
+        "research-notes"
+      ],
+      "canonical_sources": [],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "1b2e15a201cc4ba8f1db20108a1f387e666fdd47fe2553cf5feed11fcf1a0d6c"
+    },
+    {
+      "id": "ops-ledger",
+      "path": "docs/OPS_LEDGER.md",
+      "title": "Ops ledger",
+      "summary": "The ops projection protocol: a rebuildable local database plus a committed read-only ledger. Not a decision authority.",
+      "audience": "maintainer",
+      "status": "shipped",
+      "owner_issue": 18,
+      "parent": null,
+      "keywords": [
+        "ops",
+        "ledger",
+        "projection",
+        "discrepancy"
+      ],
+      "related": [
+        "authority",
+        "agent-coord"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/ops/store.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/ops_sync.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0f18adab77c35c08ea8fa04d83d52d96e6bf942bb53d960dda4e9022fd0ef6cd"
+    },
+    {
+      "id": "research-notes",
+      "path": "docs/RESEARCH_NOTES.md",
+      "title": "Research notes (non-normative)",
+      "summary": "Bootstrap research notes. Informational only; no contract depends on them.",
+      "audience": "contributor",
+      "status": "unknown",
+      "owner_issue": null,
+      "parent": null,
+      "keywords": [
+        "research",
+        "notes",
+        "bootstrap"
+      ],
+      "related": [
+        "issue-1-draft"
+      ],
+      "canonical_sources": [],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "16acf1f9d3d341ccb66d0f865ba63647f288003f1266183bfb5d4fd1374a298b"
+    },
+    {
+      "id": "brand-direction",
+      "path": "docs/BRAND_DIRECTION.md",
+      "title": "Brand direction",
+      "summary": "Target voice, preferred terms, and visual direction for project-facing documentation.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "brand",
+        "voice",
+        "visual"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "3987070f002a76aabe4d29fc3675849dd64d5232955b4196d0206af245b41eb8"
+    },
+    {
+      "id": "content-research",
+      "path": "docs/CONTENT_RESEARCH.md",
+      "title": "Content research and evidence map",
+      "summary": "Evidence map behind README claims, editorial choices, and the limits each source leaves open.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "evidence",
+        "readme",
+        "research"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "9d750ddd06e3877727f85f28bf4e51a00d6c3b1d59e7ac7681746036167f768d"
+    },
+    {
+      "id": "holdout-evaluation",
+      "path": "docs/HOLDOUT_EVALUATION.md",
+      "title": "Holdout evaluation",
+      "summary": "Quality targets, split requirements, and evaluation limits; not a report of achieved scores.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "holdout",
+        "evaluation",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "d52410edf2fe9a044e05ac803f22aea59a98548eb289d991988def1b4e81b9ad"
+    },
+    {
+      "id": "image-guide",
+      "path": "docs/IMAGE_GUIDE.md",
+      "title": "Image generation and use",
+      "summary": "Image roles, accessibility, provenance, review notes, and reuse guidance for README assets.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "image",
+        "accessibility",
+        "assets"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "1408b1656fa7fdcbbdc9dc347baf7a05b360c79cd7a63c3a336e48768158b06c"
+    },
+    {
+      "id": "migrating-to-0-2",
+      "path": "docs/MIGRATING_TO_0.2.md",
+      "title": "Content Generation Modules 0.2 guide",
+      "summary": "Repository guidance for the CGM 0.2 human-facing README contract.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "4ad3a8f0daff7332ca8326c6d36440a5b7c56d0ebf76f6f08f3910e91650c989"
+    },
+    {
+      "id": "migrating-to-0-3",
+      "path": "docs/MIGRATING_TO_0.3.md",
+      "title": "Content Generation Modules 0.3 guide",
+      "summary": "Repository guidance for CGM 0.3 scan-first writing and target-specific visual direction.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "b8f591d9c932dbbbcb47a7c8b284f7bcce6e2eccc7a0e774ae54769508f0e89d"
+    },
+    {
+      "id": "migrating-to-0-4",
+      "path": "docs/MIGRATING_TO_0.4.md",
+      "title": "Content Generation Modules 0.4 guide",
+      "summary": "Repository guidance for the pinned CGM 0.4.0 draft contract.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "cgm",
+        "migration",
+        "readme"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "686a237d1f5cc6216cb0c95e0612cdbbd48f8377180109073072f296c17882d0"
+    },
+    {
+      "id": "prior-work",
+      "path": "docs/PRIOR_WORK.md",
+      "title": "Prior work and references",
+      "summary": "Repository prior work and references that shape the README evidence boundary.",
+      "audience": "newcomer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "prior-work",
+        "references",
+        "provenance"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "1fb5ada5c08a1c3b952271cc0c0d8cf525d8925c2271cdda8e0cc4a1e0385590"
+    },
+    {
+      "id": "provenance-and-citation",
+      "path": "docs/PROVENANCE_AND_CITATION.md",
+      "title": "Provenance and citation guide",
+      "summary": "How to record a bounded claim, source, support, limit, source revision, and time.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "provenance",
+        "citation",
+        "evidence"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "bbc4805e0de5b3532e18d6a347e4c07e4dd85e43b02a756893de02c470b1f5b9"
+    },
+    {
+      "id": "readme-generation",
+      "path": "docs/README_GENERATION.md",
+      "title": "README generation and validation record",
+      "summary": "Pinned CGM authoring modules, image-generation limits, and reproducible README checks.",
+      "audience": "maintainer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "generation",
+        "validation"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "829c23497ecb7d2e1695c9f1841fb2f10b8a245b4430b0b36bd3921a71b45aee"
+    },
+    {
+      "id": "readme-playbook",
+      "path": "docs/README_PLAYBOOK.md",
+      "title": "README playbook",
+      "summary": "Reader-first source mapping and project-story drafting steps for future documentation changes.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "playbook",
+        "writing"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "e6d72deb16ddfbf8f00cadde3bce3ff65a8a7fbe5f572baa0cceed5025e28b5d"
+    },
+    {
+      "id": "readme-quality-pdd",
+      "path": "docs/README_QUALITY_PDD.md",
+      "title": "Product definition for the README",
+      "summary": "Product-definition checks for the README audience, promise, and claim boundaries.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "product",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "5e3de2177e6b2209e78cf6cda29a41f1b6f0450155f8f902bf26e3199be411d1"
+    },
+    {
+      "id": "readme-quality-sdd",
+      "path": "docs/README_QUALITY_SDD.md",
+      "title": "System design for the README",
+      "summary": "System-flow and boundary choices used to explain the product at reader height.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "system",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "610515a285ad6fb49a6cf1d0ba8a5960ed3097d78152cab22556033b35354d09"
+    },
+    {
+      "id": "readme-quality-tdd",
+      "path": "docs/README_QUALITY_TDD.md",
+      "title": "Test design for human-facing project claims",
+      "summary": "Automated checks and optional reader tasks for changes to human-facing project claims.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "tests",
+        "quality"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "0de0d0eca7e4fb2eef38363180da4a86daab35bbf8bdb23e5047e55396aa71ec"
+    },
+    {
+      "id": "readme-review",
+      "path": "docs/README_REVIEW.md",
+      "title": "README human review checklist",
+      "summary": "Optional reader and visual QA checklist; separate sign-off is not a merge gate.",
+      "audience": "reviewer",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "readme",
+        "review",
+        "accessibility"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f7d84fe730ca50db47fd74e5d2229a77faadc8310f59be06506996f31d344b4c"
+    },
+    {
+      "id": "reverse-analysis-pcm-and-adopters",
+      "path": "docs/REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md",
+      "title": "Reverse analysis of PCM and related repository examples",
+      "summary": "Source-grounded comparison of PCM and adopter documentation approaches.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 35,
+      "parent": null,
+      "keywords": [
+        "reverse-analysis",
+        "pcm",
+        "adopters"
+      ],
+      "related": [],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "35"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "95334a7b49bef1e6347567c492cd99824260308f9012e58f8dbb227c0b831009"
+    }
+  ]
+}

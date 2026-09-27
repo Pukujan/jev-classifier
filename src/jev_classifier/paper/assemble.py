@@ -81,6 +81,55 @@ def _claim_bullet(claim: Mapping[str, Any], index: int) -> str:
     return "\n".join(parts)
 
 
+def _synthesis_block(topics: Sequence[Mapping[str, Any]]) -> str:
+    """Cross-source topic state, one bullet per topic (#69).
+
+    Rendered from topic records produced by ``jev_classifier.consolidate``; no
+    wording is invented here. Disagreement stays visible: a conflicted topic
+    names every live label and current claim id, and retired claims are named
+    rather than silently dropped.
+    """
+    from jev_classifier.consolidate import topic_digest
+
+    lines: list[str] = []
+    for topic in topics:
+        lines.append(f"- **{topic['about']}** — {topic_digest(topic)}")
+        retired = topic.get("retired") or []
+        if retired:
+            rids = ", ".join(str(c.get("id") or "?") for c in retired)
+            lines.append(f"  - retired (superseded or outside valid time): {rids}")
+    return "\n".join(lines)
+
+
+def _validate_topics(topics: Sequence[Mapping[str, Any]]) -> None:
+    """Fail closed on topic records that do not look like consolidate output.
+
+    Checks shape only (keys, state vocabulary, list types); it never recomputes
+    or repairs a topic, because a repaired state here would silently disagree
+    with the consolidation module's own verdict.
+    """
+    from jev_classifier.consolidate import TOPIC_STATES
+
+    if isinstance(topics, (str, bytes)) or not isinstance(topics, Sequence):
+        raise AssembleError("topics must be a sequence of topic objects")
+    for i, topic in enumerate(topics):
+        if not isinstance(topic, Mapping):
+            raise AssembleError(f"topics[{i}] must be an object")
+        for key in ("about", "state", "labels", "evaluated_at", "current", "retired"):
+            if key not in topic:
+                raise AssembleError(f"topics[{i}] missing key: {key}")
+        if not isinstance(topic["about"], str) or not topic["about"].strip():
+            raise AssembleError(f"topics[{i}].about must be a non-empty string")
+        if topic["state"] not in TOPIC_STATES:
+            raise AssembleError(
+                f"topics[{i}].state {topic['state']!r} not in {list(TOPIC_STATES)}"
+            )
+        for key in ("labels", "current", "retired"):
+            val = topic[key]
+            if isinstance(val, (str, bytes)) or not isinstance(val, Sequence):
+                raise AssembleError(f"topics[{i}].{key} must be a list")
+
+
 def _provenance_block(claims: Sequence[Mapping[str, Any]]) -> str:
     lines = [
         "| Claim | Recorded at | Model | Epistemic status |",
@@ -139,10 +188,16 @@ def assemble_paper(
     title: str = "JEV-classified research sketch",
     abstract: str | None = None,
     assembled_at: str | None = None,
+    topics: Sequence[Mapping[str, Any]] | None = None,
 ) -> str:
     """Build a medium-quality markdown paper skeleton from claim records.
 
-    Deterministic: same inputs ? same markdown (aside from ``assembled_at`` default).
+    ``topics`` (optional) is a sequence of topic records from
+    ``jev_classifier.consolidate.consolidate_claims``; when given, a Synthesis
+    section renders the cross-source state between Abstract and Claims. Passing
+    malformed topics fails closed rather than dropping the section.
+
+    Deterministic: same inputs -> same markdown (aside from ``assembled_at`` default).
     """
     if not isinstance(claims, Sequence) or isinstance(claims, (str, bytes)):
         raise AssembleError("claims must be a sequence of claim objects")
@@ -173,7 +228,12 @@ def assemble_paper(
         "Lineage": f"## Lineage\n\n{_lineage_block(normalized)}",
         "Citations": f"## Citations\n\n{_citations_block(normalized)}",
     }
-    body = "\n\n".join(sections[name] for name in REQUIRED_SECTIONS)
+    order = list(REQUIRED_SECTIONS)
+    if topics is not None:
+        _validate_topics(topics)
+        sections["Synthesis"] = f"## Synthesis\n\n{_synthesis_block(topics)}"
+        order.insert(order.index("Claims"), "Synthesis")
+    body = "\n\n".join(sections[name] for name in order)
     validate_paper_markdown(body, claims=normalized)
     return body + "\n"
 

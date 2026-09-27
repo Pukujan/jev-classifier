@@ -1,9 +1,9 @@
 # SYSTEM SPEC — jev-classifier module contracts
 
 ```yaml
-spec_version: 0.2.0
+spec_version: 0.3.0
 status: draft
-updated: 2026-09-26
+updated: 2026-09-27
 owner: authoritative agent (claude-code-main)
 parent_issue: 21
 leaf_issue: 30
@@ -44,7 +44,9 @@ assembly. JEV does not generate narrative, summaries, or citations.
                                                                         │
                           [7] Paper assembly ◀── [6] Ontology/SHACL ◀── [5] Provenance
                              (deterministic)        (deterministic)       /bitemporal
-                                                                          (deterministic)
+                                ▲                                          (deterministic)
+                          [8] Claim consolidation (deterministic): correlate claims by
+                             subject, resolve which one currently holds, keep conflicts
 
 Cross-cutting: [C] Coordination (SQLite aid) · [O] Ops ledger (projection) · [B] Bias signals
 ```
@@ -82,15 +84,18 @@ canonical label, score, or claim, and may not call M2/M3 to promote itself.
 | Role | **deterministic** |
 | Input | one Decisions answer object, or a response body plus question id and legal options / noul threshold |
 | Output | validated typed answer preserving native probability map + confidence |
-| API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
-| Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty |
-| Fail-closed | yes — missing required answer values, a supplied wrong `type`, wrong-typed values, out-of-set choices/probability keys, or malformed answers → `NormalizeError`; an omitted optional `type` is accepted |
-| Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py` |
+| API | `normalize_choice_answer(answer, *, legal_options, question_id)` · `extract_choice_from_response(...)` · `normalize_score_answer(answer, *, legal_scores, question_id)` · `extract_score_from_response(...)` · `normalize_noul_answer(...)` · `extract_noul_from_response(...)` · `NormalizeError(kind="parse_error")` |
+| Invariants | when answer `type` is present it must match the expected primitive; omission of `type` is accepted; `choice` must be a non-empty string **in** `legal_options`; probability keys must not exceed the legal set; `legal_options` must be non-empty; `score` must be a level **in** the ordered rubric legend, and a provider-surfaced `legend` that disagrees with the requested rubric fails closed |
+| Fail-closed | yes — missing required answer values, a supplied wrong `type`, wrong-typed values, out-of-set choices/scores/probability keys, a mismatched or malformed surfaced `legend`, or malformed answers → `NormalizeError`; an omitted optional `type` is accepted |
+| Tests | `tests/test_normalize.py`, `tests/test_normalize_noul.py`, `tests/test_normalize_score.py` |
 
-**Known gap (issue #32):** the declared `score` primitive is **not implemented**
-(`QuestionType = Literal["choice","noul"]`; no `normalize_score_answer`). Either
-implement it or strike it from AGENTS.md/PROJECT.md. Docs must not claim a
-capability the code lacks.
+**Closed (issue #32).** The `score` primitive is implemented:
+`normalize_score_answer` / `extract_score_from_response` validate the chosen
+level against an explicit ordered rubric (`legal_scores`), preserve the native
+probability map, legend, and confidence, and never fabricate a level. A
+provider-surfaced `legend` is preserved when it matches the requested rubric and
+fails closed when it does not, so a rubric disagreement routes to a parse error
+rather than a guessed score. `QuestionType` is `Literal["choice","score","noul"]`.
 
 ### M3 — JEV semantic decisions
 
@@ -216,22 +221,44 @@ silently.
 
 | | |
 |---|---|
-| Version | `0.1.0` |
+| Version | `0.2.0` |
 | Code | `src/jev_classifier/paper/assemble.py` |
 | Role | **deterministic** (templates only; **no LLM**) |
-| Input | sequence of claim-like mappings; callers are responsible for full ClaimRecord validation |
+| Input | sequence of claim-like mappings; optional `topics` (M8 topic records); callers are responsible for full ClaimRecord validation |
 | Output | markdown paper draft |
 | Required sections | `Title`, `Abstract`, `Claims`, `Provenance`, `Lineage`, `Citations` |
-| API | `assemble_paper(...)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
-| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. |
-| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown` |
-| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow) |
+| Optional sections | `Synthesis` — rendered between `Abstract` and `Claims` **only** when `topics=` is passed |
+| API | `assemble_paper(..., topics=None)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
+| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. Topic records are shape-checked (keys + closed state vocabulary) and never recomputed here. |
+| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown`; a malformed topic record raises rather than being dropped |
+| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow); `tests/test_consolidate.py` (Synthesis section, ordering, conflict survival, malformed-topic rejection) |
 
 The output is a **draft skeleton**, not a research paper or evidence synthesis.
 It renders supplied records; it does not independently establish that citations
 support claims or preserve omitted disagreements and limitations. Its
 `Citations` section is an evidence-id-to-claim index, not a bibliography or a
 set of source URLs.
+
+### M8 — Cross-source claim consolidation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/consolidate.py` (issue #69, in flight) |
+| Role | **deterministic** — no model call, no text similarity, no network |
+| Input | validated claim record mappings + an explicit evaluation instant (`at`) |
+| Output | topic records: `about`, `state`, `labels`, `distinct_sources`, `evaluated_at`, `current`, `retired`, `claim_ids` |
+| Topic states | `agreement` (same label, ≥2 distinct sources) · `conflict` (differing live labels) · `single-source` · `unknown` (no currently-valid claim) |
+| API | `consolidate_claims(claims, *, at)`, `topic_digest(topic)`, `TOPIC_STATES`, `ConsolidationError` |
+| Invariants | correlation is by the explicit `about` key — never by wording; agreement requires *distinct* evidence sources (same source twice is repetition, not corroboration); conflict preserves every live label and claim id and never resolves 2-vs-1 by majority; current-holds resolution is bitemporal (`valid_from`/`valid_to` window plus `supersedes` chains); the evaluation instant is a required argument, because a hidden clock would make identical inputs drift day to day |
+| Fail-closed | yes — missing `about`, duplicate ids, dangling or cyclic `supersedes`, inverted or naive/unparseable timestamps, mixed naive-and-aware timezones, and an all-anonymous batch each raise `ConsolidationError` |
+| Tests | `tests/test_consolidate.py` (agreement/conflict/bitemporal/fail-closed paths, digest wording, Synthesis rendering into M7) |
+
+**Known gap:** no module assigns `about` to a claim yet, so subjecting on the
+ingestion side is unimplemented. Until something does, consolidation runs on
+records whose callers supplied a subject. It does not replace M5 (which records
+time fields without ordering them) or M7 (which renders topics without
+recomputing them).
 
 ### C — Coordination
 
@@ -272,20 +299,101 @@ point-query gate importing the same records — it must not become a second boar
 | | |
 |---|---|
 | Version | `0.1.0` |
-| Code | `src/jev_classifier/bias/packs.py`, `aggregate.py`; `scripts/smoke_bias.py` |
+| Code | `src/jev_classifier/bias/packs.py`, `aggregate.py`, `sycophancy.py`; `scripts/smoke_bias.py` |
 | Role | **JEV** for the closed questions; **deterministic** for aggregation |
 | Contract | `BiasPack(pack_id, version, questions)`, `BiasQuestion`, `validate_pack`, `legal_options_for`, `aggregate_bias_answers`, `get_pack`; shipped pack `bias_pack_v1` |
-| Invariants | every question is closed (choice/noul) with a legal option set; pack_id and version required; unknown pack → `NormalizeError`; live smoke **skips without a key** |
-| Tests | `tests/test_bias_packs.py`, `tests/test_smoke_bias.py` |
+| Invariants | every question is closed (`choice`/`score`/`noul`) with a legal option set; `score` questions carry an ordered `legend`; `flags_on` values must be legal for their question; pack_id and version required; unknown pack → `NormalizeError`; live smoke **skips without a key** |
+| Tests | `tests/test_bias_packs.py`, `tests/test_bias_sycophancy.py`, `tests/test_bias_position.py`, `tests/test_smoke_bias.py` |
 
 **Bias signals are measured signals** validated against explicit fixtures. They
 are never presented as proof of bias, and never as proof of correctness.
 
-**Issue #32 reports** defects in the bias pack and score primitive. The current
-aggregate code passes `yes_threshold` to the noul normalizer, so that reported
-threshold defect requires correction at the issue record. Existing signals
-measure source text; they are not validated as a detector of classifier or
-agent bias.
+**Closed (issue #32).** The bias pack now supports `score` questions with an
+explicit ordered rubric; raised flags come from each question's declared
+`flags_on` values (validated to be legal), so the dead hardcoded entries `"high"`
+/ `"yes_biased"` are gone. Noul signals record the `yes_threshold` that produced
+their label. The `overconfidence` question now asks about the classifier's own
+stated confidence against its evidence (calibration), not a property of the
+source text. Sycophancy is a two-call pattern with ΔP computed locally in
+`sycophancy.py` (raw state, then appended pushback; questions inside one request
+stay atomic). Position bias is a pure-Python harness in `tests/test_bias_position.py`,
+never a pack question.
+
+### R — Reference claim schema
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `schemas/reference_claim_graph.schema.json`, `schemas/context_stimulus_manifest.schema.json`, `src/jev_classifier/reference/validate.py` |
+| Role | **deterministic** |
+| Input | a reference claim-graph document, or a privacy-safe context-stimulus manifest |
+| Output | validated records, or `ReferenceSchemaError(kind="schema_error")` |
+| Contract | JSON Schema (draft 2020-12) for record shape; `validate_reference_graph` / `validate_stimulus_manifest` for the cross-record invariants |
+| Invariants | every claim resolves to an immutable paper + source version and carries a non-empty evidence span with `byte_end > byte_start`; relationship endpoints resolve to claims and are never self-referential; valid time (`valid_from`/`valid_to`) and transaction time (`recorded_at`) are separate fields; absent/uncertain dates stay `null` and are never inferred; review records accumulate and a superseding review never deletes the one it replaces; paired counterfactual cases share one condition family and source packet with distinct roles; public records carry no URL, no raw private content, and no low-entropy digest of it |
+| Fail-closed | yes — any shape or cross-record violation raises `ReferenceSchemaError`; nothing is repaired, defaulted, or guessed |
+| Tests | `tests/test_reference_schema.py` |
+
+**Records only (issue #37).** This module defines and validates formats; it does
+not select a corpus (#29), run a benchmark (#23), or assign gold labels.
+Deterministic labels entering the classifier remain TypeSafe JEV-only; these
+human-reviewed records are the evaluation reference, not classifier output.
+
+**JSON Schema is normative here; SHACL is deferred.** The issue body names SHACL
+constraints, but M6 already records that SHACL is unimplemented and that adding
+`pyshacl` needs its own leaf issue. The cross-record invariants SHACL would carry
+are implemented as explicit fail-closed Python checks instead, which gives the
+same guarantee with no new runtime dependency. `jsonschema` is declared in the
+`dev` extra so the schema documents are validated in CI.
+
+**Privacy is structural.** The manifest schema has no field able to carry raw
+private text and rejects unknown keys, so a producer cannot smuggle transcript
+content into a case; private material is referenced only by an opaque
+`audit:` pointer, and public fixtures are synthetic.
+
+---
+
+### E — Claim-level evaluation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/eval/metric.py`, `scripts/eval_claims.py` |
+| Role | **deterministic** |
+| Input | a validated reference claim graph (module `R`) plus a sequence of predicted claims |
+| Output | a score report: primary claim-level micro P/R/F1, per-paper P/R/F1, citation coverage, ontology status |
+| Contract | metric version `claim_metric_v1`; matching rule `span_containment_v1` |
+| Invariants | a predicted claim matches a reference claim only when paper id, source id, and epistemic status agree *and* the predicted span is contained in the reference span; matching is one-to-one with the smallest span winning and ties broken by claim id; a prediction with no usable span, an inverted span, or a non-integer offset is a **miss**, never an exclusion; the graph is validated through module `R` and a malformed graph is rejected rather than partially scored; identical inputs produce identical output |
+| Fail-closed | yes — an unscoreable prediction counts against the metric; a malformed graph raises `ReferenceSchemaError` |
+| Tests | `tests/test_eval_metric.py` |
+
+**The metric is pre-registered (issue #66).** The matching rule is the
+deliverable, and it is frozen before any reference paper exists so the 0.80
+target is measured by a definition nobody could have tuned. A result that does
+not name `claim_metric_v1` is not a valid pre-registered result.
+
+**Containment, not overlap.** Overlap would let one sprawling prediction take
+credit for several reference claims at once, inflating recall without fidelity.
+A span wider than the reference span is therefore a miss, not a partial match.
+
+**Two honest gaps are reported as numbers, not hidden.** First, `classify.py`
+emits `evidence: {fragment_id, path}` and does not produce byte spans, so every
+such prediction is a miss under this rule; the report exposes the usable-span
+count so the gap is visible rather than papered over with a source-level
+fallback. Worse, and measured rather than assumed: even a prediction that covers
+a whole fragment still fails containment, because the fragment span is *wider*
+than a sentence-level reference span. Emitting a span is not enough — the span
+must be at least as tight as the human's. Until the pipeline localizes evidence,
+the primary metric is 0 by construction, and `predictions_with_usable_span`
+distinguishes a run that failed for lack of a span from one that failed for lack
+of precision. Second, module `R` uses lowercase epistemic values while
+`classify.py` emits capitalized ones, so the status comparison normalizes case
+and the report records that it did. Reconciling either vocabulary is a separate
+leaf.
+
+**No substitutes.** Lexical similarity as a proxy for claim fidelity and any
+LLM-as-judge are prohibited by the parent program ruling (5849173786) and are
+not implemented; a test asserts neither is imported. The harness makes no
+network call and produces no label — it scores already-structured claims.
 
 ---
 
@@ -300,9 +408,12 @@ agent bias.
 | M5 Provenance/bitemporal fields | ✗ | ✓ field storage; referential and temporal validation are gaps |
 | M6 Ontology/SHACL | ✗ | ✓ Turtle parse only; SHACL is not implemented |
 | M7 Paper assembly | ✗ | ✓ template rendering from supplied records |
+| M8 Claim consolidation | ✗ | ✓ correlation, bitemporal resolution, conflict preservation |
 | C Coordination | ✗ | ✓ claims, checkpoints, collisions |
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
+| R Reference claim schema | ✗ | ✓ JSON Schema + cross-record validation |
+| E Claim-level evaluation | ✗ | ✓ matching, P/R/F1, coverage; no model call |
 
 No module assigns a non-JEV model a deterministic-output role. If a future leaf
 proposes one, it is rejected by this table — escalate to the authoritative agent.
@@ -353,6 +464,15 @@ Contract index: [`docs/spec/modules.json`](spec/modules.json) — machine-readab
 projection of §2 and §3. `tests/test_system_spec.py` asserts the prose modules
 and the index agree on names and versions, so this document cannot drift from
 the code silently.
+
+Reader-facing companion: [`docs/EPISTEMIC_SYSTEM.md`](EPISTEMIC_SYSTEM.md)
+explains in plain language what each kind of statement here is worth (source
+fact vs JEV judgment vs inference vs unknown vs proposal) and how to verify a
+claim. Navigation and the managed-document inventory live in
+[`docs/INDEX.md`](INDEX.md) and [`docs/docs_manifest.json`](docs_manifest.json);
+`python scripts/validate_docs.py` checks that inventory offline and fails closed
+on a dangling path/source, a broken local link, an excluded path, or a reviewed
+document whose file hash has changed.
 
 ---
 
