@@ -53,7 +53,9 @@
       ],
       "related": [
         "epistemic-system",
-        "human-review-checklist"
+        "human-review-checklist",
+        "human-naming",
+        "issue-log-format"
       ],
       "canonical_sources": [
         {
@@ -66,8 +68,8 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
-      "reviewed_sha256": "722152d5dfa391765850cce287bfd3d031a6ae6281cd425b3864182714e3692e"
+      "reviewed_commit": "e7dc72e7763356c7d543806ad78254d3f6d76aa2",
+      "reviewed_sha256": "cda14a961e4fe292a415da2beb9c43ba272a1fbb746b57ab06d856c04770167b"
     },
     {
       "id": "epistemic-system",
@@ -444,6 +446,73 @@
       "review_state": "unreviewed",
       "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
       "reviewed_sha256": "16acf1f9d3d341ccb66d0f865ba63647f288003f1266183bfb5d4fd1374a298b"
+    },
+    {
+      "id": "human-naming",
+      "path": "docs/HUMAN_NAMING.md",
+      "title": "Human-readable names for issues, commits, PRs, and files",
+      "summary": "Owner rule: issue titles, commit subjects, PR titles, and new file names must be plain human sentences; CGM HSW pin and before/after examples.",
+      "audience": "agent",
+      "status": "shipped",
+      "owner_issue": 79,
+      "parent": null,
+      "keywords": [
+        "naming",
+        "titles",
+        "commits",
+        "pull-requests",
+        "readability"
+      ],
+      "related": [
+        "issue-log-format",
+        "index"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "AGENTS.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/ISSUE_LOG_FORMAT.md"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "e7dc72e7763356c7d543806ad78254d3f6d76aa2",
+      "reviewed_sha256": "0521cd35da71d46f700d5afef254ce9b08b2a0181ca2153e75bf63d5df3fe78b"
+    },
+    {
+      "id": "issue-log-format",
+      "path": "docs/ISSUE_LOG_FORMAT.md",
+      "title": "Issue log format",
+      "summary": "Expanded issue-log and PR opening shape, including the plain-human title rule from HUMAN_NAMING.",
+      "audience": "agent",
+      "status": "shipped",
+      "owner_issue": 79,
+      "parent": null,
+      "keywords": [
+        "issue-log",
+        "pull-request",
+        "format",
+        "titles"
+      ],
+      "related": [
+        "human-naming",
+        "index"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "AGENTS.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/HUMAN_NAMING.md"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "e7dc72e7763356c7d543806ad78254d3f6d76aa2",
+      "reviewed_sha256": "c32c03e73e7602e238514d5d318020fa84a980c97ba85642b427d6e9065b909a"
     }
   ]
 }

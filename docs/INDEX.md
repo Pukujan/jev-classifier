@@ -17,6 +17,11 @@ skip to what you need.
 | Read or write a claim record | [`CLAIM_SCHEMA.md`](CLAIM_SCHEMA.md) | contributor |
 | Find the machine-readable module catalog | [`spec/modules.json`](spec/modules.json) | agent, tooling |
 | Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Write issue titles, commit subjects, PR titles, or new file names in plain human words | [`HUMAN_NAMING.md`](HUMAN_NAMING.md) | agent, contributor |
+| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
 | See which reference papers are selected, and their rights | [`DATASET_CARD.md`](DATASET_CARD.md) | contributor, reviewer |
 
 ## Folder tree (curated)
