@@ -1,0 +1,52 @@
+{
+  "schema": "jev-classifier.docs-manifest.v1",
+  "manifest_version": "1.0.0",
+  "excluded_paths": [
+    {
+      "path": ".coord",
+      "reason": "Local coordination SQLite store; never part of the managed corpus."
+    },
+    {
+      "path": "docs/holdout",
+      "reason": "Restricted holdout material; must not be published."
+    }
+  ],
+  "documents": [
+    {
+      "id": "alpha",
+      "path": "alpha.md",
+      "title": "Alpha guide",
+      "summary": "First synthetic managed document used by the validator tests.",
+      "audience": "newcomer",
+      "status": "shipped",
+      "owner_issue": 63,
+      "parent": null,
+      "keywords": ["fixture", "alpha"],
+      "related": ["beta"],
+      "canonical_sources": [
+        {"kind": "code", "ref": "canonical/example.py"}
+      ],
+      "review_state": "reviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "ef3c7c86706713177c7292a6217fd9a2bf00166e7793344e23cc9e60088a1d1f"
+    },
+    {
+      "id": "beta",
+      "path": "beta.md",
+      "title": "Beta reference",
+      "summary": "Second synthetic managed document, parented to alpha.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": null,
+      "parent": "alpha",
+      "keywords": ["fixture", "beta"],
+      "related": ["alpha"],
+      "canonical_sources": [
+        {"kind": "issue", "ref": "63"}
+      ],
+      "review_state": "reviewed",
+      "reviewed_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "reviewed_sha256": "7284899af5c846db9c13e491f46f05aec37a64c4936e6e8a1d54c79dd60e0089"
+    }
+  ]
+}
