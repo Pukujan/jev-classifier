@@ -245,5 +245,3 @@ def test_overconfidence_question_measures_classifier_calibration() -> None:
     assert "classifier" in text
     assert "confidence" in text
     assert "is the claim stated with certainty" not in text
-
-

@@ -225,6 +225,21 @@ def test_missing_required_document_key_fails_closed() -> None:
         validate_manifest(manifest, root=FIX)
 
 
+def test_missing_owner_issue_fails_closed() -> None:
+    # owner_issue is required even though it may be null.
+    manifest = _fixture()
+    del manifest["documents"][0]["owner_issue"]
+    with pytest.raises(DocsManifestError, match="owner_issue"):
+        validate_manifest(manifest, root=FIX)
+
+
+def test_absent_parent_is_allowed() -> None:
+    # parent is the one optional document key.
+    manifest = _fixture()
+    del manifest["documents"][1]["parent"]
+    validate_manifest(manifest, root=FIX)
+
+
 # --- identity and reference integrity ---
 
 
@@ -273,6 +288,13 @@ def test_issue_source_must_be_a_number() -> None:
     with pytest.raises(DocsManifestError, match="issue number") as excinfo:
         validate_manifest(manifest, root=FIX)
     assert excinfo.value.kind == "dangling_reference"
+
+
+def test_non_ascii_digits_are_not_an_issue_number() -> None:
+    manifest = _fixture()
+    manifest["documents"][1]["canonical_sources"][0]["ref"] = "٦٣"
+    with pytest.raises(DocsManifestError, match="issue number"):
+        validate_manifest(manifest, root=FIX)
 
 
 # --- exclusions, freshness, links, privacy ---
@@ -392,12 +414,48 @@ def test_private_segment_in_canonical_source_fails_closed(tmp_path: Path) -> Non
     assert excinfo.value.kind == "excluded_path"
 
 
+def test_private_path_is_excluded_even_when_absent(tmp_path: Path) -> None:
+    # The privacy classification must not be masked by a dangling reference.
+    root = _materialize(tmp_path, {"ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", ".coord/state.db", "0" * 64)])
+    with pytest.raises(DocsManifestError, match="private path segment") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
+def test_traversal_cannot_dodge_an_excluded_path(tmp_path: Path) -> None:
+    root = _materialize(tmp_path, {"private/secret.md": "# Secret\n"})
+    manifest = _manifest(
+        [_document("secret", "docs/../private/secret.md", "0" * 64)],
+        excluded_paths=[{"path": "private", "reason": "not managed"}],
+    )
+    with pytest.raises(DocsManifestError, match="is excluded by") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
+def test_excluded_path_wins_over_missing_file_on_every_platform(tmp_path: Path) -> None:
+    # Exclusion is decided from the path alone, so it must not depend on the
+    # file existing. Before the ordering fix, an excluded path that did not
+    # exist was reported as dangling_reference on POSIX, where "docs/../x"
+    # fails to resolve unless docs/ exists, while Windows folded the ".."
+    # away and reached the exclusion check. Same manifest, two verdicts.
+    root = _materialize(tmp_path, {"ok.md": "# Ok\n"})
+    manifest = _manifest(
+        [_document("gone", "docs/../private/gone.md", "0" * 64)],
+        excluded_paths=[{"path": "private", "reason": "not managed"}],
+    )
+    with pytest.raises(DocsManifestError, match="is excluded by") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
 # --- read-only and offline guarantees ---
 
 
 def test_validator_source_is_read_only() -> None:
     source = VALIDATOR_SOURCE.read_text(encoding="utf-8")
-    for token in (".write(", ".write_text(", ".mkdir(", "open("):
+    for token in (".write(", ".write_text(", ".write_bytes(", ".mkdir(", "open("):
         assert token not in source, f"validator must not write; found {token!r}"
 
 
@@ -405,3 +463,68 @@ def test_validator_source_is_network_and_model_free() -> None:
     source = VALIDATOR_SOURCE.read_text(encoding="utf-8")
     for token in ("httpx", "requests", "openrouter", "DecisionsClient", "socket", "jsonschema"):
         assert token not in source, f"validator must stay offline; found {token!r}"
+
+
+# --- uninventoried documents (the reverse direction) ---
+
+
+def test_uninventoried_document_fails_closed(tmp_path: Path) -> None:
+    # A page that exists but has no manifest entry. docs/DATASET_CARD.md did
+    # exactly this between #71 and #76 and nothing failed.
+    root = _materialize(tmp_path, {"docs/guide.md": "# Guide\n", "docs/extra.md": "# Extra\n"})
+    manifest = _manifest([_document("guide", "docs/guide.md", _sha256(root / "docs/guide.md"))])
+    with pytest.raises(DocsManifestError, match="not in the manifest") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "uninventoried_document"
+    assert "docs/extra.md" in str(excinfo.value)
+
+
+def test_exempted_document_is_not_reported(tmp_path: Path) -> None:
+    # docs/CURRENT.md is the one deliberate exception: it is rewritten per task,
+    # so any recorded digest would be stale on the next commit.
+    root = _materialize(
+        tmp_path, {"docs/CURRENT.md": "# Current\n", "docs/ok.md": "# Ok\n"}
+    )
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_non_markdown_files_under_docs_are_not_scanned(tmp_path: Path) -> None:
+    # The check is deliberately limited to docs/*.md; the module catalog is a
+    # JSON file and is not covered.
+    root = _materialize(tmp_path, {"docs/spec/modules.json": "{}\n", "docs/ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_nested_markdown_under_docs_is_not_scanned(tmp_path: Path) -> None:
+    # Documents in subdirectories are out of scope for this check.
+    root = _materialize(tmp_path, {"docs/sub/deep.md": "# Deep\n", "docs/ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_absent_docs_directory_is_skipped(tmp_path: Path) -> None:
+    # A root with no docs/ directory (as in the fixture tree) has nothing to
+    # compare against and must not fail.
+    root = _materialize(tmp_path, {"alpha.md": "# Alpha\n"})
+    manifest = _manifest([_document("alpha", "alpha.md", _sha256(root / "alpha.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_orphan_check_does_not_mask_a_specific_error(tmp_path: Path) -> None:
+    # The broadest check runs last, so a stale digest is still reported as
+    # stale even when an uninventoried page is also present.
+    root = _materialize(tmp_path, {"docs/ok.md": "# Ok\n", "docs/extra.md": "# Extra\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", "0" * 64)])
+    with pytest.raises(DocsManifestError, match="stale") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=True)
+    assert excinfo.value.kind == "stale"
+
+
+def test_repository_manifest_inventories_every_doc_page() -> None:
+    # The real manifest, the reason the check exists: SYSTEM_SPEC.md was the
+    # page it was written to catch.
+    validate_manifest(load_manifest(MANIFEST_PATH), check_freshness=True)
+    listed = {d["path"] for d in load_manifest(MANIFEST_PATH)["documents"]}
+    assert "docs/SYSTEM_SPEC.md" in listed

@@ -1,0 +1,42 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.1.0",
+  "assets": [
+    {
+      "path": "assets/marketing/trace-each-claim.jpg",
+      "role": "hero story",
+      "orientation": "wide",
+      "dimensions": "1280 x 854",
+      "text_policy": "Exact title and subtitle only; no extra labels or fabricated metrics.",
+      "exact_title": "Trace each claim",
+      "exact_subtitle": "From scattered sources to reviewable evidence",
+      "prompt_recipe": "Reconstructed prompt intent, not verbatim source prompt. Show a researcher at a warm paper-covered desk tracing one highlighted sentence across scattered research sheets to a small evidence note with a gold path. Editorial illustration, deep navy and cream with muted blue and restrained ochre. Keep the researcher and papers visible. Place exact title 'Trace each claim' and exact subtitle 'From scattered sources to reviewable evidence' in open space. Do not show fake data, metrics, or dense UI.",
+      "alt_text": "A researcher reads a paper at a desk where an ochre line connects a highlighted claim across scattered pages to a small evidence card.",
+      "usage": "README lead visual; place after the one-sentence project description.",
+      "crop_behavior": "Use the full wide frame; preserve the researcher on the left and the title block on the right. At narrow widths, stack image at full width without cropping the title.",
+      "rejection_conditions": "Reject if the headline is misspelled, the connecting line obscures the papers, the reader is hidden, or added text implies unverified automation.",
+      "review_decision": "accepted after visual review at repository image size",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/marketing/prompts/trace-each-claim.md",
+      "hash": "91c0bfa62933d9cd8f4c28b27aa78da80051387f50586c626aa8f95fb671a744"
+    },
+    {
+      "path": "assets/marketing/keep-model-roles-clear.jpg",
+      "role": "supporting story",
+      "orientation": "square",
+      "dimensions": "1024 x 1024",
+      "text_policy": "Exact title and subtitle only; no extra labels or fabricated metrics.",
+      "exact_title": "Keep model roles clear",
+      "exact_subtitle": "Grok provides sources; JEV supplies structured judgments",
+      "prompt_recipe": "Reconstructed prompt intent, not verbatim source prompt. Show a researcher linking a highlighted research excerpt to a separate structured claim card, using a quiet gold connector. Editorial illustration with warm cream paper, deep navy, muted blue, and ochre. The visual should communicate role separation, not automatic integration. Place exact title 'Keep model roles clear' and exact subtitle 'Grok provides sources; JEV supplies structured judgments' in clear upper negative space. Do not add metrics, labels, or dense interface panels.",
+      "alt_text": "A researcher compares a highlighted paper passage with a separate structured claim card connected by a restrained gold line.",
+      "usage": "README workflow section after the source-to-judgment role explanation.",
+      "crop_behavior": "Use the square image without cropping the title or the researcher's shoulder; allow full-width stacking on narrow screens.",
+      "rejection_conditions": "Reject if source text appears automatically trusted, if title/subtitle differ from the record, or if extra interface text or metrics are invented.",
+      "review_decision": "accepted after visual review at repository image size",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/marketing/prompts/keep-model-roles-clear.md",
+      "hash": "4f4a90bacd056294ba2b54b8868e3693a7ca5de6f835f35d06d9ed9d5905ee57"
+    }
+  ]
+}
