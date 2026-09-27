@@ -37,6 +37,7 @@ MANIFEST_SCHEMA_ID = "jev-classifier.docs-manifest.v1"
 
 MANIFEST_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DOCUMENT_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+ISSUE_NUMBER_PATTERN = re.compile(r"^[0-9]+$")
 REVIEWED_COMMIT_PATTERN = re.compile(r"^(uncommitted|[a-f0-9]{40,64})$")
 REVIEWED_SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 
@@ -84,6 +85,8 @@ _DOCUMENT_KEYS = frozenset(
         "reviewed_sha256",
     }
 )
+# ``parent`` is the one optional document key; everything else is required.
+_DOCUMENT_REQUIRED_KEYS = _DOCUMENT_KEYS - {"parent"}
 
 
 class DocsManifestError(ValueError):
@@ -177,6 +180,12 @@ def _reject_unknown_keys(body: Mapping[str, Any], allowed: frozenset[str], label
             )
 
 
+def _require_keys(body: Mapping[str, Any], required: frozenset[str], label: str) -> None:
+    for key in sorted(required):
+        if key not in body:
+            raise DocsManifestError(f"{label} is missing required key {key!r}", kind="schema_error")
+
+
 def _index_unique(items: list[Any], key: str, label: str) -> dict[str, Mapping[str, Any]]:
     out: dict[str, Mapping[str, Any]] = {}
     for item in items:
@@ -189,10 +198,22 @@ def _index_unique(items: list[Any], key: str, label: str) -> dict[str, Mapping[s
 
 
 def _segments(value: str) -> tuple[str, ...]:
-    """Split a manifest path into ``/``-separated segments, ignoring ``.``."""
-    return tuple(
-        segment for segment in value.replace("\\", "/").split("/") if segment and segment != "."
-    )
+    """Split a manifest path into ``/``-separated segments.
+
+    ``.`` segments are dropped and ``..`` segments are resolved, so a path
+    written with traversal (``docs/../private/x.md``) compares the same as its
+    normalized form and cannot dodge an exclusion.
+    """
+    out: list[str] = []
+    for segment in value.replace("\\", "/").split("/"):
+        if not segment or segment == ".":
+            continue
+        if segment == "..":
+            if out:
+                out.pop()
+            continue
+        out.append(segment)
+    return tuple(out)
 
 
 def _is_within(path: str, ancestor: str) -> bool:
@@ -262,6 +283,7 @@ def _within_root(base: Path, candidate: Path) -> bool:
 def _validate_document_shape(document: Any, label: str) -> Mapping[str, Any]:
     body = _require_mapping(document, label)
     _reject_unknown_keys(body, _DOCUMENT_KEYS, label)
+    _require_keys(body, _DOCUMENT_REQUIRED_KEYS, label)
     _require_str_matching(body.get("id"), DOCUMENT_ID_PATTERN, f"{label}.id", "an id slug")
     _require_nonempty_str(body.get("path"), f"{label}.path")
     _require_nonempty_str(body.get("title"), f"{label}.title")
@@ -278,6 +300,7 @@ def _validate_document_shape(document: Any, label: str) -> Mapping[str, Any]:
         source_label = f"{label}.canonical_sources[{idx}]"
         source_body = _require_mapping(source, source_label)
         _reject_unknown_keys(source_body, _SOURCE_REF_KEYS, source_label)
+        _require_keys(source_body, _SOURCE_REF_KEYS, source_label)
         _require_enum(source_body.get("kind"), SOURCE_KINDS, f"{source_label}.kind")
         _require_nonempty_str(source_body.get("ref"), f"{source_label}.ref")
 
@@ -310,6 +333,7 @@ def validate_manifest(
 
     body = _require_mapping(manifest, "manifest")
     _reject_unknown_keys(body, _MANIFEST_KEYS, "manifest")
+    _require_keys(body, _MANIFEST_KEYS, "manifest")
 
     if body.get("schema") != MANIFEST_SCHEMA_ID:
         raise DocsManifestError(
@@ -329,6 +353,7 @@ def validate_manifest(
         label = f"excluded_paths[{idx}]"
         exclusion_body = _require_mapping(exclusion, label)
         _reject_unknown_keys(exclusion_body, _EXCLUSION_KEYS, label)
+        _require_keys(exclusion_body, _EXCLUSION_KEYS, label)
         excluded.append(_require_nonempty_str(exclusion_body.get("path"), f"{label}.path"))
         _require_nonempty_str(exclusion_body.get("reason"), f"{label}.reason")
 
@@ -359,6 +384,28 @@ def validate_manifest(
                 kind="schema_error",
             )
 
+    # The path-classification scans run before the on-disk checks so an
+    # excluded or private path is always reported as ``excluded_path``, even
+    # when the file it names does not exist. Existence would otherwise mask it
+    # as a dangling reference. This also keeps the answer platform-independent:
+    # on POSIX a ".." segment does not resolve unless every intermediate
+    # directory exists, while on Windows it is folded away lexically, so an
+    # existence check that ran first would decide the same manifest differently
+    # on the two platforms.
+    for doc_id, document in docs.items():
+        path = document["path"]
+        _reject_private_path(path, f"document {doc_id!r} path")
+        for exclusion in excluded:
+            if _is_within(path, exclusion):
+                raise DocsManifestError(
+                    f"document {doc_id!r} path {path!r} is excluded by {exclusion!r}",
+                    kind="excluded_path",
+                )
+        for idx, source in enumerate(document["canonical_sources"]):
+            _reject_private_path(
+                source["ref"], f"document {doc_id!r} canonical source {idx} ref"
+            )
+
     for doc_id, document in docs.items():
         path = document["path"]
         if not (base / path).is_file():
@@ -373,7 +420,7 @@ def validate_manifest(
             ref = source["ref"]
             label = f"document {doc_id!r} canonical source {idx}"
             if kind == "issue":
-                if not ref.isdigit():
+                if not ISSUE_NUMBER_PATTERN.match(ref):
                     raise DocsManifestError(
                         f"{label} ({kind}) ref {ref!r} must be a GitHub issue number "
                         f"(digits only)",
@@ -386,15 +433,6 @@ def validate_manifest(
                         f"under {base}",
                         kind="dangling_reference",
                     )
-
-    for doc_id, document in docs.items():
-        path = document["path"]
-        for exclusion in excluded:
-            if _is_within(path, exclusion):
-                raise DocsManifestError(
-                    f"document {doc_id!r} path {path!r} is excluded by {exclusion!r}",
-                    kind="excluded_path",
-                )
 
     tree_page = base / "docs" / "INDEX.md"
     if tree_page.is_file():
@@ -435,10 +473,3 @@ def validate_manifest(
                     f"document {path!r} links to missing target {target!r}",
                     kind="broken_link",
                 )
-
-    for doc_id, document in docs.items():
-        _reject_private_path(document["path"], f"document {doc_id!r} path")
-        for idx, source in enumerate(document["canonical_sources"]):
-            _reject_private_path(
-                source["ref"], f"document {doc_id!r} canonical source {idx} ref"
-            )

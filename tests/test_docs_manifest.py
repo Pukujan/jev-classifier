@@ -225,6 +225,21 @@ def test_missing_required_document_key_fails_closed() -> None:
         validate_manifest(manifest, root=FIX)
 
 
+def test_missing_owner_issue_fails_closed() -> None:
+    # owner_issue is required even though it may be null.
+    manifest = _fixture()
+    del manifest["documents"][0]["owner_issue"]
+    with pytest.raises(DocsManifestError, match="owner_issue"):
+        validate_manifest(manifest, root=FIX)
+
+
+def test_absent_parent_is_allowed() -> None:
+    # parent is the one optional document key.
+    manifest = _fixture()
+    del manifest["documents"][1]["parent"]
+    validate_manifest(manifest, root=FIX)
+
+
 # --- identity and reference integrity ---
 
 
@@ -273,6 +288,13 @@ def test_issue_source_must_be_a_number() -> None:
     with pytest.raises(DocsManifestError, match="issue number") as excinfo:
         validate_manifest(manifest, root=FIX)
     assert excinfo.value.kind == "dangling_reference"
+
+
+def test_non_ascii_digits_are_not_an_issue_number() -> None:
+    manifest = _fixture()
+    manifest["documents"][1]["canonical_sources"][0]["ref"] = "٦٣"
+    with pytest.raises(DocsManifestError, match="issue number"):
+        validate_manifest(manifest, root=FIX)
 
 
 # --- exclusions, freshness, links, privacy ---
@@ -392,12 +414,48 @@ def test_private_segment_in_canonical_source_fails_closed(tmp_path: Path) -> Non
     assert excinfo.value.kind == "excluded_path"
 
 
+def test_private_path_is_excluded_even_when_absent(tmp_path: Path) -> None:
+    # The privacy classification must not be masked by a dangling reference.
+    root = _materialize(tmp_path, {"ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", ".coord/state.db", "0" * 64)])
+    with pytest.raises(DocsManifestError, match="private path segment") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
+def test_traversal_cannot_dodge_an_excluded_path(tmp_path: Path) -> None:
+    root = _materialize(tmp_path, {"private/secret.md": "# Secret\n"})
+    manifest = _manifest(
+        [_document("secret", "docs/../private/secret.md", "0" * 64)],
+        excluded_paths=[{"path": "private", "reason": "not managed"}],
+    )
+    with pytest.raises(DocsManifestError, match="is excluded by") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
+def test_excluded_path_wins_over_missing_file_on_every_platform(tmp_path: Path) -> None:
+    # Exclusion is decided from the path alone, so it must not depend on the
+    # file existing. Before the ordering fix, an excluded path that did not
+    # exist was reported as dangling_reference on POSIX, where "docs/../x"
+    # fails to resolve unless docs/ exists, while Windows folded the ".."
+    # away and reached the exclusion check. Same manifest, two verdicts.
+    root = _materialize(tmp_path, {"ok.md": "# Ok\n"})
+    manifest = _manifest(
+        [_document("gone", "docs/../private/gone.md", "0" * 64)],
+        excluded_paths=[{"path": "private", "reason": "not managed"}],
+    )
+    with pytest.raises(DocsManifestError, match="is excluded by") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
 # --- read-only and offline guarantees ---
 
 
 def test_validator_source_is_read_only() -> None:
     source = VALIDATOR_SOURCE.read_text(encoding="utf-8")
-    for token in (".write(", ".write_text(", ".mkdir(", "open("):
+    for token in (".write(", ".write_text(", ".write_bytes(", ".mkdir(", "open("):
         assert token not in source, f"validator must not write; found {token!r}"
 
 

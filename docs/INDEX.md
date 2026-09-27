@@ -17,6 +17,7 @@ skip to what you need.
 | Read or write a claim record | [`CLAIM_SCHEMA.md`](CLAIM_SCHEMA.md) | contributor |
 | Find the machine-readable module catalog | [`spec/modules.json`](spec/modules.json) | agent, tooling |
 | Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| See which reference papers are selected, and their rights | [`DATASET_CARD.md`](DATASET_CARD.md) | contributor, reviewer |
 
 ## Folder tree (curated)
 
@@ -40,6 +41,7 @@ jev-classifier/
 │   ├── AGENT_PROPOSALS.md         proposal / verdict / receipt mechanics
 │   ├── OPS_LEDGER.md              ops projection protocol
 │   ├── DATASETS.md                fixtures and licensing
+│   ├── DATASET_CARD.md            reference-paper selection and rights
 │   ├── GROK_SOURCE.md             source-capture adapter
 │   ├── RESEARCH_NOTES.md          bootstrap notes (non-normative)
 │   ├── ISSUE_1_DRAFT.md           historical draft
