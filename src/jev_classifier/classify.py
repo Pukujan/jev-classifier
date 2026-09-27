@@ -37,8 +37,13 @@ PCM_CLAIM_KEYS = frozenset(
         "independence_class",
         "response_id",
         "notes",
+        "provenance",
     }
 )
+
+# Ontology / graph namespaces used by attach_claim_prov_edges.
+JCC_NS = "https://github.com/Pukujan/jev-classifier/ontology/claims#"
+PROV_NS = "http://www.w3.org/ns/prov#"
 
 # Legacy / camelCase → canonical snake_case (PCM-friendly). Canonical wins on clash.
 LEGACY_CLAIM_KEY_ALIASES: dict[str, str] = {
@@ -117,6 +122,118 @@ def _validate_optional_iso_or_null(value: Any, key: str) -> None:
         )
 
 
+def _validate_provenance(value: Any) -> None:
+    """Optional nested provenance: claim→activity→agent and activity→used.
+
+    Shape only. Never invents model ids; ``surfaced_model_id`` may be absent.
+    """
+    if value is None:
+        return
+    if not isinstance(value, Mapping):
+        raise NormalizeError("provenance must be an object or null", kind="parse_error")
+    if "was_generated_by" not in value:
+        raise NormalizeError(
+            "provenance requires was_generated_by (ClassificationActivity)",
+            kind="parse_error",
+        )
+    activity = value["was_generated_by"]
+    if not isinstance(activity, Mapping):
+        raise NormalizeError(
+            "provenance.was_generated_by must be an object",
+            kind="parse_error",
+        )
+    if "id" in activity and activity["id"] is not None:
+        if not isinstance(activity["id"], str) or not activity["id"].strip():
+            raise NormalizeError(
+                "provenance.was_generated_by.id must be a non-empty string or null",
+                kind="parse_error",
+            )
+    if "surfaced_model_id" in activity and activity["surfaced_model_id"] is not None:
+        sm = activity["surfaced_model_id"]
+        if not isinstance(sm, str) or not sm.strip():
+            raise NormalizeError(
+                "provenance.was_generated_by.surfaced_model_id must be a "
+                "non-empty string when set (omit or null when provider did not surface one)",
+                kind="parse_error",
+            )
+    agent = activity.get("was_associated_with")
+    if agent is None:
+        raise NormalizeError(
+            "provenance.was_generated_by requires was_associated_with (ClassifierAgent)",
+            kind="parse_error",
+        )
+    if not isinstance(agent, Mapping):
+        raise NormalizeError(
+            "provenance.was_generated_by.was_associated_with must be an object",
+            kind="parse_error",
+        )
+    model_id = agent.get("model_id")
+    if not isinstance(model_id, str) or not model_id.strip():
+        raise NormalizeError(
+            "provenance agent model_id (requested) must be a non-empty string",
+            kind="parse_error",
+        )
+    if "id" in agent and agent["id"] is not None:
+        if not isinstance(agent["id"], str) or not agent["id"].strip():
+            raise NormalizeError(
+                "provenance agent id must be a non-empty string or null",
+                kind="parse_error",
+            )
+    used = activity.get("used")
+    if used is not None:
+        if not isinstance(used, Mapping):
+            raise NormalizeError(
+                "provenance.was_generated_by.used must be an object or null",
+                kind="parse_error",
+            )
+        if "fragment_id" not in used and "path" not in used:
+            raise NormalizeError(
+                "provenance.was_generated_by.used needs fragment_id and/or path",
+                kind="parse_error",
+            )
+
+
+def build_provenance(
+    *,
+    requested_model: str,
+    fragment_id: str | None = None,
+    evidence_path: str | None = None,
+    surfaced_model: str | None = None,
+    activity_id: str | None = None,
+    agent_id: str | None = None,
+) -> dict[str, Any]:
+    """Build nested provenance for claim→activity→agent and activity→used.
+
+    ``requested_model`` is always recorded on the agent as ``model_id``.
+    ``surfaced_model`` is recorded on the activity only when the provider
+    returned a non-empty string — never copied from the requested model.
+    """
+    if not isinstance(requested_model, str) or not requested_model.strip():
+        raise NormalizeError(
+            "requested_model must be a non-empty string",
+            kind="parse_error",
+        )
+    agent: dict[str, Any] = {"model_id": requested_model}
+    if agent_id is not None:
+        agent["id"] = agent_id
+
+    activity: dict[str, Any] = {"was_associated_with": agent}
+    if activity_id is not None:
+        activity["id"] = activity_id
+    if isinstance(surfaced_model, str) and surfaced_model.strip():
+        activity["surfaced_model_id"] = surfaced_model
+
+    used: dict[str, Any] = {}
+    if fragment_id is not None:
+        used["fragment_id"] = fragment_id
+    if evidence_path is not None:
+        used["path"] = evidence_path
+    if used:
+        activity["used"] = used
+
+    return {"was_generated_by": activity}
+
+
 def validate_claim_record(
     claim: Mapping[str, Any],
     *,
@@ -165,6 +282,8 @@ def validate_claim_record(
                 "independence_class must be a non-empty string or null",
                 kind="parse_error",
             )
+    if "provenance" in body:
+        _validate_provenance(body["provenance"])
 
     return dict(body)
 
@@ -184,7 +303,20 @@ def build_claim_record(
     response_id: str | None = None,
     independence_class: str | None = None,
     claim_id: str | None = None,
+    provenance: Mapping[str, Any] | None = None,
+    requested_model: str | None = None,
+    surfaced_model: str | None = None,
+    activity_id: str | None = None,
+    agent_id: str | None = None,
 ) -> dict[str, Any]:
+    """Build a claim JSON record.
+
+    ``model`` remains the application-required requested model id (maps to
+    ``jcc:modelId`` on the ClassifierAgent). When ``provenance`` is omitted,
+    a nested block is built from ``requested_model`` (defaults to ``model``),
+    evidence fragment pointer, and optional ``surfaced_model`` (activity only;
+    never fabricated from the requested id).
+    """
     ts = recorded_at or datetime.now(timezone.utc).isoformat()
     record: dict[str, Any] = {
         "label": label,
@@ -202,7 +334,77 @@ def build_claim_record(
     }
     if claim_id is not None:
         record["id"] = claim_id
+
+    if provenance is not None:
+        record["provenance"] = dict(provenance)
+    else:
+        req = requested_model if requested_model is not None else model
+        frag_id = evidence.get("fragment_id") if isinstance(evidence, Mapping) else None
+        path = evidence.get("path") if isinstance(evidence, Mapping) else None
+        record["provenance"] = build_provenance(
+            requested_model=req,
+            fragment_id=frag_id if isinstance(frag_id, str) else None,
+            evidence_path=path if isinstance(path, str) else None,
+            surfaced_model=surfaced_model,
+            activity_id=activity_id if activity_id is not None else response_id,
+            agent_id=agent_id,
+        )
     return record
+
+
+def attach_claim_prov_edges(graph: Any, claim: Mapping[str, Any]) -> None:
+    """Attach claim→activity→agent and activity→used triples onto an rdflib Graph.
+
+    Reads the nested ``provenance`` block emitted by ``build_claim_record`` /
+    ``classify_fragment``. Does not invent ``surfaced_model_id`` when absent.
+    Requires the optional ``ontology`` extra (rdflib).
+    """
+    try:
+        import rdflib
+        from rdflib import Literal, Namespace, URIRef
+        from rdflib.namespace import RDF
+    except ImportError as exc:  # pragma: no cover - env without ontology extra
+        raise ImportError(
+            "attach_claim_prov_edges requires rdflib (install ontology extra)"
+        ) from exc
+
+    if "provenance" not in claim or claim["provenance"] is None:
+        raise NormalizeError(
+            "claim missing provenance block for graph edges",
+            kind="parse_error",
+        )
+    _validate_provenance(claim["provenance"])
+
+    jcc = Namespace(JCC_NS)
+    prov = Namespace(PROV_NS)
+    activity = claim["provenance"]["was_generated_by"]
+    agent = activity["was_associated_with"]
+
+    claim_key = claim.get("id") or claim.get("label") or "claim"
+    claim_uri = URIRef(JCC_NS + f"claim-{claim_key}")
+    act_key = activity.get("id") or f"act-{claim_key}"
+    act_uri = URIRef(JCC_NS + str(act_key))
+    agent_key = agent.get("id") or f"agent-{agent['model_id']}"
+    agent_uri = URIRef(JCC_NS + str(agent_key).replace("/", "-"))
+
+    graph.add((claim_uri, RDF.type, jcc.Claim))
+    graph.add((claim_uri, prov.wasGeneratedBy, act_uri))
+    graph.add((act_uri, RDF.type, jcc.ClassificationActivity))
+    graph.add((act_uri, prov.wasAssociatedWith, agent_uri))
+    graph.add((agent_uri, RDF.type, jcc.ClassifierAgent))
+    graph.add((agent_uri, jcc.modelId, Literal(agent["model_id"])))
+
+    if "surfaced_model_id" in activity and activity["surfaced_model_id"] is not None:
+        graph.add((act_uri, jcc.surfacedModelId, Literal(activity["surfaced_model_id"])))
+
+    used = activity.get("used") or {}
+    frag_id = used.get("fragment_id")
+    if not frag_id and isinstance(claim.get("evidence"), Mapping):
+        frag_id = claim["evidence"].get("fragment_id")
+    if isinstance(frag_id, str) and frag_id.strip():
+        frag_uri = URIRef(JCC_NS + f"frag-{frag_id}")
+        graph.add((frag_uri, RDF.type, jcc.SourceFragment))
+        graph.add((act_uri, prov.used, frag_uri))
 
 
 def classify_fragment(
@@ -214,6 +416,10 @@ def classify_fragment(
     """Call JEV choice on a fragment fixture dict; return a claim JSON record.
 
     Fail closed: DecisionsError / NormalizeError propagate; never fabricates labels.
+    Emits nested ``provenance`` so a serializer can attach claim→activity→agent
+    and activity→used SourceFragment edges. Top-level ``model`` is the
+    *requested* model id; provider-surfaced model (when present) lives only on
+    the activity as ``surfaced_model_id``.
     """
     legal = frozenset(fragment["closed_label_set"])
     qid = fragment["question_id"]
@@ -252,18 +458,28 @@ def classify_fragment(
         question_id=qid,
         legal_options=legal,
     )
-    model = normalized.get("model") or svc.model
+    requested_model = svc.model
+    surfaced_raw = normalized.get("model")
+    surfaced_model = (
+        surfaced_raw
+        if isinstance(surfaced_raw, str) and surfaced_raw.strip()
+        else None
+    )
     evidence = {
         "fragment_id": fragment.get("id"),
         "path": evidence_path,
     }
+    response_id = normalized.get("response_id")
     claim = build_claim_record(
         label=normalized["choice"],
-        model=model,
+        model=requested_model,
         evidence=evidence,
         probabilities=normalized.get("probabilities"),
         confidence=normalized.get("confidence"),
         epistemic_status="Inferred",
-        response_id=normalized.get("response_id"),
+        response_id=response_id,
+        requested_model=requested_model,
+        surfaced_model=surfaced_model,
+        activity_id=response_id if isinstance(response_id, str) else None,
     )
     return validate_claim_record(claim, legal_labels=legal)

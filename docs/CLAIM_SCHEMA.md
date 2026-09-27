@@ -70,3 +70,15 @@ The generating JEV call is modelled as ``jcc:ClassificationActivity``
 (⊑ ``prov:SoftwareAgent``), so the model id hangs on the agent rather than on
 the produced claim; the provider-surfaced id, when returned, is
 ``jcc:surfacedModelId`` on the activity.
+
+## Runtime emission (#78)
+
+`build_claim_record` / `classify_fragment` emit a nested `provenance` object
+so a graph serializer (see `attach_claim_prov_edges`) can attach:
+
+- claim `prov:wasGeneratedBy` → `jcc:ClassificationActivity`
+- activity `prov:wasAssociatedWith` → `jcc:ClassifierAgent` (requested `model_id`)
+- activity `prov:used` → `jcc:SourceFragment` (from evidence fragment pointer)
+- `jcc:surfacedModelId` on the activity **only** when the provider returned a model string
+
+Absent surfaced model → key omitted (never copied from the requested id).
