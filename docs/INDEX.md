@@ -18,6 +18,7 @@ skip to what you need.
 | Read or write a claim record | [`CLAIM_SCHEMA.md`](CLAIM_SCHEMA.md) | contributor |
 | Find the machine-readable module catalog | [`spec/modules.json`](spec/modules.json) | agent, tooling |
 | Use an optional reader-usefulness checklist | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
+| Write issue titles, commit subjects, PR titles, or new file names in plain human words | [`HUMAN_NAMING.md`](HUMAN_NAMING.md) | agent, contributor |
 | See which reference papers are selected, and their rights | [`DATASET_CARD.md`](DATASET_CARD.md) | contributor, reviewer |
 | Understand the README's evidence map and editorial choices | [`CONTENT_RESEARCH.md`](CONTENT_RESEARCH.md) | contributor, maintainer |
 | Find prior-work analysis and source comparisons | [`PRIOR_WORK.md`](PRIOR_WORK.md) and [`REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md`](REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md) | contributor |
@@ -63,6 +64,7 @@ jev-classifier/
 │   ├── REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md prior-work comparison
 │   ├── MIGRATING_TO_0.*.md        CGM contract migration notes
 │   ├── ISSUE_1_DRAFT.md           historical draft
+│   ├── HUMAN_NAMING.md            plain-human titles for issues, commits, PRs, files
 │   ├── HUMAN_REVIEW_CHECKLIST.md  reader-usefulness review rubric
 │   ├── CURRENT.md                 live continuity card (rewritten per task)
 │   ├── docs_manifest.json         machine-readable inventory of the above
