@@ -350,13 +350,60 @@ def test_provenance_empty_surfaced_model_id_fails_closed() -> None:
     assert ei.value.kind == "parse_error"
 
 
-def test_modules_m5_known_gap_closed_for_activity_edges() -> None:
-    import json
+def test_two_claims_attach_as_distinct_claim_nodes() -> None:
+    """Two claims on one graph must yield two distinct Claim nodes (#78 must-fix)."""
+    from jev_classifier.classify import attach_claim_prov_edges
 
-    modules = json.loads((ROOT / "docs" / "spec" / "modules.json").read_text(encoding="utf-8"))
-    m5 = next(m for m in modules["modules"] if m["id"] == "M5")
-    gap = m5["contract"].get("known_gap") or ""
-    assert "classify.py claim records do not yet carry" not in gap
-    assert m5["contract"].get("activity_agent_edges") == "emitted" or (
-        "activity" in gap.lower() and "residual" in gap.lower()
-    ) or gap == "" or "closed" in gap.lower() or "#78" in gap
+    rdflib = pytest.importorskip("rdflib")
+    claim_a = build_claim_record(
+        label="empirical_finding",
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-a", "path": "tests/fixtures/a.json"},
+        activity_id="act-a",
+    )
+    claim_b = build_claim_record(
+        label="empirical_finding",  # same closed-set label must not collapse nodes
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-b", "path": "tests/fixtures/b.json"},
+        activity_id="act-b",
+    )
+    g = rdflib.Graph()
+    attach_claim_prov_edges(g, claim_a)
+    attach_claim_prov_edges(g, claim_b)
+    jcc = rdflib.Namespace(JCC)
+    RDF = rdflib.RDF
+    claim_nodes = sorted(g.subjects(RDF.type, jcc.Claim))
+    assert len(claim_nodes) == 2
+    assert str(claim_nodes[0]).endswith("claim-frag-a")
+    assert str(claim_nodes[1]).endswith("claim-frag-b")
+    # Distinct activities too (act-<claim_key> when no explicit id would also diverge)
+    prov = rdflib.Namespace(PROV)
+    acts = sorted({o for _, o in g.subject_objects(prov.wasGeneratedBy)})
+    assert len(acts) == 2
+
+
+def test_path_only_evidence_fails_closed_on_attach() -> None:
+    """Path-only evidence must not silently drop prov:used (#78 must-fix)."""
+    from jev_classifier.classify import attach_claim_prov_edges
+
+    rdflib = pytest.importorskip("rdflib")
+    claim = build_claim_record(
+        label="other",
+        model="typesafe/jev-1.13",
+        evidence={"path": "tests/fixtures/path_only.json"},
+        claim_id="claim-path-only",
+        activity_id="act-path-only",
+    )
+    # Record itself remains valid (path-only evidence is allowed).
+    validate_claim_record(claim, legal_labels={"other"})
+    g = rdflib.Graph()
+    with pytest.raises(NormalizeError, match="fragment_id") as ei:
+        attach_claim_prov_edges(g, claim)
+    assert ei.value.kind == "parse_error"
+    # Fail closed before mutating the graph.
+    jcc = rdflib.Namespace(JCC)
+    RDF = rdflib.RDF
+    prov = rdflib.Namespace(PROV)
+    assert not list(g.subjects(RDF.type, jcc.Claim))
+    assert not list(g.objects(predicate=prov.used))
+

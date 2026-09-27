@@ -352,12 +352,36 @@ def build_claim_record(
     return record
 
 
+
+def _claim_graph_key(claim: Mapping[str, Any]) -> str:
+    """Stable claim URI key: claim.id -> evidence.fragment_id -> error.
+
+    Never falls back to ``label`` (closed-set labels collapse distinct claims
+    onto one graph node). Does not invent new identities.
+    """
+    claim_id = claim.get("id")
+    if isinstance(claim_id, str) and claim_id.strip():
+        return claim_id.strip()
+    evidence = claim.get("evidence")
+    if isinstance(evidence, Mapping):
+        frag_id = evidence.get("fragment_id")
+        if isinstance(frag_id, str) and frag_id.strip():
+            return frag_id.strip()
+    raise NormalizeError(
+        "claim graph key requires claim.id or evidence.fragment_id "
+        "(label is not an identity)",
+        kind="parse_error",
+    )
+
+
 def attach_claim_prov_edges(graph: Any, claim: Mapping[str, Any]) -> None:
     """Attach claim→activity→agent and activity→used triples onto an rdflib Graph.
 
     Reads the nested ``provenance`` block emitted by ``build_claim_record`` /
     ``classify_fragment``. Does not invent ``surfaced_model_id`` when absent.
-    Requires the optional ``ontology`` extra (rdflib).
+    Claim URI key is ``id`` then evidence ``fragment_id`` (never ``label``).
+    Path-only evidence raises ``NormalizeError`` rather than silently omitting
+    ``prov:used``. Requires the optional ``ontology`` extra (rdflib).
     """
     try:
         import rdflib
@@ -380,12 +404,28 @@ def attach_claim_prov_edges(graph: Any, claim: Mapping[str, Any]) -> None:
     activity = claim["provenance"]["was_generated_by"]
     agent = activity["was_associated_with"]
 
-    claim_key = claim.get("id") or claim.get("label") or "claim"
+    claim_key = _claim_graph_key(claim)
     claim_uri = URIRef(JCC_NS + f"claim-{claim_key}")
-    act_key = activity.get("id") or f"act-{claim_key}"
+    act_key = activity.get("id")
+    if not (isinstance(act_key, str) and act_key.strip()):
+        act_key = f"act-{claim_key}"
     act_uri = URIRef(JCC_NS + str(act_key))
     agent_key = agent.get("id") or f"agent-{agent['model_id']}"
     agent_uri = URIRef(JCC_NS + str(agent_key).replace("/", "-"))
+
+    # Resolve fragment_id before mutating the graph so path-only fails closed
+    # without leaving a half-written Claim / Activity / Agent.
+    used = activity.get("used") or {}
+    frag_id = used.get("fragment_id")
+    if not frag_id and isinstance(claim.get("evidence"), Mapping):
+        frag_id = claim["evidence"].get("fragment_id")
+    if not (isinstance(frag_id, str) and frag_id.strip()):
+        raise NormalizeError(
+            "attach_claim_prov_edges requires evidence fragment_id to emit prov:used "
+            "(path-only evidence cannot be serialized to a SourceFragment node)",
+            kind="parse_error",
+        )
+    frag_uri = URIRef(JCC_NS + f"frag-{frag_id}")
 
     graph.add((claim_uri, RDF.type, jcc.Claim))
     graph.add((claim_uri, prov.wasGeneratedBy, act_uri))
@@ -397,14 +437,8 @@ def attach_claim_prov_edges(graph: Any, claim: Mapping[str, Any]) -> None:
     if "surfaced_model_id" in activity and activity["surfaced_model_id"] is not None:
         graph.add((act_uri, jcc.surfacedModelId, Literal(activity["surfaced_model_id"])))
 
-    used = activity.get("used") or {}
-    frag_id = used.get("fragment_id")
-    if not frag_id and isinstance(claim.get("evidence"), Mapping):
-        frag_id = claim["evidence"].get("fragment_id")
-    if isinstance(frag_id, str) and frag_id.strip():
-        frag_uri = URIRef(JCC_NS + f"frag-{frag_id}")
-        graph.add((frag_uri, RDF.type, jcc.SourceFragment))
-        graph.add((act_uri, prov.used, frag_uri))
+    graph.add((frag_uri, RDF.type, jcc.SourceFragment))
+    graph.add((act_uri, prov.used, frag_uri))
 
 
 def classify_fragment(

@@ -82,3 +82,5 @@ so a graph serializer (see `attach_claim_prov_edges`) can attach:
 - `jcc:surfacedModelId` on the activity **only** when the provider returned a model string
 
 Absent surfaced model → key omitted (never copied from the requested id).
+
+`attach_claim_prov_edges` claim URI key is `claim.id` then `evidence.fragment_id` (never `label` — closed-set labels would collapse distinct claims). Activity id falls back to `act-<claim_key>` with the same key rule. Path-only evidence remains valid on the claim record, but graph serialization raises `NormalizeError(kind="parse_error")` rather than silently omitting `prov:used` or inventing a fragment IRI from the path.
