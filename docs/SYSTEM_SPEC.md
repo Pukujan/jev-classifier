@@ -352,6 +352,51 @@ content into a case; private material is referenced only by an opaque
 
 ---
 
+### E — Claim-level evaluation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/eval/metric.py`, `scripts/eval_claims.py` |
+| Role | **deterministic** |
+| Input | a validated reference claim graph (module `R`) plus a sequence of predicted claims |
+| Output | a score report: primary claim-level micro P/R/F1, per-paper P/R/F1, citation coverage, ontology status |
+| Contract | metric version `claim_metric_v1`; matching rule `span_containment_v1` |
+| Invariants | a predicted claim matches a reference claim only when paper id, source id, and epistemic status agree *and* the predicted span is contained in the reference span; matching is one-to-one with the smallest span winning and ties broken by claim id; a prediction with no usable span, an inverted span, or a non-integer offset is a **miss**, never an exclusion; the graph is validated through module `R` and a malformed graph is rejected rather than partially scored; identical inputs produce identical output |
+| Fail-closed | yes — an unscoreable prediction counts against the metric; a malformed graph raises `ReferenceSchemaError` |
+| Tests | `tests/test_eval_metric.py` |
+
+**The metric is pre-registered (issue #66).** The matching rule is the
+deliverable, and it is frozen before any reference paper exists so the 0.80
+target is measured by a definition nobody could have tuned. A result that does
+not name `claim_metric_v1` is not a valid pre-registered result.
+
+**Containment, not overlap.** Overlap would let one sprawling prediction take
+credit for several reference claims at once, inflating recall without fidelity.
+A span wider than the reference span is therefore a miss, not a partial match.
+
+**Two honest gaps are reported as numbers, not hidden.** First, `classify.py`
+emits `evidence: {fragment_id, path}` and does not produce byte spans, so every
+such prediction is a miss under this rule; the report exposes the usable-span
+count so the gap is visible rather than papered over with a source-level
+fallback. Worse, and measured rather than assumed: even a prediction that covers
+a whole fragment still fails containment, because the fragment span is *wider*
+than a sentence-level reference span. Emitting a span is not enough — the span
+must be at least as tight as the human's. Until the pipeline localizes evidence,
+the primary metric is 0 by construction, and `predictions_with_usable_span`
+distinguishes a run that failed for lack of a span from one that failed for lack
+of precision. Second, module `R` uses lowercase epistemic values while
+`classify.py` emits capitalized ones, so the status comparison normalizes case
+and the report records that it did. Reconciling either vocabulary is a separate
+leaf.
+
+**No substitutes.** Lexical similarity as a proxy for claim fidelity and any
+LLM-as-judge are prohibited by the parent program ruling (5849173786) and are
+not implemented; a test asserts neither is imported. The harness makes no
+network call and produces no label — it scores already-structured claims.
+
+---
+
 ## 3. Role table (JEV vs deterministic)
 
 | Module | JEV permitted | Deterministic Python |
@@ -368,6 +413,7 @@ content into a case; private material is referenced only by an opaque
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
 | R Reference claim schema | ✗ | ✓ JSON Schema + cross-record validation |
+| E Claim-level evaluation | ✗ | ✓ matching, P/R/F1, coverage; no model call |
 
 No module assigns a non-JEV model a deterministic-output role. If a future leaf
 proposes one, it is rejected by this table — escalate to the authoritative agent.
