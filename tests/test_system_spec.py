@@ -18,7 +18,7 @@ SPEC_MD = ROOT / "docs" / "SYSTEM_SPEC.md"
 SPEC_JSON = ROOT / "docs" / "spec" / "modules.json"
 
 # Module ids the spec must cover, per docs/SYSTEM_SPEC.md section 2.
-EXPECTED_MODULES = {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "C", "O", "B", "R"}
+EXPECTED_MODULES = {"M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "C", "O", "B", "R"}
 
 # Only JEV may produce deterministic classifier output (AGENTS.md hard rule).
 JEV_ROLES = {"jev", "jev_plus_deterministic"}

@@ -1,9 +1,9 @@
 # SYSTEM SPEC — jev-classifier module contracts
 
 ```yaml
-spec_version: 0.2.0
+spec_version: 0.3.0
 status: draft
-updated: 2026-09-26
+updated: 2026-09-27
 owner: authoritative agent (claude-code-main)
 parent_issue: 21
 leaf_issue: 30
@@ -44,7 +44,9 @@ assembly. JEV does not generate narrative, summaries, or citations.
                                                                         │
                           [7] Paper assembly ◀── [6] Ontology/SHACL ◀── [5] Provenance
                              (deterministic)        (deterministic)       /bitemporal
-                                                                          (deterministic)
+                                ▲                                          (deterministic)
+                          [8] Claim consolidation (deterministic): correlate claims by
+                             subject, resolve which one currently holds, keep conflicts
 
 Cross-cutting: [C] Coordination (SQLite aid) · [O] Ops ledger (projection) · [B] Bias signals
 ```
@@ -219,22 +221,44 @@ silently.
 
 | | |
 |---|---|
-| Version | `0.1.0` |
+| Version | `0.2.0` |
 | Code | `src/jev_classifier/paper/assemble.py` |
 | Role | **deterministic** (templates only; **no LLM**) |
-| Input | sequence of claim-like mappings; callers are responsible for full ClaimRecord validation |
+| Input | sequence of claim-like mappings; optional `topics` (M8 topic records); callers are responsible for full ClaimRecord validation |
 | Output | markdown paper draft |
 | Required sections | `Title`, `Abstract`, `Claims`, `Provenance`, `Lineage`, `Citations` |
-| API | `assemble_paper(...)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
-| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. |
-| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown` |
-| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow) |
+| Optional sections | `Synthesis` — rendered between `Abstract` and `Claims` **only** when `topics=` is passed |
+| API | `assemble_paper(..., topics=None)`, `validate_paper_markdown(...)`, `REQUIRED_SECTIONS`, `AssembleError` |
+| Invariants | each rendered claim includes its supplied evidence id(s); output is deterministic for fixed inputs and timestamp. The assembler checks required-key presence, non-empty label, evidence mapping, and at least one evidence id; it does not call `validate_claim_record` or enforce a legal label/time/model type. Topic records are shape-checked (keys + closed state vocabulary) and never recomputed here. |
+| Fail-closed | yes — empty claims or a claim missing an evidence id → `AssembleError`; a missing required section is detected by `validate_paper_markdown`; a malformed topic record raises rather than being dropped |
+| Tests | `tests/test_paper_assemble.py` (section/evidence-id rendering and fixed-time determinism); `tests/test_multisource_e2e.py` (synthetic multi-claim flow); `tests/test_consolidate.py` (Synthesis section, ordering, conflict survival, malformed-topic rejection) |
 
 The output is a **draft skeleton**, not a research paper or evidence synthesis.
 It renders supplied records; it does not independently establish that citations
 support claims or preserve omitted disagreements and limitations. Its
 `Citations` section is an evidence-id-to-claim index, not a bibliography or a
 set of source URLs.
+
+### M8 — Cross-source claim consolidation
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `src/jev_classifier/consolidate.py` (issue #69, in flight) |
+| Role | **deterministic** — no model call, no text similarity, no network |
+| Input | validated claim record mappings + an explicit evaluation instant (`at`) |
+| Output | topic records: `about`, `state`, `labels`, `distinct_sources`, `evaluated_at`, `current`, `retired`, `claim_ids` |
+| Topic states | `agreement` (same label, ≥2 distinct sources) · `conflict` (differing live labels) · `single-source` · `unknown` (no currently-valid claim) |
+| API | `consolidate_claims(claims, *, at)`, `topic_digest(topic)`, `TOPIC_STATES`, `ConsolidationError` |
+| Invariants | correlation is by the explicit `about` key — never by wording; agreement requires *distinct* evidence sources (same source twice is repetition, not corroboration); conflict preserves every live label and claim id and never resolves 2-vs-1 by majority; current-holds resolution is bitemporal (`valid_from`/`valid_to` window plus `supersedes` chains); the evaluation instant is a required argument, because a hidden clock would make identical inputs drift day to day |
+| Fail-closed | yes — missing `about`, duplicate ids, dangling or cyclic `supersedes`, inverted or naive/unparseable timestamps, mixed naive-and-aware timezones, and an all-anonymous batch each raise `ConsolidationError` |
+| Tests | `tests/test_consolidate.py` (agreement/conflict/bitemporal/fail-closed paths, digest wording, Synthesis rendering into M7) |
+
+**Known gap:** no module assigns `about` to a claim yet, so subjecting on the
+ingestion side is unimplemented. Until something does, consolidation runs on
+records whose callers supplied a subject. It does not replace M5 (which records
+time fields without ordering them) or M7 (which renders topics without
+recomputing them).
 
 ### C — Coordination
 
@@ -339,6 +363,7 @@ content into a case; private material is referenced only by an opaque
 | M5 Provenance/bitemporal fields | ✗ | ✓ field storage; referential and temporal validation are gaps |
 | M6 Ontology/SHACL | ✗ | ✓ Turtle parse only; SHACL is not implemented |
 | M7 Paper assembly | ✗ | ✓ template rendering from supplied records |
+| M8 Claim consolidation | ✗ | ✓ correlation, bitemporal resolution, conflict preservation |
 | C Coordination | ✗ | ✓ claims, checkpoints, collisions |
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
