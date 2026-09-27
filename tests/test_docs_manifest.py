@@ -463,3 +463,69 @@ def test_validator_source_is_network_and_model_free() -> None:
     source = VALIDATOR_SOURCE.read_text(encoding="utf-8")
     for token in ("httpx", "requests", "openrouter", "DecisionsClient", "socket", "jsonschema"):
         assert token not in source, f"validator must stay offline; found {token!r}"
+
+
+# --- uninventoried documents (the reverse direction) ---
+
+
+def test_uninventoried_document_fails_closed(tmp_path: Path) -> None:
+    # A page that exists but has no manifest entry. docs/DATASET_CARD.md did
+    # exactly this between #71 and #76 and nothing failed.
+    root = _materialize(tmp_path, {"docs/guide.md": "# Guide\n", "docs/extra.md": "# Extra\n"})
+    manifest = _manifest([_document("guide", "docs/guide.md", _sha256(root / "docs/guide.md"))])
+    with pytest.raises(DocsManifestError, match="not in the manifest") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "uninventoried_document"
+    assert "docs/extra.md" in str(excinfo.value)
+
+
+def test_exempted_document_is_not_reported(tmp_path: Path) -> None:
+    # docs/CURRENT.md is the one deliberate exception: it is rewritten per task,
+    # so any recorded digest would be stale on the next commit.
+    root = _materialize(
+        tmp_path, {"docs/CURRENT.md": "# Current\n", "docs/ok.md": "# Ok\n"}
+    )
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_non_markdown_files_under_docs_are_not_scanned(tmp_path: Path) -> None:
+    # The check is deliberately limited to docs/*.md; the module catalog is a
+    # JSON file and is not covered.
+    root = _materialize(tmp_path, {"docs/spec/modules.json": "{}\n", "docs/ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_nested_markdown_under_docs_is_not_scanned(tmp_path: Path) -> None:
+    # Documents in subdirectories are out of scope for this check.
+    root = _materialize(tmp_path, {"docs/sub/deep.md": "# Deep\n", "docs/ok.md": "# Ok\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", _sha256(root / "docs/ok.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_absent_docs_directory_is_skipped(tmp_path: Path) -> None:
+    # A root with no docs/ directory (as in the fixture tree) has nothing to
+    # compare against and must not fail.
+    root = _materialize(tmp_path, {"alpha.md": "# Alpha\n"})
+    manifest = _manifest([_document("alpha", "alpha.md", _sha256(root / "alpha.md"))])
+    validate_manifest(manifest, root=root, check_freshness=False)
+
+
+def test_orphan_check_does_not_mask_a_specific_error(tmp_path: Path) -> None:
+    # The broadest check runs last, so a stale digest is still reported as
+    # stale even when an uninventoried page is also present.
+    root = _materialize(tmp_path, {"docs/ok.md": "# Ok\n", "docs/extra.md": "# Extra\n"})
+    manifest = _manifest([_document("ok", "docs/ok.md", "0" * 64)])
+    with pytest.raises(DocsManifestError, match="stale") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=True)
+    assert excinfo.value.kind == "stale"
+
+
+def test_repository_manifest_inventories_every_doc_page() -> None:
+    # The real manifest, the reason the check exists: SYSTEM_SPEC.md was the
+    # page it was written to catch.
+    validate_manifest(load_manifest(MANIFEST_PATH), check_freshness=True)
+    listed = {d["path"] for d in load_manifest(MANIFEST_PATH)["documents"]}
+    assert "docs/SYSTEM_SPEC.md" in listed
+

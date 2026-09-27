@@ -115,6 +115,41 @@
       "reviewed_sha256": "3fa208abc111ee3fa8bf7589fcb3dcc2fe747de8a6483d3f39e0209e41d05d52"
     },
     {
+      "id": "system-spec",
+      "path": "docs/SYSTEM_SPEC.md",
+      "title": "System specification: module contracts",
+      "summary": "The normative module contracts: boundaries, which roles are JEV and which are deterministic Python, and the invariants each module must hold.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": 30,
+      "parent": null,
+      "keywords": [
+        "spec",
+        "contracts",
+        "modules",
+        "invariants",
+        "roles"
+      ],
+      "related": [
+        "epistemic-system",
+        "claim-schema",
+        "index"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "docs/spec/modules.json"
+        },
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/classify.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "ea3631a2cf352278530e14da9a31034004a91d57",
+      "reviewed_sha256": "eaffab8cd00352b4692ce9b9744885e8f88313787f1c92908b5c42b6e785a7fd"
+    },
+    {
       "id": "human-review-checklist",
       "path": "docs/HUMAN_REVIEW_CHECKLIST.md",
       "title": "Human review checklist",
