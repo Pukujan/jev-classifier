@@ -160,6 +160,20 @@ def test_a_span_wider_than_the_reference_span_is_a_miss() -> None:
     assert report["predictions_unmatched"] == 1
 
 
+def test_a_whole_fragment_span_is_still_a_miss_against_a_tighter_reference() -> None:
+    # Measured consequence of the rule, pinned so it cannot be lost: the live
+    # pipeline classifies a whole fragment, so its natural evidence unit is the
+    # fragment. claim:demo-1's reference span is 120..163, a sentence inside it.
+    # A prediction covering the whole fragment (0..185) is *wider* than the
+    # reference span and therefore fails containment. Emitting a span is not
+    # enough to score — the span must be at least as tight as the human's.
+    whole_fragment = _prediction("p", status="observed", byte_start=0, byte_end=185)
+    report = score_claims(_graph(), [whole_fragment])
+    assert report["predictions_with_usable_span"] == 1  # it is a real span...
+    assert report["primary"]["true_positives"] == 0  # ...and still a miss
+    assert report["primary"]["recall"] == 0.0
+
+
 def test_one_prediction_matches_only_one_of_two_overlapping_reference_claims() -> None:
     # Two reference spans overlap; a prediction inside the overlap is contained
     # in both. It must take exactly one, deterministically.

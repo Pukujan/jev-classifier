@@ -355,9 +355,16 @@ A span wider than the reference span is therefore a miss, not a partial match.
 emits `evidence: {fragment_id, path}` and does not produce byte spans, so every
 such prediction is a miss under this rule; the report exposes the usable-span
 count so the gap is visible rather than papered over with a source-level
-fallback. Second, module `R` uses lowercase epistemic values while `classify.py`
-emits capitalized ones, so the status comparison normalizes case and the report
-records that it did. Reconciling either vocabulary is a separate leaf.
+fallback. Worse, and measured rather than assumed: even a prediction that covers
+a whole fragment still fails containment, because the fragment span is *wider*
+than a sentence-level reference span. Emitting a span is not enough — the span
+must be at least as tight as the human's. Until the pipeline localizes evidence,
+the primary metric is 0 by construction, and `predictions_with_usable_span`
+distinguishes a run that failed for lack of a span from one that failed for lack
+of precision. Second, module `R` uses lowercase epistemic values while
+`classify.py` emits capitalized ones, so the status comparison normalizes case
+and the report records that it did. Reconciling either vocabulary is a separate
+leaf.
 
 **No substitutes.** Lexical similarity as a proxy for claim fidelity and any
 LLM-as-judge are prohibited by the parent program ruling (5849173786) and are

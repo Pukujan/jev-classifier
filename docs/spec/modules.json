@@ -382,6 +382,7 @@
         ],
         "known_gaps": [
           "classify.py_emits_fragment_id_and_path_not_byte_spans_so_its_predictions_score_as_misses_until_a_span_emitting_leaf_lands",
+          "measured_a_whole_fragment_span_is_wider_than_a_sentence_level_reference_span_so_containment_still_fails_emitting_a_span_is_not_enough_it_must_be_as_tight_as_the_human_span",
           "schema_uses_lowercase_epistemic_values_while_classify_py_emits_capitalized_ones",
           "shacl_validity_reported_as_not_implemented_not_measured"
         ]

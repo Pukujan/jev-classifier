@@ -24,6 +24,15 @@ Fail closed: a prediction with no usable span, an inverted span, or a
 non-integer offset is a **miss**, never excluded. Lexical similarity and any
 LLM-as-judge are prohibited substitutes for claim fidelity (parent ruling
 5849173786) and are not implemented here.
+
+Measured consequence of containment, recorded so it is not rediscovered as a
+surprise: the live pipeline classifies a whole fragment, so its natural evidence
+unit is the fragment. A prediction covering the whole fragment is *wider* than a
+sentence-level reference span and therefore fails containment. Emitting a span
+is not sufficient to score — the span must be at least as tight as the human's.
+Until a localization step exists, the primary metric is 0 by construction, and
+``predictions_with_usable_span`` shows whether a run failed for lack of a span
+or for lack of precision.
 """
 
 from __future__ import annotations
