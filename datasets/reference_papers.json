@@ -1,0 +1,429 @@
+{
+  "checked_at": "2026-09-26",
+  "dataset_id": "jev-reference-papers-v1",
+  "excluded_candidates": [
+    {
+      "candidate_id": "consistencygate",
+      "reason": "Kept outside the selected ten because it is a preprint and the checked metadata did not establish a version-specific license. Its controlled-corruption setup is a useful design reference, not a basis for claims about real-world effects.",
+      "source_url": "https://arxiv.org/abs/2607.22962",
+      "title": "ConsistencyGate: Preventing Memory Contamination in LLM Agents via Self-Consistency Admission Control"
+    },
+    {
+      "candidate_id": "longmemeval",
+      "reason": "Kept outside this paper set because paper, repository, and dataset terms differ, and corpus/source-material rights need a release-specific review before reuse.",
+      "source_url": "https://github.com/xiaowu0162/LongMemEval",
+      "title": "LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory"
+    },
+    {
+      "candidate_id": "saraf-label-induced-bias",
+      "reason": "Recorded as supplementary, not selected among the ten. Evaluator label sensitivity is adjacent but does not directly test research-goal drift or user-memory effects; publication and method relevance review remains open.",
+      "source_url": "https://arxiv.org/abs/2508.21164",
+      "title": "Quantifying Label-Induced Bias in Large Language Model Self- and Cross-Evaluations"
+    }
+  ],
+  "intended_use": "Provide a version-pinned bibliography for later human-reviewed claim graphs, annotation design, and paper-level evaluation of research-summary fidelity, context effects, citations, and factual support. These records are not annotations, training data, or a development/holdout split.",
+  "papers": [
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Shomik Jain",
+        "Charlotte Park",
+        "Matt Viana",
+        "Ashia Wilson",
+        "Dana Calacci"
+      ],
+      "canonical_record_url": "https://doi.org/10.1145/3772318.3791915",
+      "checked_at": "2026-09-26",
+      "doi": "10.1145/3772318.3791915",
+      "full_text_url": "https://arxiv.org/pdf/2509.12517v3",
+      "license": {
+        "applies_to": "The selected arXiv v3 text; ACM’s CHI record also states CC BY 4.0 for the version of record.",
+        "evidence_urls": [
+          "https://arxiv.org/abs/2509.12517v3",
+          "https://doi.org/10.1145/3772318.3791915"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The authors report increased sycophancy for most tested models, with heterogeneous effects. This does not establish the same effect in JEV.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "interaction-context-sycophancy",
+      "publication_details": "Article 793, pp. 1–26",
+      "publication_year": 2026,
+      "scope_limit": "Results concern the models and tasks tested in this study. They do not establish effects in JEV or in research synthesis.",
+      "selected_text_version": "arXiv:2509.12517v3; associated CHI 2026 version of record, Article 793",
+      "selection_rationale": "Directly tests whether interaction context and generated user-memory profiles affect sycophantic answers; it gives the benchmark a source for varying prior context.",
+      "title": "Interaction Context Often Increases Sycophancy in LLMs",
+      "topics": [
+        "interaction context",
+        "sycophancy",
+        "user history"
+      ],
+      "venue": "Proceedings of the CHI Conference on Human Factors in Computing Systems (CHI ’26)"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Avneet Kaur"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2025.findings-emnlp.1241/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2025.findings-emnlp.1241",
+      "full_text_url": "https://aclanthology.org/2025.findings-emnlp.1241.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2025.findings-emnlp.1241/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL Anthology policy states CC BY 4.0 for its materials published since 2016. That policy does not grant rights to separate datasets.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "argument-driven-sycophancy",
+      "publication_details": "pp. 22803–22812",
+      "publication_year": 2025,
+      "scope_limit": "The paper studies argumentative prompts in its evaluated setting; it does not test persistent memory or research-goal drift.",
+      "selected_text_version": "ACL Anthology proceedings version, Findings of EMNLP 2025",
+      "selection_rationale": "Adds an argumentative stance condition, distinct from personal-memory and majority-consensus conditions.",
+      "title": "Echoes of Agreement: Argument Driven Sycophancy in Large Language Models",
+      "topics": [
+        "argument framing",
+        "sycophancy",
+        "stance"
+      ],
+      "venue": "Findings of the Association for Computational Linguistics: EMNLP 2025"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Xiaochen Zhu",
+        "Caiqi Zhang",
+        "Tom Stafford",
+        "Nigel Collier",
+        "Andreas Vlachos"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2025.acl-long.195/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2025.acl-long.195",
+      "full_text_url": "https://aclanthology.org/2025.acl-long.195.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2025.acl-long.195/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL Anthology policy states CC BY 4.0 for its materials published since 2016. That policy does not grant rights to separate datasets.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "conformity-in-llms",
+      "publication_details": "pp. 3854–3872",
+      "publication_year": 2025,
+      "scope_limit": "Majority-answer conformity is a different mechanism from user-specific memory effects; findings should not be merged into one bias score.",
+      "selected_text_version": "ACL Anthology proceedings version, ACL 2025 Volume 1",
+      "selection_rationale": "Provides a majority-opinion condition that can be separated from a user’s personal history or vendor labels.",
+      "title": "Conformity in Large Language Models",
+      "topics": [
+        "social conformity",
+        "majority answers",
+        "agreement"
+      ],
+      "venue": "Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics, Volume 1: Long Papers"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Zidi Xiong",
+        "Yuping Lin",
+        "Wenya Xie",
+        "Pengfei He",
+        "Zirui Liu",
+        "Jiliang Tang",
+        "Himabindu Lakkaraju",
+        "Zhen Xiang"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2026.acl-long.27/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2026.acl-long.27",
+      "full_text_url": "https://aclanthology.org/2026.acl-long.27.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2026.acl-long.27/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL Anthology policy states CC BY 4.0 for its materials published since 2016. That policy does not grant rights to separate datasets.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "memory-management-agent-experience",
+      "publication_details": "pp. 623–645",
+      "publication_year": 2026,
+      "scope_limit": "The paper is not specifically a test of user-preference memory or research summarization. Transfer to JEV needs a separate experiment.",
+      "selected_text_version": "ACL Anthology proceedings version, ACL 2026 Volume 1",
+      "selection_rationale": "Studies how memory insertion and deletion affect agent experience-following and possible error propagation.",
+      "title": "How Memory Management Impacts LLM Agents: An Empirical Study of Experience-Following Behavior",
+      "topics": [
+        "agent memory",
+        "memory management",
+        "experience following"
+      ],
+      "venue": "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics, Volume 1: Long Papers"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Zixi Jia",
+        "Qinghua Liu",
+        "Hexiao Li",
+        "Yuyan Chen",
+        "Jiqiang Liu"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2025.findings-acl.1014/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2025.findings-acl.1014",
+      "full_text_url": "https://aclanthology.org/2025.findings-acl.1014.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2025.findings-acl.1014/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL Anthology policy states CC BY 4.0 for its materials published since 2016. The paper license does not establish reuse rights for an associated dataset.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "long-term-memory-evaluation",
+      "publication_details": "pp. 19759–19777",
+      "publication_year": 2025,
+      "scope_limit": "It measures long-term memory performance, not necessarily bias, contamination, or claim fidelity in research summaries.",
+      "selected_text_version": "ACL Anthology proceedings version, Findings of ACL 2025",
+      "selection_rationale": "Adds a long-term memory evaluation precedent for retention and memory-category conditions.",
+      "title": "Evaluating the Long-Term Memory of Large Language Models",
+      "topics": [
+        "long-term memory",
+        "memory retention",
+        "agent evaluation"
+      ],
+      "venue": "Findings of the Association for Computational Linguistics: ACL 2025"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Uwe Peters",
+        "Benjamin Chin-Yee"
+      ],
+      "canonical_record_url": "https://doi.org/10.1098/rsos.241776",
+      "checked_at": "2026-09-26",
+      "doi": "10.1098/rsos.241776",
+      "full_text_url": "https://research-portal.uu.nl/ws/portalfiles/portal/263071618/peters-chin-yee-generalization-bias-in-large-language-model-summarization-of-scientific-research.pdf",
+      "license": {
+        "applies_to": "The version of record identified by DOI 10.1098/rsos.241776, as recorded by Utrecht University’s repository.",
+        "evidence_urls": [
+          "https://doi.org/10.1098/rsos.241776",
+          "https://research-portal.uu.nl/en/publications/generalization-bias-in-large-language-model-summarization-of-scie/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The university repository identifies the DOI version as CC BY. Its reported results support testing scope preservation; they do not measure memory contamination.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "scientific-summary-generalization-bias",
+      "publication_details": "12(4), article 241776",
+      "publication_year": 2025,
+      "scope_limit": "Its studied summary task and models do not establish effects from user history or persistent agent memory.",
+      "selected_text_version": "Version of record, Royal Society Open Science 12(4), article 241776",
+      "selection_rationale": "Directly evaluates scope generalization in scientific summaries and gives the project a summary-fidelity reference.",
+      "title": "Generalization bias in large language model summarization of scientific research",
+      "topics": [
+        "scientific summarization",
+        "generalization bias",
+        "scope preservation"
+      ],
+      "venue": "Royal Society Open Science"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Sebastian Joseph",
+        "Lily Chen",
+        "Jan Trienes",
+        "Hannah Göke",
+        "Monika Coers",
+        "Wei Xu",
+        "Byron Wallace",
+        "Junyi Jessy Li"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2024.acl-long.459/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2024.acl-long.459",
+      "full_text_url": "https://aclanthology.org/2024.acl-long.459.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2024.acl-long.459/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The paper separately identifies FactPICO annotations as CC BY 4.0. Article, annotation, code, and source-paper rights remain distinct.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "factpico-plain-language-evidence",
+      "publication_details": "pp. 8437–8464",
+      "publication_year": 2024,
+      "scope_limit": "The task is medical evidence summarization. It does not establish validity for JEV’s broader research domains.",
+      "selected_text_version": "ACL Anthology proceedings version, ACL 2024 Volume 1",
+      "selection_rationale": "Offers a claim-level evaluation precedent and explicit limits around plain-language summaries of evidence.",
+      "title": "FactPICO: Factuality Evaluation for Plain Language Summarization of Medical Evidence",
+      "topics": [
+        "plain-language summaries",
+        "factuality",
+        "claim evaluation"
+      ],
+      "venue": "Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics, Volume 1: Long Papers"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Tianyu Gao",
+        "Howard Yen",
+        "Jiatong Yu",
+        "Danqi Chen"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2023.emnlp-main.398/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2023.emnlp-main.398",
+      "full_text_url": "https://aclanthology.org/2023.emnlp-main.398.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2023.emnlp-main.398/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL policy covers the article. ALCE’s repository license and the licenses for its datasets are separate.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "alce-citation-generation",
+      "publication_details": "pp. 6465–6488",
+      "publication_year": 2023,
+      "scope_limit": "Its datasets and citation-generation task have separate licenses and do not validate JEV claim graphs on their own.",
+      "selected_text_version": "ACL Anthology proceedings version, EMNLP 2023",
+      "selection_rationale": "Provides a citation-support evaluation precedent relevant to source-linked JEV outputs.",
+      "title": "Enabling Large Language Models to Generate Text with Citations",
+      "topics": [
+        "citation generation",
+        "citation support",
+        "factuality"
+      ],
+      "venue": "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Sewon Min",
+        "Kalpesh Krishna",
+        "Xinxi Lyu",
+        "Mike Lewis",
+        "Wen-tau Yih",
+        "Pang Koh",
+        "Mohit Iyyer",
+        "Luke Zettlemoyer",
+        "Hannaneh Hajishirzi"
+      ],
+      "canonical_record_url": "https://aclanthology.org/2023.emnlp-main.741/",
+      "checked_at": "2026-09-26",
+      "doi": "10.18653/v1/2023.emnlp-main.741",
+      "full_text_url": "https://aclanthology.org/2023.emnlp-main.741.pdf",
+      "license": {
+        "applies_to": "ACL Anthology article for the selected proceedings version; third-party material is excluded.",
+        "evidence_urls": [
+          "https://aclanthology.org/2023.emnlp-main.741/",
+          "https://aclanthology.org/faq/copyright/"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The ACL article license does not clear rights for FActScore code, examples, or its Wikipedia snapshot.",
+        "status": "confirmed_for_selected_version"
+      },
+      "paper_id": "factscore-atomic-factual-precision",
+      "publication_details": "pp. 12076–12100",
+      "publication_year": 2023,
+      "scope_limit": "Its biography-domain evaluation does not establish that the metric is valid for research summaries without adaptation.",
+      "selected_text_version": "ACL Anthology proceedings version, EMNLP 2023",
+      "selection_rationale": "Adds atomic-fact scoring as a precedent for measuring factual precision in long outputs.",
+      "title": "FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation",
+      "topics": [
+        "atomic facts",
+        "factual precision",
+        "long-form generation"
+      ],
+      "venue": "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing"
+    },
+    {
+      "access_status": "open_full_text",
+      "authors": [
+        "Mrinank Sharma",
+        "Meg Tong",
+        "Tomasz Korbak",
+        "David Duvenaud",
+        "Amanda Askell",
+        "Samuel R. Bowman",
+        "Newton Cheng",
+        "Esin Durmus",
+        "Zac Hatfield-Dodds",
+        "Scott R. Johnston",
+        "Shauna Kravec",
+        "Timothy Maxwell",
+        "Sam McCandlish",
+        "Kamal Ndousse",
+        "Oliver Rausch",
+        "Nicholas Schiefer",
+        "Da Yan",
+        "Miranda Zhang",
+        "Ethan Perez"
+      ],
+      "canonical_record_url": "https://arxiv.org/abs/2310.13548v4",
+      "checked_at": "2026-09-26",
+      "doi": null,
+      "full_text_url": "https://arxiv.org/pdf/2310.13548v4",
+      "license": {
+        "applies_to": "The selected arXiv v4 record only; license for the ICLR proceedings version was not verified in the checked record.",
+        "evidence_urls": [
+          "https://arxiv.org/abs/2310.13548v4",
+          "https://proceedings.iclr.cc/paper_files/paper/2024/hash/0105f7972202c1d4fb817da9f21a9663-Abstract-Conference.html"
+        ],
+        "name": "CC BY 4.0",
+        "notes": "The arXiv v4 record links CC BY 4.0. Do not infer that the separate ICLR proceedings version has the same license.",
+        "status": "partial_version_scope"
+      },
+      "paper_id": "understanding-sycophancy",
+      "publication_details": "ICLR 2024 proceedings; arXiv:2310.13548v4",
+      "publication_year": 2024,
+      "scope_limit": "It does not study persistent user memory or research-agent goal changes. Proceedings-version reuse rights remain unverified.",
+      "selected_text_version": "arXiv:2310.13548v4; ICLR 2024 proceedings record linked separately",
+      "selection_rationale": "Adds a foundational study of agreement with user views and the trade-off between user preference and truthfulness.",
+      "title": "Towards Understanding Sycophancy in Language Models",
+      "topics": [
+        "sycophancy",
+        "user views",
+        "truthfulness"
+      ],
+      "venue": "International Conference on Learning Representations (ICLR 2024)"
+    }
+  ],
+  "rights_boundary": "The manifest records public full-text routes and the rights evidence found for each selected version. A paper license does not grant rights to its cited sources, source corpora, datasets, repository code, or third-party figures. Sharma’s CC BY 4.0 evidence is scoped to arXiv v4; the ICLR proceedings license was not verified. No paper text, PDFs, dataset records, annotations, or holdout assignments belong in this manifest.",
+  "schema_version": "1.0.0",
+  "selection_method": "Preserve the final ten candidates from the owner’s research checkpoints on issue #29. Select an exact paper version with a public full-text route, record bibliographic and rights evidence per item, and retain the stated exclusions and scope limits. Do not treat access as blanket reuse permission.",
+  "source_checkpoints": [
+    {
+      "comment_id": "5849820822",
+      "purpose": "Initial candidate map, relevance boundaries, and exclusions.",
+      "url": "https://github.com/Pukujan/jev-classifier/issues/29#issuecomment-5849820822"
+    },
+    {
+      "comment_id": "5849937992",
+      "purpose": "Final ten candidates, exact versions, and paper-level rights notes.",
+      "url": "https://github.com/Pukujan/jev-classifier/issues/29#issuecomment-5849937992"
+    }
+  ],
+  "status": "selected_candidates_not_annotated"
+}
