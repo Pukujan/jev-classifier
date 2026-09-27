@@ -302,9 +302,9 @@
           "ref": "ontology/jev_classifier_claims.ttl"
         }
       ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "uncommitted",
-      "reviewed_sha256": "b70452b711af538a0e2121070a84f865136e1ec58aa8a6d16dc7a820e55e2311"
+      "review_state": "reviewed",
+      "reviewed_commit": "a0f91b0d1354323f4313f57e90abd8e2599bb75e",
+      "reviewed_sha256": "32521880ec0f66c729acd34430041842838f4107c667254b6750986166301497"
     },
     {
       "id": "datasets",

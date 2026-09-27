@@ -10,6 +10,7 @@ import pytest
 from jev_classifier.classify import (
     REQUIRED_CLAIM_KEYS,
     build_claim_record,
+    classify_fragment,
     load_fragment_fixture,
     validate_claim_record,
 )
@@ -198,3 +199,211 @@ def test_missing_required_claim_key_fails_closed() -> None:
             legal_labels={"other"},
         )
     assert ei.value.kind == "parse_error"
+
+# --- Claim provenance activity/agent edges (#78) -------------------------
+
+class _FakeClient:
+    """Minimal DecisionsClient stand-in; optional surfaced model on response."""
+
+    def __init__(
+        self,
+        *,
+        choice: str,
+        legal: list[str],
+        surfaced_model: str | None = "typesafe/jev-1.13",
+        response_id: str = "mock-resp-prov-1",
+        requested_model: str = "typesafe/jev-1.13",
+    ) -> None:
+        self.model = requested_model
+        probs = {lab: (0.9 if lab == choice else 0.1 / max(len(legal) - 1, 1)) for lab in legal}
+        answer = {
+            "type": "choice",
+            "choice": choice,
+            "probabilities": probs,
+            "confidence": 0.9,
+        }
+        body: dict = {"id": response_id, "answers": {"claim_kind": answer}}
+        if surfaced_model is not None:
+            body["model"] = surfaced_model
+        self._body = body
+
+    def decide(self, *, state, questions, model=None):
+        del state, questions, model
+        return dict(self._body)
+
+
+def test_build_claim_record_emits_provenance_edges() -> None:
+    claim = build_claim_record(
+        label="empirical_finding",
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-x", "path": "tests/fixtures/x.json"},
+        surfaced_model="typesafe/jev-1.13",
+        activity_id="act-1",
+        claim_id="claim-1",
+    )
+    prov = claim["provenance"]
+    activity = prov["was_generated_by"]
+    assert activity["id"] == "act-1"
+    assert activity["surfaced_model_id"] == "typesafe/jev-1.13"
+    assert activity["was_associated_with"]["model_id"] == "typesafe/jev-1.13"
+    assert activity["used"]["fragment_id"] == "frag-x"
+    validate_claim_record(
+        claim, legal_labels={"empirical_finding", "other"}
+    )
+
+
+def test_build_claim_record_omits_surfaced_model_when_absent() -> None:
+    claim = build_claim_record(
+        label="other",
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-y"},
+        surfaced_model=None,
+    )
+    activity = claim["provenance"]["was_generated_by"]
+    assert "surfaced_model_id" not in activity
+    assert activity["was_associated_with"]["model_id"] == "typesafe/jev-1.13"
+    validate_claim_record(claim, legal_labels={"other"})
+
+
+def test_classify_fragment_provenance_round_trips_to_graph() -> None:
+    from jev_classifier.classify import attach_claim_prov_edges
+
+    rdflib = pytest.importorskip("rdflib")
+    frag = load_fragment_fixture(FIXTURES / "fragment_empirical_001.json")
+    legal = list(frag["closed_label_set"])
+    client = _FakeClient(
+        choice="empirical_finding",
+        legal=legal,
+        surfaced_model="typesafe/jev-1.13",
+        response_id="mock-resp-graph-1",
+    )
+    claim = classify_fragment(
+        frag,
+        client=client,  # type: ignore[arg-type]
+        evidence_path="tests/fixtures/fragment_empirical_001.json",
+    )
+    assert claim["model"] == "typesafe/jev-1.13"
+    activity = claim["provenance"]["was_generated_by"]
+    assert activity["id"] == "mock-resp-graph-1"
+    assert activity["surfaced_model_id"] == "typesafe/jev-1.13"
+    assert activity["was_associated_with"]["model_id"] == "typesafe/jev-1.13"
+    assert activity["used"]["fragment_id"] == frag["id"]
+
+    g = rdflib.Graph()
+    g.parse(str(ONTOLOGY), format="turtle")
+    attach_claim_prov_edges(g, claim)
+    jcc = rdflib.Namespace(JCC)
+    prov = rdflib.Namespace(PROV)
+    RDF = rdflib.RDF
+    # Find the activity linked from some claim
+    edges = list(g.subject_objects(prov.wasGeneratedBy))
+    assert edges, "expected claim --wasGeneratedBy--> activity"
+    claim_uri, act_uri = edges[-1]
+    assert (act_uri, RDF.type, jcc.ClassificationActivity) in g
+    agents = list(g.objects(act_uri, prov.wasAssociatedWith))
+    assert len(agents) == 1
+    assert (agents[0], jcc.modelId, rdflib.Literal("typesafe/jev-1.13")) in g
+    used = list(g.objects(act_uri, prov.used))
+    assert used, "activity must used the SourceFragment"
+    assert (act_uri, jcc.surfacedModelId, rdflib.Literal("typesafe/jev-1.13")) in g
+    # Round-trip serialize
+    back = rdflib.Graph()
+    back.parse(data=g.serialize(format="turtle"), format="turtle")
+    assert (claim_uri, prov.wasGeneratedBy, act_uri) in back
+
+
+def test_classify_fragment_absent_surfaced_model_stays_unset() -> None:
+    from jev_classifier.classify import attach_claim_prov_edges
+
+    rdflib = pytest.importorskip("rdflib")
+    frag = load_fragment_fixture(FIXTURES / "fragment_empirical_001.json")
+    legal = list(frag["closed_label_set"])
+    client = _FakeClient(
+        choice="empirical_finding",
+        legal=legal,
+        surfaced_model=None,  # provider did not return model
+        requested_model="typesafe/jev-1.13",
+        response_id="mock-resp-no-surface",
+    )
+    claim = classify_fragment(frag, client=client)  # type: ignore[arg-type]
+    activity = claim["provenance"]["was_generated_by"]
+    assert "surfaced_model_id" not in activity
+    assert claim["model"] == "typesafe/jev-1.13"  # requested, not fabricated surface
+
+    g = rdflib.Graph()
+    attach_claim_prov_edges(g, claim)
+    jcc = rdflib.Namespace(JCC)
+    prov = rdflib.Namespace(PROV)
+    act_uri = next(g.objects(None, prov.wasGeneratedBy))
+    assert not list(g.objects(act_uri, jcc.surfacedModelId))
+
+
+def test_provenance_empty_surfaced_model_id_fails_closed() -> None:
+    claim = build_claim_record(
+        label="other",
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "x"},
+    )
+    claim["provenance"]["was_generated_by"]["surfaced_model_id"] = "  "
+    with pytest.raises(NormalizeError, match="surfaced_model_id") as ei:
+        validate_claim_record(claim, legal_labels={"other"})
+    assert ei.value.kind == "parse_error"
+
+
+def test_two_claims_attach_as_distinct_claim_nodes() -> None:
+    """Two claims on one graph must yield two distinct Claim nodes (#78 must-fix)."""
+    from jev_classifier.classify import attach_claim_prov_edges
+
+    rdflib = pytest.importorskip("rdflib")
+    claim_a = build_claim_record(
+        label="empirical_finding",
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-a", "path": "tests/fixtures/a.json"},
+        activity_id="act-a",
+    )
+    claim_b = build_claim_record(
+        label="empirical_finding",  # same closed-set label must not collapse nodes
+        model="typesafe/jev-1.13",
+        evidence={"fragment_id": "frag-b", "path": "tests/fixtures/b.json"},
+        activity_id="act-b",
+    )
+    g = rdflib.Graph()
+    attach_claim_prov_edges(g, claim_a)
+    attach_claim_prov_edges(g, claim_b)
+    jcc = rdflib.Namespace(JCC)
+    RDF = rdflib.RDF
+    claim_nodes = sorted(g.subjects(RDF.type, jcc.Claim))
+    assert len(claim_nodes) == 2
+    assert str(claim_nodes[0]).endswith("claim-frag-a")
+    assert str(claim_nodes[1]).endswith("claim-frag-b")
+    # Distinct activities too (act-<claim_key> when no explicit id would also diverge)
+    prov = rdflib.Namespace(PROV)
+    acts = sorted({o for _, o in g.subject_objects(prov.wasGeneratedBy)})
+    assert len(acts) == 2
+
+
+def test_path_only_evidence_fails_closed_on_attach() -> None:
+    """Path-only evidence must not silently drop prov:used (#78 must-fix)."""
+    from jev_classifier.classify import attach_claim_prov_edges
+
+    rdflib = pytest.importorskip("rdflib")
+    claim = build_claim_record(
+        label="other",
+        model="typesafe/jev-1.13",
+        evidence={"path": "tests/fixtures/path_only.json"},
+        claim_id="claim-path-only",
+        activity_id="act-path-only",
+    )
+    # Record itself remains valid (path-only evidence is allowed).
+    validate_claim_record(claim, legal_labels={"other"})
+    g = rdflib.Graph()
+    with pytest.raises(NormalizeError, match="fragment_id") as ei:
+        attach_claim_prov_edges(g, claim)
+    assert ei.value.kind == "parse_error"
+    # Fail closed before mutating the graph.
+    jcc = rdflib.Namespace(JCC)
+    RDF = rdflib.RDF
+    prov = rdflib.Namespace(PROV)
+    assert not list(g.subjects(RDF.type, jcc.Claim))
+    assert not list(g.objects(predicate=prov.used))
+

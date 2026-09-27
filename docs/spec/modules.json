@@ -172,7 +172,8 @@
           "confidence",
           "response_id",
           "independence_class",
-          "id"
+          "id",
+          "provenance"
         ],
         "invariants": [
           "label_in_legal_labels",
@@ -202,11 +203,12 @@
       ],
       "tests": [
         "tests/test_claim_schema.py",
-        "tests/test_multisource_e2e.py"
+        "tests/test_multisource_e2e.py",
+        "tests/test_ontology_and_classify.py"
       ],
       "fail_closed": true,
-      "issue": 31,
-      "status": "partial",
+      "issue": 78,
+      "status": "merged",
       "contract": {
         "input": [
           "claim_record_dict"
@@ -220,7 +222,11 @@
           "recorded_at_field_designated_as_transaction_time",
           "supersedes_string_field_records_revision_pointer",
           "validator_does_not_check_evidence_reference_existence",
-          "validator_does_not_parse_timestamps_or_check_time_order"
+          "validator_does_not_parse_timestamps_or_check_time_order",
+          "provenance_was_generated_by_activity_present_when_emitted",
+          "provenance_agent_carries_requested_model_id",
+          "provenance_surfaced_model_id_unset_when_provider_absent",
+          "provenance_activity_used_source_fragment_pointer"
         ],
         "design_rulings": [
           "flat_validity_kept_no_reasoner_installed",
@@ -229,7 +235,11 @@
           "owl_time_declines_valid_time",
           "validFrom_validTo_recordedAt_are_domain_extension"
         ],
-        "known_gap": "ontology now declares ClassificationActivity/ClassifierAgent, but classify.py claim records do not yet carry those activity/agent edges"
+        "known_gap": "closed (#78): classify.py emits nested provenance (claim wasGeneratedBy activity wasAssociatedWith agent; activity used SourceFragment; requested model_id on agent; surfaced_model_id on activity only when provider returns it). Residual by design: no referential evidence existence or ISO-8601/time-order validation.",
+        "activity_agent_edges": "emitted",
+        "optional_keys": [
+          "provenance"
+        ]
       }
     },
     {
@@ -535,14 +545,24 @@
       "title": "Claim-level evaluation",
       "version": "0.1.0",
       "role": "deterministic",
-      "code": ["src/jev_classifier/eval/metric.py", "scripts/eval_claims.py"],
-      "tests": ["tests/test_eval_metric.py"],
+      "code": [
+        "src/jev_classifier/eval/metric.py",
+        "scripts/eval_claims.py"
+      ],
+      "tests": [
+        "tests/test_eval_metric.py"
+      ],
       "fail_closed": true,
       "issue": 66,
       "status": "merged",
       "contract": {
-        "input": ["validated_reference_claim_graph_from_module_R", "sequence_of_predicted_claims"],
-        "output": ["score_report_with_primary_prf_per_paper_prf_citation_coverage_and_ontology_status"],
+        "input": [
+          "validated_reference_claim_graph_from_module_R",
+          "sequence_of_predicted_claims"
+        ],
+        "output": [
+          "score_report_with_primary_prf_per_paper_prf_citation_coverage_and_ontology_status"
+        ],
         "metric_version": "claim_metric_v1",
         "match_rule": "span_containment_v1",
         "invariants": [
