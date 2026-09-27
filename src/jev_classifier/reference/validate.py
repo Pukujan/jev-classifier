@@ -16,6 +16,9 @@ with "now", and review records accumulate rather than overwrite.
 
 Scope: this module defines and checks records only. It does not select a corpus
 (#29), run a benchmark (#23), or assign gold labels.
+
+Reader-facing explanation of what these records mean and what they do *not*
+establish: ``docs/EPISTEMIC_SYSTEM.md``.
 """
 
 from __future__ import annotations
