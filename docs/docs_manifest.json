@@ -66,8 +66,8 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "844bfb29fa19d1b7b5f1780c3565cd7f3fa5563f62a76b0a89663721e904dfb7"
+      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
+      "reviewed_sha256": "722152d5dfa391765850cce287bfd3d031a6ae6281cd425b3864182714e3692e"
     },
     {
       "id": "epistemic-system",
@@ -297,6 +297,43 @@
       "review_state": "unreviewed",
       "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
       "reviewed_sha256": "e4a1930ef6945ee81c3f005071b1722a2bb30bcb3ead70e457c7d846af713063"
+    },
+    {
+      "id": "dataset-card",
+      "path": "docs/DATASET_CARD.md",
+      "title": "Reference paper dataset card",
+      "summary": "The ten selected reference papers, why each is included, its version, and the rights note for that version.",
+      "audience": "contributor",
+      "status": "shipped",
+      "owner_issue": 29,
+      "parent": null,
+      "keywords": [
+        "dataset",
+        "reference-papers",
+        "selection",
+        "rights"
+      ],
+      "related": [
+        "datasets",
+        "epistemic-system"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "datasets/reference_papers.json"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/reference_papers.schema.json"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/validate_reference_papers.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
+      "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc"
     },
     {
       "id": "grok-source",
