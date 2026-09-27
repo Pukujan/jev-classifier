@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/jev-classifier/schemas/holdout_split.schema.json",
+  "title": "Holdout split custody assignment",
+  "description": "A frozen, custodian-owned division of the paper corpus into a development side and a holdout side, bound to the inputs it was computed over. Structural validation only: the cross-field invariants (disjoint sides, at least 20% of papers held out, exact corpus coverage) and the salted commitment are enforced by jev_classifier.holdout, because a JSON Schema cannot express them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "split_version",
+    "frozen_at",
+    "custodian",
+    "inputs",
+    "dev_paper_ids",
+    "holdout_paper_ids"
+  ],
+  "properties": {
+    "split_version": { "const": "holdout_split_v1" },
+    "frozen_at": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ISO-8601 UTC instant at which the split was frozen, before any tuning."
+    },
+    "custodian": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Who owns the split and authorizes evaluator access."
+    },
+    "inputs": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "description": "Binds the freeze to what was frozen, e.g. {\"papers\": \"sha256:...\", \"annotation_schema\": \"sha256:...\"}."
+    },
+    "dev_paper_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/paperId" }
+    },
+    "holdout_paper_ids": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/paperId" },
+      "description": "At least two papers (MINIMUM_HOLDOUT_PAPERS) and at least 20% of the corpus; the fraction is checked by the validator."
+    }
+  },
+  "$defs": {
+    "paperId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    }
+  }
+}

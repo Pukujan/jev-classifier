@@ -23,6 +23,7 @@ docs/SYSTEM_SPEC.md text eol=lf
 AGENTS.md text eol=lf
 docs/ISSUE_LOG_FORMAT.md text eol=lf
 docs/HUMAN_NAMING.md text eol=lf
+docs/HOLDOUT_PROTOCOL.md text eol=lf
 
 # Docs-manifest fixtures: reviewed_sha256 in manifest_ok.json is of LF bytes,
 # so the same cross-platform stability rule applies (Issue #63).

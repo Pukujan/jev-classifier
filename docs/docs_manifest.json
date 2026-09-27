@@ -55,7 +55,8 @@
         "epistemic-system",
         "human-review-checklist",
         "human-naming",
-        "issue-log-format"
+        "issue-log-format",
+        "holdout-protocol"
       ],
       "canonical_sources": [
         {
@@ -68,8 +69,8 @@
         }
       ],
       "review_state": "unreviewed",
-      "reviewed_commit": "e7dc72e7763356c7d543806ad78254d3f6d76aa2",
-      "reviewed_sha256": "cda14a961e4fe292a415da2beb9c43ba272a1fbb746b57ab06d856c04770167b"
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "11cb8a92b946ab2784b04d1b107620f4351638e03238640b54d2fb6918b9b07e"
     },
     {
       "id": "epistemic-system",
@@ -371,6 +372,50 @@
       "review_state": "unreviewed",
       "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
       "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc"
+    },
+    {
+      "id": "holdout-protocol",
+      "path": "docs/HOLDOUT_PROTOCOL.md",
+      "title": "Holdout split protocol and custody boundary",
+      "summary": "The paper-level holdout protocol: roles and access matrix, whole-paper split rule, salted-HMAC freeze evidence, and the rule that per-paper holdout scores appear only in the authorized frozen-evaluation report.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": 81,
+      "parent": null,
+      "keywords": [
+        "holdout",
+        "custody",
+        "leakage",
+        "freeze",
+        "split"
+      ],
+      "related": [
+        "dataset-card",
+        "datasets",
+        "epistemic-system",
+        "system-spec"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "81"
+        },
+        {
+          "kind": "issue",
+          "ref": "21"
+        },
+        {
+          "kind": "spec",
+          "ref": "datasets/reference_papers.json"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/eval_claims.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f8696995c2f52d1ae41d72253905b03db002c2c211205f01e159f89f2c582bd0"
     },
     {
       "id": "grok-source",

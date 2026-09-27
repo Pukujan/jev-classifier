@@ -23,6 +23,7 @@ skip to what you need.
 | Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
 | Check a page's reader-usefulness before publishing | [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | reviewer |
 | See which reference papers are selected, and their rights | [`DATASET_CARD.md`](DATASET_CARD.md) | contributor, reviewer |
+| Understand how the hidden holdout is frozen and kept out of development | [`HOLDOUT_PROTOCOL.md`](HOLDOUT_PROTOCOL.md) | contributor, reviewer |
 
 ## Folder tree (curated)
 
@@ -47,6 +48,7 @@ jev-classifier/
 │   ├── OPS_LEDGER.md              ops projection protocol
 │   ├── DATASETS.md                fixtures and licensing
 │   ├── DATASET_CARD.md            reference-paper selection and rights
+│   ├── HOLDOUT_PROTOCOL.md        how the hidden holdout is frozen and kept out
 │   ├── GROK_SOURCE.md             source-capture adapter
 │   ├── RESEARCH_NOTES.md          bootstrap notes (non-normative)
 │   ├── ISSUE_1_DRAFT.md           historical draft
