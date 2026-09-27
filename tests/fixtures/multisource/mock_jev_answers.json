@@ -13,6 +13,16 @@
           "other": 0.05
         },
         "confidence": 0.82
+      },
+      "subject_about": {
+        "type": "choice",
+        "choice": "study_alpha",
+        "probabilities": {
+          "study_alpha": 0.9,
+          "unrelated_trial": 0.05,
+          "unknown": 0.05
+        },
+        "confidence": 0.9
       }
     }
   },
@@ -30,6 +40,16 @@
           "other": 0.03
         },
         "confidence": 0.88
+      },
+      "subject_about": {
+        "type": "choice",
+        "choice": "study_alpha",
+        "probabilities": {
+          "study_alpha": 0.9,
+          "unrelated_trial": 0.05,
+          "unknown": 0.05
+        },
+        "confidence": 0.9
       }
     }
   }

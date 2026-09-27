@@ -28,6 +28,7 @@ them as camelCase properties under the ``jcc:`` prefix with lean PROV-O hooks.
 | ``confidence`` | number or null | Native confidence when present. |
 | ``response_id`` | string or null | Provider response id when present. |
 | ``notes`` | string | Free-form; not used for deterministic judgments. |
+| ``about`` | non-empty string | Closed-taxonomy subject key for M8 correlation; set by ``classify_fragment`` only when JEV chooses an in-taxonomy subject (``unknown`` leaves it unset). |
 
 ## Supersession link shape
 

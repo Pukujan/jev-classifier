@@ -17,5 +17,14 @@
     "opinion": "Authorial judgment, speculation, or recommendation without direct empirical support in the fragment.",
     "other": "Does not clearly fit empirical finding, method claim, or opinion."
   },
-  "notes": "Synthetic fixture for Iteration 2; not gold-labeled for calibration."
+  "notes": "Synthetic fixture for Iteration 2; not gold-labeled for calibration.",
+  "section": "primary endpoint",
+  "subject_taxonomy": [
+    "controlled_study_primary_endpoint",
+    "enrollment_methods",
+    "secondary_safety"
+  ],
+  "subject_candidates": [
+    "controlled_study_primary_endpoint"
+  ]
 }

@@ -87,6 +87,8 @@ def test_multisource_classify_mock_to_paper_e2e() -> None:
 
     assert claim_a["label"] == "method_claim"
     assert claim_b["label"] == "empirical_finding"
+    assert claim_a["about"] == "study_alpha"
+    assert claim_b["about"] == "study_alpha"
     assert claim_a["evidence"]["fragment_id"] == "msrc-frag-method-a"
     assert claim_b["evidence"]["fragment_id"] == "msrc-frag-result-b"
 

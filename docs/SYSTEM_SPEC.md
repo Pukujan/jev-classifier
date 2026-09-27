@@ -141,11 +141,11 @@ concern (see #32).
 | Version | `0.1.0` |
 | Code | `src/jev_classifier/classify.py` |
 | Role | **deterministic** |
-| Input | `classify_fragment` accepts one fragment fixture plus an optional Decisions client; `validate_claim_record` accepts a raw claim dict; `build_claim_record` accepts claim fields |
+| Input | `classify_fragment` accepts one fragment fixture (with closed `subject_taxonomy`) plus an optional Decisions client; `validate_claim_record` accepts a raw claim dict; `build_claim_record` accepts claim fields |
 | Output | `ClaimRecord` JSON |
 | API | `build_claim_record(...)`, `validate_claim_record(claim, *, legal_labels, migrate=True)`, `classify_fragment(fragment, *, client=, evidence_path=)`, `migrate_legacy_claim(raw)`, `load_fragment_fixture(path)`, `REQUIRED_CLAIM_KEYS` |
 | Required keys | `label`, `epistemic_status`, `recorded_at`, `evidence`, `model` |
-| Optional keys | `valid_from`, `valid_to`, `supersedes`, `probabilities`, `confidence`, `response_id`, `independence_class`, `id` |
+| Optional keys | `valid_from`, `valid_to`, `supersedes`, `probabilities`, `confidence`, `response_id`, `independence_class`, `id`, `about` |
 | Invariants | `label ∈ legal_labels`; `epistemic_status` non-empty string; `recorded_at` is non-empty string; `evidence` is an object containing `fragment_id` and/or `path` (referential existence is not checked); `model` non-empty string; `supersedes` is null or a non-empty string (empty string rejected); `valid_from`/`valid_to` are null or non-empty strings; `independence_class` null or non-empty string. Timestamp strings are **not parsed** as ISO-8601 and valid-time ordering is not checked. |
 | Migration | legacy camelCase → canonical snake_case; **canonical key wins** over legacy when both present |
 | Fail-closed | yes — missing key, out-of-set label, bad type → `NormalizeError` |
@@ -254,11 +254,13 @@ set of source URLs.
 | Fail-closed | yes — missing `about`, duplicate ids, dangling or cyclic `supersedes`, inverted or naive/unparseable timestamps, mixed naive-and-aware timezones, and an all-anonymous batch each raise `ConsolidationError` |
 | Tests | `tests/test_consolidate.py` (agreement/conflict/bitemporal/fail-closed paths, digest wording, Synthesis rendering into M7) |
 
-**Known gap:** no module assigns `about` to a claim yet, so subjecting on the
-ingestion side is unimplemented. Until something does, consolidation runs on
-records whose callers supplied a subject. It does not replace M5 (which records
-time fields without ordering them) or M7 (which renders topics without
-recomputing them).
+**Subject assignment:** `classify_fragment` (M4, issue #72) asks JEV one additional
+atomic `choice` from the fragment's closed `subject_taxonomy` (+ `unknown`) and
+writes `about` only for an in-taxonomy answer; `unknown` leaves `about` unset so
+consolidation fails closed rather than guessing. Deterministic Python owns the
+taxonomy and validation; JEV never free-forms subjects. M8 does not replace M5
+(which records time fields without ordering them) or M7 (which renders topics
+without recomputing them).
 
 ### C — Coordination
 

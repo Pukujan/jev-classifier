@@ -4,7 +4,12 @@
   "source_id": "src-lab-alpha",
   "title": "Alpha study protocol excerpt",
   "text": "Study Alpha enrolled 80 adults under a pre-registered protocol. Randomization used permuted blocks of size 4. The primary endpoint was change in symptom score at day 28 versus baseline.",
-  "closed_label_set": ["empirical_finding", "method_claim", "opinion", "other"],
+  "closed_label_set": [
+    "empirical_finding",
+    "method_claim",
+    "opinion",
+    "other"
+  ],
   "question_id": "claim_kind",
   "instructions": "Classify the research fragment into exactly one claim kind.",
   "criteria": {
@@ -13,5 +18,13 @@
     "opinion": "Authorial judgment, speculation, or recommendation without direct empirical support in the fragment.",
     "other": "Does not clearly fit empirical finding, method claim, or opinion."
   },
-  "notes": "Synthetic correlated source A (protocol/methods) for multi-source e2e; not HF."
+  "notes": "Synthetic correlated source A (protocol/methods) for multi-source e2e; not HF.",
+  "section": "Study Alpha protocol",
+  "subject_taxonomy": [
+    "study_alpha",
+    "unrelated_trial"
+  ],
+  "subject_candidates": [
+    "study_alpha"
+  ]
 }
