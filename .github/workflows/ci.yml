@@ -44,6 +44,9 @@ jobs:
       - name: OWL2 ontology parses (rdflib)
         run: python -c "import rdflib,sys; g=rdflib.Graph(); g.parse('ontology/jev_classifier_claims.ttl', format='turtle'); print('ontology triples:', len(g)); sys.exit(0 if len(g)>0 else 1)"
 
+      - name: Managed docs manifest is consistent (offline, read-only)
+        run: python scripts/validate_docs.py
+
   hygiene:
     runs-on: ubuntu-latest
     steps:

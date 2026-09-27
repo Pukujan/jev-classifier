@@ -467,6 +467,15 @@ projection of §2 and §3. `tests/test_system_spec.py` asserts the prose modules
 and the index agree on names and versions, so this document cannot drift from
 the code silently.
 
+Reader-facing companion: [`docs/EPISTEMIC_SYSTEM.md`](EPISTEMIC_SYSTEM.md)
+explains in plain language what each kind of statement here is worth (source
+fact vs JEV judgment vs inference vs unknown vs proposal) and how to verify a
+claim. Navigation and the managed-document inventory live in
+[`docs/INDEX.md`](INDEX.md) and [`docs/docs_manifest.json`](docs_manifest.json);
+`python scripts/validate_docs.py` checks that inventory offline and fails closed
+on a dangling path/source, a broken local link, an excluded path, or a reviewed
+document whose file hash has changed.
+
 ---
 
 ## 6. Change control

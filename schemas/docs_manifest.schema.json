@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/jev-classifier/schemas/docs_manifest.schema.json",
+  "title": "Managed documentation manifest v1",
+  "description": "Inventory of the managed documentation corpus: which files are managed, what each is for, who it is for, where its facts come from, and whether a human has reviewed it. Structural validation only; path, source, freshness, link and exclusion invariants live in jev_classifier.docs.validate. The identity fields (id, path, title, summary, keywords, related, reviewed_commit, reviewed_sha256) deliberately reuse the names and patterns of schemas/v1/documents.schema.json so the two stay compatible; this manifest is the target-repository instance that schema had no instance for, extended only with the fields it does not cover.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "manifest_version",
+    "excluded_paths",
+    "documents"
+  ],
+  "properties": {
+    "schema": {
+      "const": "jev-classifier.docs-manifest.v1"
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "excluded_paths": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/document" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "reason"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": {
+          "enum": ["code", "spec", "schema", "test", "script", "issue"]
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "title",
+        "summary",
+        "audience",
+        "status",
+        "owner_issue",
+        "keywords",
+        "related",
+        "canonical_sources",
+        "review_state",
+        "reviewed_commit",
+        "reviewed_sha256"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audience": {
+          "enum": ["newcomer", "contributor", "maintainer", "reviewer", "agent"]
+        },
+        "status": {
+          "enum": ["shipped", "partial", "planned", "unknown"]
+        },
+        "owner_issue": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "parent": {
+          "type": ["string", "null"]
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "related": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "canonical_sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source_ref" }
+        },
+        "review_state": {
+          "enum": ["unreviewed", "reviewed", "stale"]
+        },
+        "reviewed_commit": {
+          "type": "string",
+          "pattern": "^(uncommitted|[a-f0-9]{40,64})$"
+        },
+        "reviewed_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}
