@@ -1,0 +1,50 @@
+[
+  {
+    "number": 14,
+    "state": "open",
+    "title": "Long-running JEV research synthesis classifier",
+    "body": "Parent initiative."
+  },
+  {
+    "number": 21,
+    "state": "open",
+    "title": "Owner-directed modular quality program",
+    "body": "Parent: none\nDepends: none"
+  },
+  {
+    "number": 29,
+    "state": "open",
+    "title": "#21.2 Dataset card and reference-paper selection",
+    "body": "Parent: #21\nDepends on: none"
+  },
+  {
+    "number": 37,
+    "state": "open",
+    "title": "#21 child 3 reference claim graph",
+    "body": "Parent: #21"
+  },
+  {
+    "number": 60,
+    "state": "open",
+    "title": "DAG runtime proposal",
+    "body": "Depends: #22 (closed)"
+  },
+  {
+    "number": 23,
+    "state": "open",
+    "title": "framing study",
+    "body": "Depends on: #21, #15"
+  },
+  {
+    "number": 22,
+    "state": "closed",
+    "title": "coord layer v2",
+    "body": "done"
+  },
+  {
+    "number": 15,
+    "state": "closed",
+    "title": "grok source",
+    "body": "done"
+  }
+]

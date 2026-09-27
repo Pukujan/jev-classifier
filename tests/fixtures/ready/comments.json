@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "created_at": "2026-09-26T18:43:14Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/60",
+    "body": "<!-- coord:proposal id=P-60-1 author=codex@cloud issue=60 status=open scope=coordination depends=none -->\n## Proposal"
+  },
+  {
+    "id": 2,
+    "created_at": "2026-09-26T23:44:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/60",
+    "body": "<!-- coord:verdict on=P-60-1 by=claude-code-main@mbp decision=accepted writer=unassigned -->"
+  },
+  {
+    "id": 3,
+    "created_at": "2026-09-26T23:40:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/37",
+    "body": "<!-- coord:proposal id=P-37-1 author=codex issue=37 status=open scope=ref -->\n## P"
+  },
+  {
+    "id": 4,
+    "created_at": "2026-09-26T23:41:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/37",
+    "body": "<!-- coord:verdict on=P-37-1 by=claude-code-main decision=accepted -->"
+  },
+  {
+    "id": 5,
+    "created_at": "2026-09-26T23:42:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/37",
+    "body": "<!-- coord:claim issue=37 agent=claude-code-main@desktop-utf8-44 branch=feat/reference-claim-schema-37 state=active -->"
+  },
+  {
+    "id": 6,
+    "created_at": "2026-09-26T22:30:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/29",
+    "body": "<!-- coord:proposal id=P-29-1 author=codex issue=29 status=open scope=card -->\n## P"
+  },
+  {
+    "id": 7,
+    "created_at": "2026-09-26T22:31:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/29",
+    "body": "<!-- coord:verdict on=P-29-1 by=claude-code-main decision=accepted writer=codex-project-agent -->"
+  },
+  {
+    "id": 8,
+    "created_at": "2026-09-26T21:00:00Z",
+    "user": {
+      "login": "Pukujan"
+    },
+    "issue_url": "https://api.github.com/repos/o/r/issues/23",
+    "body": "<!-- coord:proposal id=P-23-1 author=x issue=23 status=open scope=bench -->\n## P"
+  }
+]
