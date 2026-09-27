@@ -562,8 +562,9 @@
           "epistemic_status_compares_case_insensitively_at_the_schema_pipeline_boundary"
         ],
         "known_gaps": [
-          "classify.py_emits_fragment_id_and_path_not_byte_spans_so_its_predictions_score_as_misses_until_a_span_emitting_leaf_lands",
-          "measured_a_whole_fragment_span_is_wider_than_a_sentence_level_reference_span_so_containment_still_fails_emitting_a_span_is_not_enough_it_must_be_as_tight_as_the_human_span",
+          "closed_for_spans_issue_86_landed_classify_py_now_emits_byte_start_byte_end_from_a_closed_candidate_set_so_spanless_predictions_are_only_an_honest_decline_not_a_missing_capability",
+          "residual_candidate_granularity_is_sentence_level_so_references_annotated_clause_level_or_multi_sentence_stay_unmatchable_until_a_finer_splitter_or_a_reannotation_ruling_lands",
+          "predictions_still_score_zero_overall_until_issue_88_top_level_paper_id_source_id_and_issue_89_epistemic_status_land_the_metric_cannot_match_what_the_prediction_never_named",
           "schema_uses_lowercase_epistemic_values_while_classify_py_emits_capitalized_ones",
           "shacl_validity_reported_as_not_implemented_not_measured"
         ]

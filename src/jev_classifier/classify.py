@@ -117,6 +117,130 @@ def _validate_optional_iso_or_null(value: Any, key: str) -> None:
         )
 
 
+# --- closed-candidate evidence spans (issue #86) ----------------------------
+
+_END_BYTES = frozenset(b".!?")
+_BREAK_BYTES = frozenset({0x0A, 0x0D})
+_WS_BYTES = frozenset({0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x20})
+
+
+def _rstrip_end(raw: bytes, start: int, end: int) -> int:
+    j = end
+    while j > start and raw[j - 1] in _WS_BYTES:
+        j -= 1
+    return j
+
+
+def candidate_spans(text: str) -> list[dict[str, Any]]:
+    """Deterministic sentence-level candidate spans as UTF-8 byte offsets.
+
+    Scans the UTF-8 bytes directly so offsets cannot disagree with decoding.
+    A candidate ends at the first ``.``, ``!`` or ``?`` followed by whitespace
+    or end of text (terminator included), or at a line break; leading and
+    trailing whitespace is excluded from every span. Ids are stable and
+    ordered: ``c1``, ``c2``, … in document order. Offsets are bytes into
+    ``text.encode('utf-8')`` — the convention the claim metric and
+    ``docs/CLAIM_SCHEMA.md`` use — never character counts.
+    """
+    raw = text.encode("utf-8")
+    n = len(raw)
+    spans: list[dict[str, Any]] = []
+    i = 0
+    while i < n:
+        while i < n and raw[i] in _WS_BYTES:
+            i += 1
+        if i >= n:
+            break
+        start = i
+        end = i
+        while i < n:
+            b = raw[i]
+            if b in _BREAK_BYTES:
+                break
+            if b in _END_BYTES:
+                nxt = i + 1
+                if nxt >= n or raw[nxt] in _WS_BYTES:
+                    end = i + 1  # include terminator, exclude what follows
+                    i = nxt
+                    break
+                i += 1
+                continue
+            i += 1
+        if end <= start:
+            # ran to line break / EOF without a terminator
+            end = _rstrip_end(raw, start, i)
+        if end > start:
+            spans.append(
+                {
+                    "id": f"c{len(spans) + 1}",
+                    "byte_start": start,
+                    "byte_end": end,
+                    "text": raw[start:end].decode("utf-8", errors="replace"),
+                }
+            )
+        if i == start:
+            i += 1  # guarantee progress on a lone break byte
+    return spans
+
+
+def build_span_question(
+    claim_question_id: str, candidates: list[dict[str, Any]]
+) -> dict[str, Any] | None:
+    """The atomic closed choice that rides the label call. None if useless.
+
+    Criteria text is fragment-independent by design (AGENTS.md: evidence in
+    ``state``, option descriptions in ``criteria``): span content goes to
+    ``state["evidence_candidates"]`` only. With zero candidates no
+    localization decision exists, so no question is emitted and the span
+    stays unset (honest miss). With a single candidate the closed set is
+    ``{c1, unknown}`` — JEV still decides whether that sentence localizes
+    the evidence, and a one-sentence fragment's candidate is exactly the
+    span a sentence-level reference would contain.
+    """
+    if not candidates:
+        return None
+    criteria = {
+        str(c["id"]): (
+            "The candidate span with this id, listed in "
+            "state.evidence_candidates with its byte offsets and text."
+        )
+        for c in candidates
+    }
+    criteria["unknown"] = (
+        "No candidate span reliably localizes the evidence; decline rather "
+        "than guess."
+    )
+    return {
+        "type": "choice",
+        "instructions": (
+            "Select exactly one candidate span that localizes the evidence "
+            "for the claim, or unknown if no candidate is reliable. Only the "
+            "listed closed candidate ids and unknown are valid answers."
+        ),
+        "criteria": criteria,
+    }
+
+
+def resolve_span_answer(
+    candidates: list[dict[str, Any]], answer: Any
+) -> tuple[int, int] | None:
+    """Map a closed-set answer to ``(byte_start, byte_end)`` or fail closed.
+
+    ``unknown``, out-of-set ids, and malformed answers all return ``None`` —
+    the metric then records an honest miss. Offsets come from the
+    deterministic candidate table, never from model text.
+    """
+    if not isinstance(answer, Mapping):
+        return None
+    choice = answer.get("choice")
+    if not isinstance(choice, str):
+        return None
+    for c in candidates:
+        if c["id"] == choice:
+            return int(c["byte_start"]), int(c["byte_end"])
+    return None
+
+
 def validate_claim_record(
     claim: Mapping[str, Any],
     *,
@@ -234,12 +358,21 @@ def classify_fragment(
             "criteria": dict(criteria),
         }
     }
+    candidates = candidate_spans(fragment["text"])
+    span_q = build_span_question(qid, candidates)
+    if span_q is not None:
+        questions[f"{qid}_span"] = span_q
     state = {
         "fragment_id": fragment.get("id"),
         "fragment": fragment["text"],
         "source": fragment.get("source"),
         "title": fragment.get("title"),
     }
+    if candidates:
+        state["evidence_candidates"] = [
+            {k: c[k] for k in ("id", "byte_start", "byte_end", "text")}
+            for c in candidates
+        ]
 
     svc = client or DecisionsClient()
     try:
@@ -257,6 +390,13 @@ def classify_fragment(
         "fragment_id": fragment.get("id"),
         "path": evidence_path,
     }
+    if span_q is not None:
+        answers = raw.get("answers") if isinstance(raw, Mapping) else None
+        span = resolve_span_answer(
+            candidates, answers.get(f"{qid}_span") if isinstance(answers, Mapping) else None
+        )
+        if span is not None:
+            evidence["byte_start"], evidence["byte_end"] = span
     claim = build_claim_record(
         label=normalized["choice"],
         model=model,

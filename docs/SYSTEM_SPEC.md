@@ -375,20 +375,23 @@ not name `claim_metric_v1` is not a valid pre-registered result.
 credit for several reference claims at once, inflating recall without fidelity.
 A span wider than the reference span is therefore a miss, not a partial match.
 
-**Two honest gaps are reported as numbers, not hidden.** First, `classify.py`
-emits `evidence: {fragment_id, path}` and does not produce byte spans, so every
-such prediction is a miss under this rule; the report exposes the usable-span
-count so the gap is visible rather than papered over with a source-level
-fallback. Worse, and measured rather than assumed: even a prediction that covers
-a whole fragment still fails containment, because the fragment span is *wider*
-than a sentence-level reference span. Emitting a span is not enough — the span
-must be at least as tight as the human's. Until the pipeline localizes evidence,
-the primary metric is 0 by construction, and `predictions_with_usable_span`
-distinguishes a run that failed for lack of a span from one that failed for lack
-of precision. Second, module `R` uses lowercase epistemic values while
-`classify.py` emits capitalized ones, so the status comparison normalizes case
-and the report records that it did. Reconciling either vocabulary is a separate
-leaf.
+**Three honest gaps are reported as numbers, not hidden.** First was span
+localization: `classify.py` used to emit `evidence: {fragment_id, path}` with no
+byte spans, so every live prediction was a miss. Issue #86 closed it —
+`classify_fragment` now offers JEV a closed set of deterministic sentence
+candidates (UTF-8 byte offsets) on the same call, writes `byte_start`/`byte_end`
+only on an in-set answer, and leaves the span unset on `unknown`/out-of-set (an
+honest miss, never an invented offset). Emitting a span was never enough by
+itself: a whole-fragment span is *wider* than a sentence-level reference span
+and still fails containment — which is why the candidates are sentence-level.
+Two gaps keep the primary metric at 0 by construction until their leaves land:
+#88 — live predictions carry no top-level `paper_id`/`source_id`, so the match
+predicate rejects them before the span is even compared; and #89 —
+`classify_fragment` hardcodes `epistemic_status` to `Inferred`, so only
+`inferred` reference claims are reachable at all (module `R` uses lowercase
+epistemic values; the comparison normalizes case, and the report records that
+it did). `predictions_with_usable_span` keeps distinguishing lack-of-span from
+lack-of-precision.
 
 **No substitutes.** Lexical similarity as a proxy for claim fidelity and any
 LLM-as-judge are prohibited by the parent program ruling (5849173786) and are
