@@ -1,0 +1,49 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "assets/marketing/trace-each-claim.jpg",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "supporting"
+  ],
+  "palette": {
+    "background": "warm paper cream",
+    "primary": "deep navy",
+    "accent": "muted blue",
+    "warm_accent": "ochre gold",
+    "text": "deep navy"
+  },
+  "subjects": [
+    "A researcher reviewing scattered papers and tracing a highlighted claim to a structured evidence card."
+  ],
+  "composition": [
+    "One visible person and one clear paper-to-claim relationship.",
+    "Keep type in quiet negative space.",
+    "Use editorial paper textures and restrained gold links."
+  ],
+  "text_policy": "Narrative raster assets carry the exact recorded title and subtitle; no extra labels, fake metrics, dense UI panels, or pseudo-text.",
+  "roles": {
+    "hero": {
+      "orientation": "wide",
+      "dimensions": "1280 × 854"
+    },
+    "supporting": {
+      "orientation": "square",
+      "dimensions": "1024 × 1024"
+    },
+    "system": {
+      "orientation": "square",
+      "dimensions": "not currently generated"
+    },
+    "evidence": {
+      "orientation": "portrait",
+      "dimensions": "not currently generated"
+    }
+  },
+  "reject_when": [
+    "The person or paper relationship is obscured.",
+    "Generated wording differs from the asset record.",
+    "The image implies automatic source-to-classification integration.",
+    "The image adds unsupported metrics or capabilities."
+  ]
+}

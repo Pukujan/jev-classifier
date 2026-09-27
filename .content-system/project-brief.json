@@ -1,0 +1,200 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "jev-classifier",
+  "audience": [
+    "Researcher comparing AI-produced research accounts",
+    "Maintainer verifying classifier boundaries",
+    "Fresh agent continuing a GitHub-tracked task"
+  ],
+  "problem": "Research notes can repeat claims while obscuring which supplied source supports each claim and when the record was changed.",
+  "solution": "Provide a mostly deterministic, JEV-only semantic classification path and structured records that expose evidence pointers, epistemic status, lineage, and time fields.",
+  "mechanism": [
+    "Bounded non-JEV source capture produces untrusted transcripts.",
+    "One supplied fragment and a closed label set are sent through TypeSafe JEV Decisions.",
+    "Python validates answers and records claim fields.",
+    "A deterministic consolidator groups already-formed claims by explicit topic and preserves disagreement.",
+    "A deterministic template renders six required Markdown sections and may add a Synthesis section from supplied topic records."
+  ],
+  "evidence": [
+    {
+      "claim": "The source collector captures bounded Grok research responses as untrusted source material.",
+      "source": "Source capture module.",
+      "status": "shipped",
+      "supports": "The module preserves the requested and surfaced model, transcript, citation annotations, request settings, and content hash without assigning claim labels.",
+      "limits": "A recorded live provider smoke returned HTTP 404; successful live collection is not verified.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "src/jev_classifier/sources/grok.py",
+        "locator": "source-only module contract and artifact assembly",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/sources/grok.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The implemented classifier path sends one supplied fragment to the TypeSafe JEV Decisions client and validates a closed choice.",
+      "source": "Fragment classifier.",
+      "status": "shipped",
+      "supports": "The code builds a question from the fragment's closed labels and criteria, calls Decisions, and rejects malformed or out-of-set answers.",
+      "limits": "The path is per-fragment; surfaced model identity is not checked against the request end to end, and this code does not establish paper-level accuracy.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "src/jev_classifier/classify.py",
+        "locator": "classify_fragment and validate_claim_record",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/classify.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "Answer normalization supports choice, score, and noul.",
+      "source": "Answer normalizer.",
+      "status": "shipped",
+      "supports": "The module validates closed choices, ordered-rubric score levels and surfaced legends, and yes/no probability values while preserving native probabilities.",
+      "limits": "A valid score is a normalized JEV response, not a measure of paper-level summary accuracy.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "src/jev_classifier/normalize.py",
+        "locator": "normalize_choice_answer, normalize_score_answer, and normalize_noul_answer",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/normalize.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The assembler renders six required Markdown sections and an optional Synthesis section from supplied topic records.",
+      "source": "Deterministic paper assembly module.",
+      "status": "shipped",
+      "supports": "It renders Title, Abstract, Claims, Provenance, Lineage, and Citations; when topic records are supplied, it also renders their deterministic summary in a Synthesis section.",
+      "limits": "It does not write narrative research prose, select topics, verify citation support, or guarantee preservation of every caveat.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "src/jev_classifier/paper/assemble.py",
+        "locator": "REQUIRED_SECTIONS and assemble_paper",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/paper/assemble.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The consolidator deterministically groups already-formed claim records by explicit topic and preserves agreement, conflict, and temporal status.",
+      "source": "Cross-source consolidator and assembler.",
+      "status": "shipped",
+      "supports": "The code groups validated records by their explicit about value, requires an evaluation time, preserves conflicting live labels, and can render the resulting topic records.",
+      "limits": "It does not extract claims or infer topics from raw transcripts; source ingestion and claim formation remain separate steps.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "src/jev_classifier/consolidate.py",
+        "locator": "consolidate_claims and topic_digest",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/src/jev_classifier/consolidate.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The checked-in multi-source workflow is exercised with synthetic fragments and mocked JEV answers.",
+      "source": "Multi-source end-to-end test.",
+      "status": "experimentally_supported",
+      "supports": "The test checks a two-fragment example through the prototype claim and draft-assembly path.",
+      "limits": "The example is synthetic; it does not measure quality on real papers or live model outputs.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "da7e3a3efe199228004f72ebcecbf115fb40530c",
+        "path": "tests/test_multisource_e2e.py",
+        "locator": "fixture-backed end-to-end test",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/da7e3a3efe199228004f72ebcecbf115fb40530c/tests/test_multisource_e2e.py"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "Ten candidate papers and a deterministic claim metric are selected and recorded; the reverse-analysis and holdout evaluation remain incomplete.",
+      "source": "Owner-directed quality program in GitHub issue #21.",
+      "status": "planned",
+      "supports": "The repository records ten candidate papers and claim_metric_v1; issue #21 retains the goals for at least ten reverse-analyzed papers, 30 qualifying iterations, and 0.80 claim-level F1 on a hidden paper-level holdout.",
+      "limits": "Paper annotations, iteration count, and holdout performance have not been completed or measured; the F1 threshold is a target.",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "GitHub issue #21, current quality-program scope",
+        "uri": "https://github.com/Pukujan/jev-classifier/issues/21",
+        "observed_at": "2026-09-26"
+      },
+      "recorded_at": "2026-09-27T02:04:02Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "One capped live provider smoke returned HTTP 404 and produced no live artifact.",
+      "source": "GitHub issue #15 completion checkpoint.",
+      "status": "experimentally_supported",
+      "supports": "The completion record states that the single capped smoke returned HTTP 404, was not retried, and yielded no live artifact.",
+      "limits": "This does not establish the cause of the response or current provider availability.",
+      "source_revision": {
+        "kind": "experiment_result",
+        "reference": "GitHub issue #15 completion checkpoint for Grok source capture",
+        "uri": "https://github.com/Pukujan/jev-classifier/issues/15#issuecomment-5849375676",
+        "accessed_at": "2026-09-26",
+        "locator": "Issue #15 completion comment, capped live-smoke result"
+      },
+      "recorded_at": "2026-09-26T22:39:33Z",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "Small claim-type and contradiction fixtures are generated deterministically from hand-authored synthetic samples.",
+      "source": "Dataset fixture card and generator.",
+      "status": "shipped",
+      "supports": "The dataset card identifies the committed fixture files, label-shape sources, hashes, and generator; the source revision contains the generator and matching tests.",
+      "limits": "The samples are synthetic, contain no upstream corpus text, and are not benchmark items or performance evidence.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "Pukujan/jev-classifier@122e4742b260c8e63fc35b2916adb8eb6dfd1e96",
+        "repository": "Pukujan/jev-classifier",
+        "commit": "122e4742b260c8e63fc35b2916adb8eb6dfd1e96",
+        "path": "docs/DATASETS.md",
+        "locator": "Committed fixture inventory, limitations, and deterministic generator record",
+        "uri": "https://github.com/Pukujan/jev-classifier/blob/122e4742b260c8e63fc35b2916adb8eb6dfd1e96/docs/DATASETS.md"
+      },
+      "recorded_at": "2026-09-26T22:42:00Z",
+      "cite_in_readme": true
+    }
+  ],
+  "boundaries": [
+    "Only TypeSafe JEV may supply semantic classifier judgments that enter claim records.",
+    "Grok or another research model supplies untrusted source text only; source capture is not automatically classification.",
+    "The classifier handles one fragment per call; multi-source tests use synthetic fixtures and mocked responses.",
+    "The assembler creates a structural draft, not narrative research synthesis or citation support verification.",
+    "The legacy M5 record path does not enforce surfaced model identity end to end, parse timestamp order, or resolve its evidence references; M8 and the reference-graph module provide narrower bitemporal, span, and link checks. SHACL validation and full OWL2 reasoning remain incomplete.",
+    "Ten candidate papers and the metric harness are available, but paper annotations, an actual frozen holdout evaluation, thirty qualifying iterations, and measured paper-level accuracy remain outstanding."
+  ],
+  "terminology": {
+    "preferred": {
+      "source transcript": "untrusted captured research text and citation annotations",
+      "claim record": "typed record for one classified fragment",
+      "transaction time": "when this version was recorded",
+      "valid time": "when a time-bounded claim applies"
+    },
+    "avoid": [
+      "autonomous researcher",
+      "verified truth",
+      "bias detector",
+      "complete synthesis system",
+      "proven accuracy"
+    ]
+  }
+}

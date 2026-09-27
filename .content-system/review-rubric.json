@@ -1,0 +1,36 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "human_comprehension",
+      "question": "Can a first-time researcher explain the current one-fragment workflow and its limits after twenty seconds?",
+      "weight": 3
+    },
+    {
+      "id": "claim_safety",
+      "question": "Does each material capability claim point to the inspected source and state what it does not prove?",
+      "weight": 3
+    },
+    {
+      "id": "role_clarity",
+      "question": "Can the reader distinguish untrusted source generation from JEV-only classifier judgments?",
+      "weight": 3
+    },
+    {
+      "id": "skimmability",
+      "question": "Do headings, link text, and short bold anchors communicate situation, mechanism, boundary, and next action?",
+      "weight": 2
+    },
+    {
+      "id": "visual_clarity",
+      "question": "Do both images explain the claim/evidence path without implying unsupported automation?",
+      "weight": 2
+    },
+    {
+      "id": "reproducibility",
+      "question": "Can a maintainer resolve citations and reproduce offline checks from this revision?",
+      "weight": 2
+    }
+  ],
+  "decision_rule": "Merge readiness requires the pinned CGM contract validator, target headings and required-reference/link checks, a current-source audit, the docs-manifest validator, and required repository CI to pass on a current branch. Separate reader/visual observations are optional QA, not an approval gate; do not claim unrecorded observations."
+}
