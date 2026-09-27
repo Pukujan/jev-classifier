@@ -1,10 +1,419 @@
 {
-  "schema": "jev-classifier.docs-manifest.v1",
-  "manifest_version": "1.0.0",
+  "documents": [
+    {
+      "audience": "newcomer",
+      "canonical_sources": [
+        {
+          "kind": "script",
+          "ref": "scripts/validate_docs.py"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/docs_manifest.schema.json"
+        }
+      ],
+      "id": "index",
+      "keywords": [
+        "navigation",
+        "index",
+        "tree",
+        "start"
+      ],
+      "owner_issue": 63,
+      "parent": null,
+      "path": "docs/INDEX.md",
+      "related": [
+        "epistemic-system",
+        "human-review-checklist"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
+      "reviewed_sha256": "722152d5dfa391765850cce287bfd3d031a6ae6281cd425b3864182714e3692e",
+      "status": "shipped",
+      "summary": "Reader-first entry point: what to read for a given goal, a curated folder tree, and the authority order.",
+      "title": "Documentation index and folder tree"
+    },
+    {
+      "audience": "newcomer",
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "docs/SYSTEM_SPEC.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/CLAIM_SCHEMA.md"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/reference_claim_graph.schema.json"
+        },
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/reference/validate.py"
+        }
+      ],
+      "id": "epistemic-system",
+      "keywords": [
+        "epistemics",
+        "provenance",
+        "uncertainty",
+        "valid-time",
+        "limits"
+      ],
+      "owner_issue": 63,
+      "parent": null,
+      "path": "docs/EPISTEMIC_SYSTEM.md",
+      "related": [
+        "system-spec",
+        "claim-schema",
+        "index"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "3fa208abc111ee3fa8bf7589fcb3dcc2fe747de8a6483d3f39e0209e41d05d52",
+      "status": "shipped",
+      "summary": "Plain-language guide separating source facts, JEV judgments, inferences, unknowns and proposals, with limits and a verification path.",
+      "title": "Epistemic system: what the project may claim"
+    },
+    {
+      "audience": "reviewer",
+      "canonical_sources": [
+        {
+          "kind": "script",
+          "ref": "scripts/validate_docs.py"
+        },
+        {
+          "kind": "spec",
+          "ref": "docs/INDEX.md"
+        }
+      ],
+      "id": "human-review-checklist",
+      "keywords": [
+        "review",
+        "readability",
+        "accessibility",
+        "checklist"
+      ],
+      "owner_issue": 63,
+      "parent": null,
+      "path": "docs/HUMAN_REVIEW_CHECKLIST.md",
+      "related": [
+        "index",
+        "epistemic-system"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "b150fc805450fd6c536827686785fdeacac038ac80d929945dbe3673c13d0e1c",
+      "status": "shipped",
+      "summary": "Reader-usefulness rubric (first-time reader, evidence and boundaries, navigation and accessibility) recorded separately from automated checks.",
+      "title": "Human review checklist"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/records.py"
+        }
+      ],
+      "id": "authority",
+      "keywords": [
+        "authority",
+        "arbiter",
+        "claim",
+        "protocol"
+      ],
+      "owner_issue": null,
+      "parent": null,
+      "path": "docs/AUTHORITY.md",
+      "related": [
+        "agent-proposals",
+        "agent-coord"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "ca1ef7ad918617da3b834d1789eb90cb64537502db210b1a186e1b95ece0440d",
+      "status": "shipped",
+      "summary": "Who decides when agents disagree, and the reserved-branch claim protocol that prevents two writers on one leaf.",
+      "title": "Authority and the claim protocol"
+    },
+    {
+      "audience": "agent",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/store.py"
+        }
+      ],
+      "id": "agent-coord",
+      "keywords": [
+        "coordination",
+        "checkpoint",
+        "ownership",
+        "collision"
+      ],
+      "owner_issue": 22,
+      "parent": null,
+      "path": "docs/AGENT_COORD.md",
+      "related": [
+        "agent-proposals",
+        "authority"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "e1835dca7a093b83704debc7cf753017e55fd1b7aca8a99edfb3242eb9e2eddc",
+      "status": "shipped",
+      "summary": "The optional local SQLite coordination aid: checkpoints, ownership, collisions. Never authoritative over GitHub.",
+      "title": "Agent coordination aid"
+    },
+    {
+      "audience": "agent",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/coord/records.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/coord_board.py"
+        }
+      ],
+      "id": "agent-proposals",
+      "keywords": [
+        "proposal",
+        "verdict",
+        "receipt",
+        "grammar",
+        "board"
+      ],
+      "owner_issue": 22,
+      "parent": null,
+      "path": "docs/AGENT_PROPOSALS.md",
+      "related": [
+        "authority",
+        "agent-coord"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "073e3bce56037c6bd6d50efb25f712c9b53312419393705a09132a086c17b985",
+      "status": "shipped",
+      "summary": "The comment grammar for proposals, verdicts, claims and receipts, and how the board folds them deterministically.",
+      "title": "Proposal, verdict and receipt mechanics"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/classify.py"
+        },
+        {
+          "kind": "spec",
+          "ref": "ontology/jev_classifier_claims.ttl"
+        }
+      ],
+      "id": "claim-schema",
+      "keywords": [
+        "claim",
+        "schema",
+        "evidence",
+        "provenance"
+      ],
+      "owner_issue": null,
+      "parent": null,
+      "path": "docs/CLAIM_SCHEMA.md",
+      "related": [
+        "epistemic-system",
+        "system-spec"
+      ],
+      "review_state": "reviewed",
+      "reviewed_commit": "b8312a9e77d3d99ac50b3d5d53a1d82cab7823ea",
+      "reviewed_sha256": "6ffb344d92d9ded8a144f1667f5e633e1aebc1ea4567a0edb275b7300d408615",
+      "status": "shipped",
+      "summary": "The claim-record fields: label, epistemic status, evidence, model, provenance and bitemporal dates.",
+      "title": "Claim ledger schema"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [
+        {
+          "kind": "test",
+          "ref": "tests/fixtures/reference/claim_graph_ok.json"
+        }
+      ],
+      "id": "datasets",
+      "keywords": [
+        "datasets",
+        "fixtures",
+        "licensing",
+        "storage"
+      ],
+      "owner_issue": null,
+      "parent": null,
+      "path": "docs/DATASETS.md",
+      "related": [
+        "system-spec"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "e4a1930ef6945ee81c3f005071b1722a2bb30bcb3ead70e457c7d846af713063",
+      "status": "partial",
+      "summary": "Which fixtures are synthetic, what they are for, and the licensing and storage rules for external data.",
+      "title": "Datasets and fixtures"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [
+        {
+          "kind": "spec",
+          "ref": "datasets/reference_papers.json"
+        },
+        {
+          "kind": "schema",
+          "ref": "schemas/reference_papers.schema.json"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/validate_reference_papers.py"
+        }
+      ],
+      "id": "dataset-card",
+      "keywords": [
+        "dataset",
+        "reference-papers",
+        "selection",
+        "rights"
+      ],
+      "owner_issue": 29,
+      "parent": null,
+      "path": "docs/DATASET_CARD.md",
+      "related": [
+        "datasets",
+        "epistemic-system"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
+      "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc",
+      "status": "shipped",
+      "summary": "The ten selected reference papers, why each is included, its version, and the rights note for that version.",
+      "title": "Reference paper dataset card"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/sources/grok.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/grok_research.py"
+        }
+      ],
+      "id": "grok-source",
+      "keywords": [
+        "grok",
+        "source",
+        "capture",
+        "untrusted"
+      ],
+      "owner_issue": 15,
+      "parent": null,
+      "path": "docs/GROK_SOURCE.md",
+      "related": [
+        "system-spec",
+        "epistemic-system"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "568a4211f195d72fe4592df061f6037c19e20626ce6570510747ec1aa3821a02",
+      "status": "shipped",
+      "summary": "The untrusted source-capture adapter: it may produce source material only, never a label or canonical claim.",
+      "title": "Grok source capture"
+    },
+    {
+      "audience": "maintainer",
+      "canonical_sources": [],
+      "id": "issue-1-draft",
+      "keywords": [
+        "historical",
+        "bootstrap",
+        "draft"
+      ],
+      "owner_issue": 1,
+      "parent": null,
+      "path": "docs/ISSUE_1_DRAFT.md",
+      "related": [
+        "research-notes"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "1b2e15a201cc4ba8f1db20108a1f387e666fdd47fe2553cf5feed11fcf1a0d6c",
+      "status": "unknown",
+      "summary": "The original bootstrap issue draft, kept for lineage. Not normative.",
+      "title": "Issue 1 draft (historical)"
+    },
+    {
+      "audience": "maintainer",
+      "canonical_sources": [
+        {
+          "kind": "code",
+          "ref": "src/jev_classifier/ops/store.py"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/ops_sync.py"
+        }
+      ],
+      "id": "ops-ledger",
+      "keywords": [
+        "ops",
+        "ledger",
+        "projection",
+        "discrepancy"
+      ],
+      "owner_issue": 18,
+      "parent": null,
+      "path": "docs/OPS_LEDGER.md",
+      "related": [
+        "authority",
+        "agent-coord"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "0f18adab77c35c08ea8fa04d83d52d96e6bf942bb53d960dda4e9022fd0ef6cd",
+      "status": "shipped",
+      "summary": "The ops projection protocol: a rebuildable local database plus a committed read-only ledger. Not a decision authority.",
+      "title": "Ops ledger"
+    },
+    {
+      "audience": "contributor",
+      "canonical_sources": [],
+      "id": "research-notes",
+      "keywords": [
+        "research",
+        "notes",
+        "bootstrap"
+      ],
+      "owner_issue": null,
+      "parent": null,
+      "path": "docs/RESEARCH_NOTES.md",
+      "related": [
+        "issue-1-draft"
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
+      "reviewed_sha256": "16acf1f9d3d341ccb66d0f865ba63647f288003f1266183bfb5d4fd1374a298b",
+      "status": "unknown",
+      "summary": "Bootstrap research notes. Informational only; no contract depends on them.",
+      "title": "Research notes (non-normative)"
+    }
+  ],
   "excluded_paths": [
     {
       "path": ".env",
-      "reason": "secrets — never inventoried, displayed, or committed"
+      "reason": "secrets \u2014 never inventoried, displayed, or committed"
     },
     {
       "path": ".coord",
@@ -35,415 +444,6 @@
       "reason": "external research cache (gitignored)"
     }
   ],
-  "documents": [
-    {
-      "id": "index",
-      "path": "docs/INDEX.md",
-      "title": "Documentation index and folder tree",
-      "summary": "Reader-first entry point: what to read for a given goal, a curated folder tree, and the authority order.",
-      "audience": "newcomer",
-      "status": "shipped",
-      "owner_issue": 63,
-      "parent": null,
-      "keywords": [
-        "navigation",
-        "index",
-        "tree",
-        "start"
-      ],
-      "related": [
-        "epistemic-system",
-        "human-review-checklist"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "script",
-          "ref": "scripts/validate_docs.py"
-        },
-        {
-          "kind": "schema",
-          "ref": "schemas/docs_manifest.schema.json"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
-      "reviewed_sha256": "722152d5dfa391765850cce287bfd3d031a6ae6281cd425b3864182714e3692e"
-    },
-    {
-      "id": "epistemic-system",
-      "path": "docs/EPISTEMIC_SYSTEM.md",
-      "title": "Epistemic system: what the project may claim",
-      "summary": "Plain-language guide separating source facts, JEV judgments, inferences, unknowns and proposals, with limits and a verification path.",
-      "audience": "newcomer",
-      "status": "shipped",
-      "owner_issue": 63,
-      "parent": null,
-      "keywords": [
-        "epistemics",
-        "provenance",
-        "uncertainty",
-        "valid-time",
-        "limits"
-      ],
-      "related": [
-        "system-spec",
-        "claim-schema",
-        "index"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "spec",
-          "ref": "docs/SYSTEM_SPEC.md"
-        },
-        {
-          "kind": "spec",
-          "ref": "docs/CLAIM_SCHEMA.md"
-        },
-        {
-          "kind": "schema",
-          "ref": "schemas/reference_claim_graph.schema.json"
-        },
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/reference/validate.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "3fa208abc111ee3fa8bf7589fcb3dcc2fe747de8a6483d3f39e0209e41d05d52"
-    },
-    {
-      "id": "human-review-checklist",
-      "path": "docs/HUMAN_REVIEW_CHECKLIST.md",
-      "title": "Human review checklist",
-      "summary": "Reader-usefulness rubric (first-time reader, evidence and boundaries, navigation and accessibility) recorded separately from automated checks.",
-      "audience": "reviewer",
-      "status": "shipped",
-      "owner_issue": 63,
-      "parent": null,
-      "keywords": [
-        "review",
-        "readability",
-        "accessibility",
-        "checklist"
-      ],
-      "related": [
-        "index",
-        "epistemic-system"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "script",
-          "ref": "scripts/validate_docs.py"
-        },
-        {
-          "kind": "spec",
-          "ref": "docs/INDEX.md"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "b150fc805450fd6c536827686785fdeacac038ac80d929945dbe3673c13d0e1c"
-    },
-    {
-      "id": "authority",
-      "path": "docs/AUTHORITY.md",
-      "title": "Authority and the claim protocol",
-      "summary": "Who decides when agents disagree, and the reserved-branch claim protocol that prevents two writers on one leaf.",
-      "audience": "contributor",
-      "status": "shipped",
-      "owner_issue": null,
-      "parent": null,
-      "keywords": [
-        "authority",
-        "arbiter",
-        "claim",
-        "protocol"
-      ],
-      "related": [
-        "agent-proposals",
-        "agent-coord"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/coord/records.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "ca1ef7ad918617da3b834d1789eb90cb64537502db210b1a186e1b95ece0440d"
-    },
-    {
-      "id": "agent-coord",
-      "path": "docs/AGENT_COORD.md",
-      "title": "Agent coordination aid",
-      "summary": "The optional local SQLite coordination aid: checkpoints, ownership, collisions. Never authoritative over GitHub.",
-      "audience": "agent",
-      "status": "shipped",
-      "owner_issue": 22,
-      "parent": null,
-      "keywords": [
-        "coordination",
-        "checkpoint",
-        "ownership",
-        "collision"
-      ],
-      "related": [
-        "agent-proposals",
-        "authority"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/coord/store.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "e1835dca7a093b83704debc7cf753017e55fd1b7aca8a99edfb3242eb9e2eddc"
-    },
-    {
-      "id": "agent-proposals",
-      "path": "docs/AGENT_PROPOSALS.md",
-      "title": "Proposal, verdict and receipt mechanics",
-      "summary": "The comment grammar for proposals, verdicts, claims and receipts, and how the board folds them deterministically.",
-      "audience": "agent",
-      "status": "shipped",
-      "owner_issue": 22,
-      "parent": null,
-      "keywords": [
-        "proposal",
-        "verdict",
-        "receipt",
-        "grammar",
-        "board"
-      ],
-      "related": [
-        "authority",
-        "agent-coord"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/coord/records.py"
-        },
-        {
-          "kind": "script",
-          "ref": "scripts/coord_board.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "073e3bce56037c6bd6d50efb25f712c9b53312419393705a09132a086c17b985"
-    },
-    {
-      "id": "claim-schema",
-      "path": "docs/CLAIM_SCHEMA.md",
-      "title": "Claim ledger schema",
-      "summary": "The claim-record fields: label, epistemic status, evidence, model, provenance and bitemporal dates.",
-      "audience": "contributor",
-      "status": "shipped",
-      "owner_issue": null,
-      "parent": null,
-      "keywords": [
-        "claim",
-        "schema",
-        "evidence",
-        "provenance"
-      ],
-      "related": [
-        "epistemic-system",
-        "system-spec"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/classify.py"
-        },
-        {
-          "kind": "spec",
-          "ref": "ontology/jev_classifier_claims.ttl"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "b70452b711af538a0e2121070a84f865136e1ec58aa8a6d16dc7a820e55e2311"
-    },
-    {
-      "id": "datasets",
-      "path": "docs/DATASETS.md",
-      "title": "Datasets and fixtures",
-      "summary": "Which fixtures are synthetic, what they are for, and the licensing and storage rules for external data.",
-      "audience": "contributor",
-      "status": "partial",
-      "owner_issue": null,
-      "parent": null,
-      "keywords": [
-        "datasets",
-        "fixtures",
-        "licensing",
-        "storage"
-      ],
-      "related": [
-        "system-spec"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "test",
-          "ref": "tests/fixtures/reference/claim_graph_ok.json"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "e4a1930ef6945ee81c3f005071b1722a2bb30bcb3ead70e457c7d846af713063"
-    },
-    {
-      "id": "dataset-card",
-      "path": "docs/DATASET_CARD.md",
-      "title": "Reference paper dataset card",
-      "summary": "The ten selected reference papers, why each is included, its version, and the rights note for that version.",
-      "audience": "contributor",
-      "status": "shipped",
-      "owner_issue": 29,
-      "parent": null,
-      "keywords": [
-        "dataset",
-        "reference-papers",
-        "selection",
-        "rights"
-      ],
-      "related": [
-        "datasets",
-        "epistemic-system"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "spec",
-          "ref": "datasets/reference_papers.json"
-        },
-        {
-          "kind": "schema",
-          "ref": "schemas/reference_papers.schema.json"
-        },
-        {
-          "kind": "script",
-          "ref": "scripts/validate_reference_papers.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
-      "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc"
-    },
-    {
-      "id": "grok-source",
-      "path": "docs/GROK_SOURCE.md",
-      "title": "Grok source capture",
-      "summary": "The untrusted source-capture adapter: it may produce source material only, never a label or canonical claim.",
-      "audience": "contributor",
-      "status": "shipped",
-      "owner_issue": 15,
-      "parent": null,
-      "keywords": [
-        "grok",
-        "source",
-        "capture",
-        "untrusted"
-      ],
-      "related": [
-        "system-spec",
-        "epistemic-system"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/sources/grok.py"
-        },
-        {
-          "kind": "script",
-          "ref": "scripts/grok_research.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "568a4211f195d72fe4592df061f6037c19e20626ce6570510747ec1aa3821a02"
-    },
-    {
-      "id": "issue-1-draft",
-      "path": "docs/ISSUE_1_DRAFT.md",
-      "title": "Issue 1 draft (historical)",
-      "summary": "The original bootstrap issue draft, kept for lineage. Not normative.",
-      "audience": "maintainer",
-      "status": "unknown",
-      "owner_issue": 1,
-      "parent": null,
-      "keywords": [
-        "historical",
-        "bootstrap",
-        "draft"
-      ],
-      "related": [
-        "research-notes"
-      ],
-      "canonical_sources": [],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "1b2e15a201cc4ba8f1db20108a1f387e666fdd47fe2553cf5feed11fcf1a0d6c"
-    },
-    {
-      "id": "ops-ledger",
-      "path": "docs/OPS_LEDGER.md",
-      "title": "Ops ledger",
-      "summary": "The ops projection protocol: a rebuildable local database plus a committed read-only ledger. Not a decision authority.",
-      "audience": "maintainer",
-      "status": "shipped",
-      "owner_issue": 18,
-      "parent": null,
-      "keywords": [
-        "ops",
-        "ledger",
-        "projection",
-        "discrepancy"
-      ],
-      "related": [
-        "authority",
-        "agent-coord"
-      ],
-      "canonical_sources": [
-        {
-          "kind": "code",
-          "ref": "src/jev_classifier/ops/store.py"
-        },
-        {
-          "kind": "script",
-          "ref": "scripts/ops_sync.py"
-        }
-      ],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "0f18adab77c35c08ea8fa04d83d52d96e6bf942bb53d960dda4e9022fd0ef6cd"
-    },
-    {
-      "id": "research-notes",
-      "path": "docs/RESEARCH_NOTES.md",
-      "title": "Research notes (non-normative)",
-      "summary": "Bootstrap research notes. Informational only; no contract depends on them.",
-      "audience": "contributor",
-      "status": "unknown",
-      "owner_issue": null,
-      "parent": null,
-      "keywords": [
-        "research",
-        "notes",
-        "bootstrap"
-      ],
-      "related": [
-        "issue-1-draft"
-      ],
-      "canonical_sources": [],
-      "review_state": "unreviewed",
-      "reviewed_commit": "3d1795af9b0c4d70e90b584b3c00a83ccf472005",
-      "reviewed_sha256": "16acf1f9d3d341ccb66d0f865ba63647f288003f1266183bfb5d4fd1374a298b"
-    }
-  ]
+  "manifest_version": "1.0.0",
+  "schema": "jev-classifier.docs-manifest.v1"
 }
