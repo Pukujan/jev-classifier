@@ -295,6 +295,37 @@ source text. Sycophancy is a two-call pattern with ΔP computed locally in
 stay atomic). Position bias is a pure-Python harness in `tests/test_bias_position.py`,
 never a pack question.
 
+### R — Reference claim schema
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Code | `schemas/reference_claim_graph.schema.json`, `schemas/context_stimulus_manifest.schema.json`, `src/jev_classifier/reference/validate.py` |
+| Role | **deterministic** |
+| Input | a reference claim-graph document, or a privacy-safe context-stimulus manifest |
+| Output | validated records, or `ReferenceSchemaError(kind="schema_error")` |
+| Contract | JSON Schema (draft 2020-12) for record shape; `validate_reference_graph` / `validate_stimulus_manifest` for the cross-record invariants |
+| Invariants | every claim resolves to an immutable paper + source version and carries a non-empty evidence span with `byte_end > byte_start`; relationship endpoints resolve to claims and are never self-referential; valid time (`valid_from`/`valid_to`) and transaction time (`recorded_at`) are separate fields; absent/uncertain dates stay `null` and are never inferred; review records accumulate and a superseding review never deletes the one it replaces; paired counterfactual cases share one condition family and source packet with distinct roles; public records carry no URL, no raw private content, and no low-entropy digest of it |
+| Fail-closed | yes — any shape or cross-record violation raises `ReferenceSchemaError`; nothing is repaired, defaulted, or guessed |
+| Tests | `tests/test_reference_schema.py` |
+
+**Records only (issue #37).** This module defines and validates formats; it does
+not select a corpus (#29), run a benchmark (#23), or assign gold labels.
+Deterministic labels entering the classifier remain TypeSafe JEV-only; these
+human-reviewed records are the evaluation reference, not classifier output.
+
+**JSON Schema is normative here; SHACL is deferred.** The issue body names SHACL
+constraints, but M6 already records that SHACL is unimplemented and that adding
+`pyshacl` needs its own leaf issue. The cross-record invariants SHACL would carry
+are implemented as explicit fail-closed Python checks instead, which gives the
+same guarantee with no new runtime dependency. `jsonschema` is declared in the
+`dev` extra so the schema documents are validated in CI.
+
+**Privacy is structural.** The manifest schema has no field able to carry raw
+private text and rejects unknown keys, so a producer cannot smuggle transcript
+content into a case; private material is referenced only by an opaque
+`audit:` pointer, and public fixtures are synthetic.
+
 ---
 
 ## 3. Role table (JEV vs deterministic)
@@ -311,6 +342,7 @@ never a pack question.
 | C Coordination | ✗ | ✓ claims, checkpoints, collisions |
 | O Ops ledger | ✗ | ✓ snapshots, discrepancy detection |
 | B Bias signals | **✓ closed questions only** | ✓ aggregation, thresholds, flags |
+| R Reference claim schema | ✗ | ✓ JSON Schema + cross-record validation |
 
 No module assigns a non-JEV model a deterministic-output role. If a future leaf
 proposes one, it is rejected by this table — escalate to the authoritative agent.

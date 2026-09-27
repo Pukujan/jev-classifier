@@ -17,6 +17,7 @@ dependencies = [
 dev = [
   "pytest>=8.0",
   "rdflib>=7.0",
+  "jsonschema>=4.20",
 ]
 ontology = [
   "rdflib>=7.0",

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "manifest_id": "stimmanifest:synthetic-demo-1",
+  "cases": [
+    {
+      "case_id": "case:demo-1-control",
+      "condition_family_id": "family:context-size",
+      "pair_id": "pair:demo-1",
+      "pair_role": "control",
+      "stimulus_method": "synthetic",
+      "stimulus_version": "1.0.0",
+      "seed_provenance": "seed:demo-1",
+      "context_size_bucket": "s",
+      "source_packet_id": "packet:demo-1",
+      "source_packet_version": "v1",
+      "validation_status": "synthetic_reviewed",
+      "private_audit_ref": null
+    },
+    {
+      "case_id": "case:demo-1-counterfactual",
+      "condition_family_id": "family:context-size",
+      "pair_id": "pair:demo-1",
+      "pair_role": "counterfactual",
+      "stimulus_method": "synthetic",
+      "stimulus_version": "1.0.0",
+      "seed_provenance": "seed:demo-1",
+      "context_size_bucket": "l",
+      "source_packet_id": "packet:demo-1",
+      "source_packet_version": "v1",
+      "validation_status": "synthetic_reviewed",
+      "private_audit_ref": "audit:demo-1"
+    }
+  ]
+}

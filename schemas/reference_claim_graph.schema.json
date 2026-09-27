@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/jev-classifier/schemas/reference_claim_graph.schema.json",
+  "title": "Reference claim graph",
+  "description": "Human-reviewed reference claims with immutable source provenance, separate valid and transaction time, typed relationships, and preserved review disagreement. Structural validation only; cross-record invariants live in jev_classifier.reference.validate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "graph_id",
+    "papers",
+    "sources",
+    "claims",
+    "relationships",
+    "reviews"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "graph_id": { "$ref": "#/$defs/id" },
+    "papers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/paper" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relationship" }
+    },
+    "reviews": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/review" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "iso8601": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullable_iso8601": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "paper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paper_id", "title", "version"],
+      "properties": {
+        "paper_id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "doi": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "paper_id", "version"],
+      "properties": {
+        "source_id": { "$ref": "#/$defs/id" },
+        "paper_id": { "$ref": "#/$defs/id" },
+        "version": { "type": "string", "minLength": 1 },
+        "content_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "evidence_span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quote", "byte_start", "byte_end"],
+      "properties": {
+        "quote": { "type": "string", "minLength": 1 },
+        "byte_start": { "type": "integer", "minimum": 0 },
+        "byte_end": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "text",
+        "paper_id",
+        "source_id",
+        "evidence",
+        "epistemic_status",
+        "valid_from",
+        "valid_to",
+        "recorded_at"
+      ],
+      "properties": {
+        "claim_id": { "$ref": "#/$defs/id" },
+        "text": { "type": "string", "minLength": 1 },
+        "paper_id": { "$ref": "#/$defs/id" },
+        "source_id": { "$ref": "#/$defs/id" },
+        "evidence": { "$ref": "#/$defs/evidence_span" },
+        "epistemic_status": {
+          "enum": ["observed", "inferred", "hypothesized"]
+        },
+        "valid_from": { "$ref": "#/$defs/nullable_iso8601" },
+        "valid_to": { "$ref": "#/$defs/nullable_iso8601" },
+        "recorded_at": { "$ref": "#/$defs/iso8601" },
+        "notes": { "type": "string" }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rel_id", "type", "from_claim_id", "to_claim_id"],
+      "properties": {
+        "rel_id": { "$ref": "#/$defs/id" },
+        "type": {
+          "enum": [
+            "supports",
+            "contradicts",
+            "refines",
+            "corrects",
+            "supersedes",
+            "retracts",
+            "unknown"
+          ]
+        },
+        "from_claim_id": { "$ref": "#/$defs/id" },
+        "to_claim_id": { "$ref": "#/$defs/id" },
+        "notes": { "type": "string" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_id", "claim_id", "annotator_id", "decision", "recorded_at"],
+      "properties": {
+        "review_id": { "$ref": "#/$defs/id" },
+        "claim_id": { "$ref": "#/$defs/id" },
+        "annotator_id": { "$ref": "#/$defs/id" },
+        "decision": {
+          "enum": ["accept", "reject", "revise", "uncertain"]
+        },
+        "note": { "type": "string" },
+        "recorded_at": { "$ref": "#/$defs/iso8601" },
+        "supersedes_review_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
