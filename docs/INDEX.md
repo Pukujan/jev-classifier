@@ -22,6 +22,7 @@ skip to what you need.
 | Understand the README's evidence map and editorial choices | [`CONTENT_RESEARCH.md`](CONTENT_RESEARCH.md) | contributor, maintainer |
 | Find prior-work analysis and source comparisons | [`PRIOR_WORK.md`](PRIOR_WORK.md) and [`REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md`](REVERSE_ANALYSIS_PCM_AND_ADOPTERS.md) | contributor |
 | Rebuild or verify the README workflow | [`README_GENERATION.md`](README_GENERATION.md) and [`README_PLAYBOOK.md`](README_PLAYBOOK.md) | contributor, agent |
+| Understand how the hidden holdout is frozen and kept out of development | [`HOLDOUT_PROTOCOL.md`](HOLDOUT_PROTOCOL.md) | contributor, reviewer |
 
 ## Folder tree (curated)
 
@@ -49,6 +50,7 @@ jev-classifier/
 │   ├── BRAND_DIRECTION.md         target voice and visual direction
 │   ├── CONTENT_RESEARCH.md        README evidence map and editorial choices
 │   ├── HOLDOUT_EVALUATION.md      quality goals and evaluation limits
+│   ├── HOLDOUT_PROTOCOL.md        how the hidden holdout is frozen and kept out
 │   ├── GROK_SOURCE.md             source-capture adapter
 │   ├── IMAGE_GUIDE.md             image roles, accessibility, and reuse
 │   ├── RESEARCH_NOTES.md          bootstrap notes (non-normative)

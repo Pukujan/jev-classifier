@@ -53,7 +53,8 @@
       ],
       "related": [
         "epistemic-system",
-        "human-review-checklist"
+        "human-review-checklist",
+        "holdout-protocol"
       ],
       "canonical_sources": [
         {
@@ -67,7 +68,7 @@
       ],
       "review_state": "unreviewed",
       "reviewed_commit": "uncommitted",
-      "reviewed_sha256": "ce04bbc46db1565a195839dacca24b9105a63425c79cf752a24c696c8b4ebe23"
+      "reviewed_sha256": "e80ede9c23923c6b0bcecc3a8488d55c4d9d638be0a4ba599c0fc13ec8df6dbf"
     },
     {
       "id": "epistemic-system",
@@ -369,6 +370,50 @@
       "review_state": "unreviewed",
       "reviewed_commit": "2f3bc78696dd3d855c5fdf3044806ede7a795606",
       "reviewed_sha256": "58cd313a09dd2e13ff396b91ef60696999e9248e49b08bad02c95152fbc0efbc"
+    },
+    {
+      "id": "holdout-protocol",
+      "path": "docs/HOLDOUT_PROTOCOL.md",
+      "title": "Holdout split protocol and custody boundary",
+      "summary": "The paper-level holdout protocol: roles and access matrix, whole-paper split rule, salted-HMAC freeze evidence, and the rule that per-paper holdout scores appear only in the authorized frozen-evaluation report.",
+      "audience": "contributor",
+      "status": "partial",
+      "owner_issue": 81,
+      "parent": null,
+      "keywords": [
+        "holdout",
+        "custody",
+        "leakage",
+        "freeze",
+        "split"
+      ],
+      "related": [
+        "dataset-card",
+        "datasets",
+        "epistemic-system",
+        "system-spec"
+      ],
+      "canonical_sources": [
+        {
+          "kind": "issue",
+          "ref": "81"
+        },
+        {
+          "kind": "issue",
+          "ref": "21"
+        },
+        {
+          "kind": "spec",
+          "ref": "datasets/reference_papers.json"
+        },
+        {
+          "kind": "script",
+          "ref": "scripts/eval_claims.py"
+        }
+      ],
+      "review_state": "unreviewed",
+      "reviewed_commit": "uncommitted",
+      "reviewed_sha256": "f8696995c2f52d1ae41d72253905b03db002c2c211205f01e159f89f2c582bd0"
     },
     {
       "id": "grok-source",
