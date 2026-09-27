@@ -384,11 +384,23 @@ def validate_manifest(
                 kind="schema_error",
             )
 
-    # The private-path scan runs before the on-disk checks so a private path is
-    # always reported as ``excluded_path``, even when the file it names does
-    # not exist. Existence would otherwise mask it as a dangling reference.
+    # The path-classification scans run before the on-disk checks so an
+    # excluded or private path is always reported as ``excluded_path``, even
+    # when the file it names does not exist. Existence would otherwise mask it
+    # as a dangling reference. This also keeps the answer platform-independent:
+    # on POSIX a ".." segment does not resolve unless every intermediate
+    # directory exists, while on Windows it is folded away lexically, so an
+    # existence check that ran first would decide the same manifest differently
+    # on the two platforms.
     for doc_id, document in docs.items():
-        _reject_private_path(document["path"], f"document {doc_id!r} path")
+        path = document["path"]
+        _reject_private_path(path, f"document {doc_id!r} path")
+        for exclusion in excluded:
+            if _is_within(path, exclusion):
+                raise DocsManifestError(
+                    f"document {doc_id!r} path {path!r} is excluded by {exclusion!r}",
+                    kind="excluded_path",
+                )
         for idx, source in enumerate(document["canonical_sources"]):
             _reject_private_path(
                 source["ref"], f"document {doc_id!r} canonical source {idx} ref"
@@ -421,15 +433,6 @@ def validate_manifest(
                         f"under {base}",
                         kind="dangling_reference",
                     )
-
-    for doc_id, document in docs.items():
-        path = document["path"]
-        for exclusion in excluded:
-            if _is_within(path, exclusion):
-                raise DocsManifestError(
-                    f"document {doc_id!r} path {path!r} is excluded by {exclusion!r}",
-                    kind="excluded_path",
-                )
 
     tree_page = base / "docs" / "INDEX.md"
     if tree_page.is_file():

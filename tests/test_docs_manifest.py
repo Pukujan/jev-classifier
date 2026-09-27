@@ -434,6 +434,22 @@ def test_traversal_cannot_dodge_an_excluded_path(tmp_path: Path) -> None:
     assert excinfo.value.kind == "excluded_path"
 
 
+def test_excluded_path_wins_over_missing_file_on_every_platform(tmp_path: Path) -> None:
+    # Exclusion is decided from the path alone, so it must not depend on the
+    # file existing. Before the ordering fix, an excluded path that did not
+    # exist was reported as dangling_reference on POSIX, where "docs/../x"
+    # fails to resolve unless docs/ exists, while Windows folded the ".."
+    # away and reached the exclusion check. Same manifest, two verdicts.
+    root = _materialize(tmp_path, {"ok.md": "# Ok\n"})
+    manifest = _manifest(
+        [_document("gone", "docs/../private/gone.md", "0" * 64)],
+        excluded_paths=[{"path": "private", "reason": "not managed"}],
+    )
+    with pytest.raises(DocsManifestError, match="is excluded by") as excinfo:
+        validate_manifest(manifest, root=root, check_freshness=False)
+    assert excinfo.value.kind == "excluded_path"
+
+
 # --- read-only and offline guarantees ---
 
 
