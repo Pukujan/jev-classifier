@@ -19,3 +19,7 @@ docs/GROK_SOURCE.md text eol=lf
 docs/ISSUE_1_DRAFT.md text eol=lf
 docs/OPS_LEDGER.md text eol=lf
 docs/RESEARCH_NOTES.md text eol=lf
+
+# Docs-manifest fixtures: reviewed_sha256 in manifest_ok.json is of LF bytes,
+# so the same cross-platform stability rule applies (Issue #63).
+tests/fixtures/docs/** text eol=lf
