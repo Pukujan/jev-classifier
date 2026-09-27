@@ -109,6 +109,28 @@ def test_in_set_subject_lands_on_claim_about() -> None:
     )
 
 
+def test_jev_in_taxonomy_choice_not_clamped_to_candidates() -> None:
+    """JEV may pick any in-taxonomy term; about must not clamp to metadata candidates."""
+    frag = _base_fragment()
+    taxonomy = require_subject_taxonomy(frag)
+    candidates = derive_subject_candidates(frag)
+    # Pick a taxonomy term that metadata did NOT suggest.
+    non_candidate = next(t for t in taxonomy if t not in candidates)
+    assert non_candidate not in candidates
+    client = FakeDecisionsClient(
+        _response("empirical_finding", non_candidate, taxonomy)
+    )
+    claim = classify_fragment(frag, client=client)  # type: ignore[arg-type]
+    assert claim["about"] == non_candidate
+    # Criteria must be static (no per-option metadata hint).
+    criteria = client.calls[0]["questions"][SUBJECT_QUESTION_ID]["criteria"]
+    for term in taxonomy:
+        assert "suggested by fragment" not in criteria[term]
+        assert criteria[term] == (
+            f"The fragment is about the closed-taxonomy subject {term!r}."
+        )
+
+
 def test_out_of_set_subject_fails_closed() -> None:
     frag = _base_fragment()
     taxonomy = require_subject_taxonomy(frag)

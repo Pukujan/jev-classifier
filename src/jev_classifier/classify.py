@@ -144,12 +144,10 @@ def subject_choice_options(taxonomy: list[str]) -> list[str]:
 def build_subject_question(fragment: Mapping[str, Any]) -> dict[str, Any]:
     """Build the atomic JEV choice question for subject assignment."""
     taxonomy = require_subject_taxonomy(fragment)
-    candidates = derive_subject_candidates(fragment)
     criteria: dict[str, str] = {}
     for term in taxonomy:
-        hint = " (suggested by fragment title/section metadata)" if term in candidates else ""
         criteria[term] = (
-            f"The fragment is about the closed-taxonomy subject {term!r}.{hint}"
+            f"The fragment is about the closed-taxonomy subject {term!r}."
         )
     criteria[UNKNOWN_SUBJECT] = (
         "The fragment's subject cannot be placed in the closed taxonomy from "
