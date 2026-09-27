@@ -552,4 +552,3 @@ def test_custody_module_uses_a_real_hmac() -> None:
     )
     assert "hmac.new(" in source
     assert "compare_digest" in source
-

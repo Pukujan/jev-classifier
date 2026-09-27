@@ -7,6 +7,7 @@ tests/test_synthetic_fixtures.py text eol=lf
 
 # Managed documentation: docs_manifest.json reviewed_sha256 is of LF bytes, so
 # the digest is stable across platforms and CI checkouts (Issue #63).
+docs/*.md text eol=lf
 docs/docs_manifest.json text eol=lf
 docs/INDEX.md text eol=lf
 docs/EPISTEMIC_SYSTEM.md text eol=lf
