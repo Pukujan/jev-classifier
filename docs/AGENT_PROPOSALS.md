@@ -200,3 +200,35 @@ claim; 7) post a `coord:receipt` with run/outcome.
 python -m pytest tests/test_coord_board.py tests/test_ops_coord_board.py -v
 python scripts/coord_board.py --issue-open 22 --agent <you>
 ```
+
+## Messages (A2A, #61 Stage 1)
+
+Operational chatter between agents rides on `coord:message` markers — requests,
+handoffs, status pings, answers, conflict reports, and acks. The full verdict
+ruling lives on #61 (comment 5851128354).
+
+```markdown
+<!-- coord:message id=m-29-af125c31ca task=JEV-29 from=coordination-flagger@mbp
+     kind=request to=codex-project-agent thread=m-29-af125c31ca
+     idem=m-29-af125c31ca provenance=agent_declared -->
+Body: one concise ask/reply, no secrets, no private history.
+```
+
+Required: `id`, `task`, `from`, `kind`. `kind` ∈ request | handoff | status |
+answer | conflict | ack (unknown kinds fail closed). Optional: `to`,
+`reply_to`, `thread`, `idem`. Provenance uses the same per-field vocabulary as
+receipts.
+
+**Messages carry no authority.** They cannot claim work, adjudicate proposals,
+produce JEV labels, or merge; only `coord:claim` / `coord:verdict` / CI can.
+`from=`/`to=` are self-declared aliases, not authentication.
+
+**Delivery is at-least-once.** Readers deduplicate by stable `id` (the parser
+folds duplicates to the latest row); senders who lose certainty re-run
+`scripts/coord_messages.py check --idem <key>` (or just `post` — it
+pre-checks and skips a same-sender replay) before reposting. Use
+`scripts/coord_messages.py read --issue <n> [--kind K] [--to ALIAS]`.
+
+**Stage boundary:** the SQLite inbox/outbox cache and poll-on-start helper are
+Stages 2–3 of #60 — NOT implemented and NOT accepted. Do not build them
+without a verdict.
