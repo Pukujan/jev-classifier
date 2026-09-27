@@ -12,8 +12,30 @@ them as camelCase properties under the ``jcc:`` prefix with lean PROV-O hooks.
 | ``label`` | string | Closed-set classifier label (validated against fragment legal set). |
 | ``epistemic_status`` | non-empty string | e.g. Observed / Inferred / Hypothesized. |
 | ``recorded_at`` | ISO-8601 string | Transaction time (when the record was written). |
-| ``evidence`` | object | Must include ``fragment_id`` and/or ``path`` (and/or ``uri`` / ``source_id``). |
+| ``evidence`` | object | Must include ``fragment_id`` and/or ``path`` (and/or ``uri`` / ``source_id``). May carry ``byte_start`` / ``byte_end``: **UTF-8 byte offsets** into the source text (never character counts) — the convention module E's ``span_containment_v1`` matches against. |
 | ``model`` | non-empty string | Requested/surfaced JEV model id (pin: ``typesafe/jev-1.13``). |
+
+## Evidence byte spans (issue #86)
+
+``classify_fragment`` localizes evidence with a **closed candidate set**, never
+free-form offsets:
+
+- Deterministic code splits the fragment into sentence candidates
+  (``candidate_spans``) with UTF-8 byte offsets; candidates ride in
+  ``state["evidence_candidates"]`` only.
+- JEV answers one additional atomic ``choice`` (``<question_id>_span``) over the
+  closed id set plus ``unknown``, on the same Decisions call as the label.
+- An in-set answer writes ``evidence["byte_start"]/["byte_end"]`` copied from the
+  candidate table. ``unknown``, an out-of-set answer, a missing answer, or zero
+  candidates leave both fields **unset** — the metric records an honest miss;
+  offsets are never invented.
+- Because every candidate is a single sentence, an emitted span is at most one
+  sentence long: wider than the fragment is impossible, and containment against
+  sentence-level references is the property module E scores.
+
+Reference-side annotations SHOULD use the same convention (UTF-8 byte offsets
+into the exact source text); a character-offset annotation silently breaks
+containment on non-ASCII sources with no error anywhere.
 
 ## Optional PCM / ledger keys
 

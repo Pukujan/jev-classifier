@@ -30,9 +30,13 @@ surprise: the live pipeline classifies a whole fragment, so its natural evidence
 unit is the fragment. A prediction covering the whole fragment is *wider* than a
 sentence-level reference span and therefore fails containment. Emitting a span
 is not sufficient to score — the span must be at least as tight as the human's.
-Until a localization step exists, the primary metric is 0 by construction, and
-``predictions_with_usable_span`` shows whether a run failed for lack of a span
-or for lack of precision.
+Issue #86 landed the localization step: ``classify_fragment`` emits byte spans
+from a closed candidate set, so spanless predictions are now an honest decline,
+not a missing capability. The primary metric still sits at 0 by construction
+until #88 (top-level ``paper_id``/``source_id``) and #89 (``epistemic_status``)
+land — the metric cannot match a prediction that never named its paper or got
+its status wrong. ``predictions_with_usable_span`` shows whether a run failed
+for lack of a span or for lack of precision.
 """
 
 from __future__ import annotations
